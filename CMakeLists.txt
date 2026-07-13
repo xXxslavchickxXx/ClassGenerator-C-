@@ -18,6 +18,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_FILES
 )
 
 message(STATUS "Found files: ${${PROJECT_NAME}_FILES}")
+message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
 
 # 1. Путь к файлу-точке входа для приложения-примера (например: main.cpp)
 set(${PROJECT_NAME}_EXAMPLE_FILEPATH main.cpp)
@@ -42,7 +43,7 @@ set(${PROJECT_NAME}_INCLUDE
 # 4. Внешние либы для линковки к твоей основной библиотеке (например: gpuBuffers)
 find_package(glm)
 set(${PROJECT_NAME}_LIBS
-	glm::glm
+    glm::glm
 )
 
 # 5. Либы, нужные ТОЛЬКО для запуска приложения-примера (например: shaderLib)

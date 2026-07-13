@@ -33,49 +33,42 @@ namespace cg::build {
 	};
 
 	class VariableBuilder {
-		pls::TypeName type;
-		std::string name;
-		std::string value = "";
-		pls::DeclSpecifiers specs = pls::DeclSpecifiers::None;
-		std::vector<source::NamespacePrefix> ns_prefix = {};
+		pls::Variable var;
 
 	public:
 		VariableBuilder(const std::string& var_name)
-			: name(var_name), type(TypeBuilder("int").build()) {}
+			: var(var_name) {}
 
-		VariableBuilder& with_type(pls::TypeName t) { type = std::move(t); return *this; }
-		VariableBuilder& with_value(std::string val) { value = std::move(val); return *this; }
-		VariableBuilder& ns(source::NamespacePrefix prefix) { ns_prefix.push_back(std::move(prefix)); return *this; }
+		VariableBuilder& with_type(pls::TypeName t) { var.get_type() = std::move(t); return *this; }
+		VariableBuilder& with_value(std::string val) { var.set_value(std::move(val)); return *this; }
+		VariableBuilder& ns(source::NamespacePrefix prefix) { var.add_namespace_prefix(std::move(prefix)); return *this; }
 
-		VariableBuilder& as_static() { specs = specs | pls::DeclSpecifiers::Static; return *this; }
-		VariableBuilder& as_const() { specs = specs | pls::DeclSpecifiers::Const; return *this; }
-		VariableBuilder& as_constexpr() { specs = specs | pls::DeclSpecifiers::ConstExpression; return *this; }
+		VariableBuilder& as_static() { if (!var.is_static()) var.toggle_static(); return *this; }
+		VariableBuilder& as_const() { if (!var.get_type().is_const()) var.get_type().toggle_const(); return *this; }
+		VariableBuilder& as_constexpr() { if (!var.is_constexpr()) var.toggle_constexpr(); return *this; }
 
 		pls::Variable build() {
-			return pls::Variable(type, name, value, ns_prefix, specs);
+			return var;
 		}
 	};
 
 	class FunctionBuilder {
-		pls::TypeName type;
-		std::string name;
-		pls::DeclSpecifiers specs = pls::DeclSpecifiers::None;
-		std::vector<source::NamespacePrefix> ns_prefix = {};
+		pls::Function func;
 
 	public:
 		FunctionBuilder(const std::string& var_name)
-			: name(std::move(var_name)), type(TypeBuilder("void").build()) {}
+			: func(var_name){}
 
-		FunctionBuilder& with_type(pls::TypeName t) { type = std::move(t); return *this; }
-		FunctionBuilder& ns(source::NamespacePrefix prefix) { ns_prefix.push_back(std::move(prefix)); return *this; }
+		FunctionBuilder& with_type(pls::TypeName t) { func.get_type() = std::move(t); return *this; }
+		FunctionBuilder& ns(source::NamespacePrefix prefix) { func.add_namespace_prefix(std::move(prefix)); return *this; }
 
-		FunctionBuilder& as_static() { specs = specs | pls::DeclSpecifiers::Static; return *this; }
-		FunctionBuilder& as_const() { specs = specs | pls::DeclSpecifiers::Const; return *this; }
-		FunctionBuilder& as_constexpr() { specs = specs | pls::DeclSpecifiers::ConstExpression; return *this; }
+		FunctionBuilder& as_static() { if (!func.is_static()) func.toggle_static(); return *this; }
+		FunctionBuilder& as_inline() { if (!func.is_inline()) func.toggle_inline(); return *this; }
+		FunctionBuilder& as_constexpr() { if (!func.is_constexpr()) func.toggle_constexpr(); return *this; }
 
 
 		pls::Function build() {
-			return pls::Function(type, name, ns_prefix, specs);
+			return func;
 		}
 	};
 }

@@ -29,19 +29,7 @@ namespace cg::source {
         return a;
     }
 
-    enum class PrefixType {
-        Namespace,
-        Type
-    };
-
-    struct NamespacePrefix {
-        std::string name;
-        PrefixType type;
-        bool is_template;
-
-        NamespacePrefix(const std::string& name_)
-            : name(name_) {}
-    };
+    struct NamespacePrefix;
 
     class NamedEntity {
     protected:
@@ -73,6 +61,18 @@ namespace cg::source {
         Pointer
     };
 
+    class TypeName;
+
+    class TemplateEntity {
+        mutable std::vector<TypeName> template_parametrs;
+
+    public:
+        std::vector<TypeName>& get_template_parametrs() { return template_parametrs; }
+        const std::vector<TypeName>& get_template_parametrs() const { return template_parametrs; }
+
+        void add_template_parametr(const TypeName& type) const { template_parametrs.push_back(type); }
+    };
+
     class TypeName : public NamedEntity {
         std::unique_ptr<TypeName> type_name_ptr;
         std::vector<TypeName> templates;
@@ -97,6 +97,15 @@ namespace cg::source {
             }
             return *this;
         }
+        TypeName(const TypeName& other) : NamedEntity(other) {
+            if (this != &other) {
+                templates = other.templates;
+                qual = other.qual;
+                constantable = other.constantable;
+                variadic = other.variadic;
+                type_name_ptr = other.type_name_ptr ? std::make_unique<TypeName>(*other.type_name_ptr) : nullptr;
+            }
+        }
 
         TypeName(TypeName&&) = default;
         TypeName& operator=(TypeName&&) = default;
@@ -116,7 +125,7 @@ namespace cg::source {
                 type_name_ptr.reset();
             }
             else {
-                type_name_ptr = std::make_unique<TypeName>("typename", std::vector<NamespacePrefix>{}, false, false, Qualificator::None);
+                type_name_ptr = std::make_unique<TypeName>("typename");
             }
         }
 
@@ -143,14 +152,15 @@ namespace cg::source {
         Qualificator get_qualificator() const { return qual; }
     };
 
-    class TemplateEntity {
-        mutable std::vector<TypeName> template_parametrs;
+    struct NamespacePrefix {
+        TypeName name;
 
-    public:
-        std::vector<TypeName>& get_template_parametrs() { return template_parametrs; }
-        const std::vector<TypeName>& get_template_parametrs() const { return template_parametrs; }
-
-        void add_template_parametr(const TypeName& type) const { template_parametrs.push_back(type); }
+        NamespacePrefix(const std::string& name_)
+            : name(name_) {}
+        NamespacePrefix(const char* name_)
+            : name(std::string(name_)) {}
+        NamespacePrefix(const TypeName& t)
+            : name(t) {}
     };
 
     class OptionalEntity : public NamedEntity, public TemplateEntity {
