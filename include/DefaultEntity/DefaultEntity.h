@@ -67,15 +67,20 @@ namespace cg::source {
         mutable std::vector<TypeName> template_parametrs;
 
     public:
+        TemplateEntity() = default;
+        TemplateEntity(TemplateEntity&&) = default;
+        TemplateEntity& operator=(TemplateEntity&&) = default;
+        TemplateEntity(const TemplateEntity&) = default;
+        TemplateEntity& operator=(const TemplateEntity&) = default;
+
         std::vector<TypeName>& get_template_parametrs() { return template_parametrs; }
         const std::vector<TypeName>& get_template_parametrs() const { return template_parametrs; }
 
         void add_template_parametr(const TypeName& type) const { template_parametrs.push_back(type); }
     };
 
-    class TypeName : public NamedEntity {
+    class TypeName : public NamedEntity, public TemplateEntity {
         std::unique_ptr<TypeName> type_name_ptr;
-        std::vector<TypeName> templates;
         Qualificator qual;
         bool constantable;
         bool variadic;
@@ -89,7 +94,7 @@ namespace cg::source {
         TypeName& operator=(const TypeName& other) {
             if (this != &other) {
                 NamedEntity::operator=(other);
-                templates = other.templates;
+                TemplateEntity::operator=(other);
                 qual = other.qual;
                 constantable = other.constantable;
                 variadic = other.variadic;
@@ -97,9 +102,8 @@ namespace cg::source {
             }
             return *this;
         }
-        TypeName(const TypeName& other) : NamedEntity(other) {
+        TypeName(const TypeName& other) : NamedEntity(other), TemplateEntity(other) {
             if (this != &other) {
-                templates = other.templates;
                 qual = other.qual;
                 constantable = other.constantable;
                 variadic = other.variadic;
@@ -127,15 +131,6 @@ namespace cg::source {
             else {
                 type_name_ptr = std::make_unique<TypeName>("typename");
             }
-        }
-
-        std::vector<TypeName>& get_templates() { return templates; }
-        const std::vector<TypeName>& get_templates() const { return templates; }
-
-        explicit operator bool() const {
-            return name.empty() ||
-            Qualificator::None == qual ||
-            constantable;
         }
 
         const TypeName& get_typename() const {

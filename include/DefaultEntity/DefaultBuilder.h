@@ -25,7 +25,7 @@ namespace cg::build {
 		TypeBuilder& ns(const source::NamespacePrefix& namespace_prefix) { type.add_namespace_prefix(namespace_prefix); return *this; }
 
 		TypeBuilder& with_template(const pls::TypeName& t) {
-			type.get_templates().push_back(t);
+			type.add_template_parametr(t);
 			return *this;
 		}
 

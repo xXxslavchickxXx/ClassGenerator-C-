@@ -7,12 +7,7 @@
 namespace cg::generate {
 	namespace cgs = cg::source;
 
-	class Generator {
-	protected:
-		static std::string generate_template_args(const std::vector<cgs::TypeName>& templates);
-	};
-
-	class NamespaceGenerator : public Generator {
+	class NamespaceGenerator {
 	public:
 		static bool dependent_path(const cgs::NamedEntity& n);
 		static std::string generate(const cgs::NamedEntity& n);
@@ -23,27 +18,39 @@ namespace cg::generate {
 		static std::string generate(const cgs::NamedEntity& n, bool template_entity = false);
 	};
 
-	class TypeNameGenerator : public Generator {
+	class TypeNameGenerator {
 	public:
 		static std::string generate(const cgs::TypeName& t);
 	};
 
-	class TemplateEntityGenerator : public Generator {
-		static std::function<void(const cgs::TypeName&)> non_temp;
+	class TemplateEntityGenerator {
+	public:
+		static std::string generate(const cgs::TemplateEntity& t, bool arguments = false);
+	};
+
+	class OptionalEntityGenerator {
 	public:
 		static std::string generate(const cgs::TemplateEntity& t, bool arguments = false);
 	};
 }
 
 namespace cg::generate {
-	inline std::function<void(const cgs::TypeName&)> non_temp = [](const cgs::TypeName&){
-		
-	};
-
 	inline std::string TemplateEntityGenerator::generate(const cgs::TemplateEntity& t, bool arguments) {
+		if (t.get_template_parametrs().empty()) return "";
+
 		std::stringstream sstr;
 
 		auto& templates = t.get_template_parametrs();
+
+		if (templates.empty()) {
+			throw std::invalid_argument("TemplateEntityGenerator: cannot generate from empty template parameters");
+		}
+
+		for (const auto& param : templates) {
+			if (param.get_typename().get_name().empty()) {
+				throw std::invalid_argument("TemplateEntityGenerator: template parameter has no type name");
+			}
+		}
 
 		if (arguments) {
 			sstr << "<";
@@ -57,8 +64,8 @@ namespace cg::generate {
 			sstr << "template<";
 			for (size_t i = 0; i < templates.size(); i++) {
 				if (i > 0) sstr << ", ";
-				non_temp(templates[i]);
-				sstr << TypeNameGenerator::generate(templates[i].get_typename());
+				sstr << TypeNameGenerator::generate(templates[i].get_typename())
+				<< " " << TypeNameGenerator::generate(templates[i]);
 			}
 			sstr << ">";
 		}
@@ -76,8 +83,8 @@ namespace cg::generate {
 		bool dependent = NamespaceGenerator::dependent_path(t);
 
 		if (dependent) sstr << "typename ";
-		sstr << NamedGenerator::generate(t, dependent && !t.get_templates().empty());
-		sstr << generate_template_args(t.get_templates());
+		sstr << NamedGenerator::generate(t, dependent && !t.get_template_parametrs().empty());
+		sstr << TemplateEntityGenerator::generate(t, true);
 
 		switch (t.get_qualificator()) {
 		case cg::source::Qualificator::Pointer:            sstr << "*";  break;
@@ -111,8 +118,8 @@ namespace cg::generate {
 		for (auto& prefix : pref) {
 			if (!prefix.name.get_name().empty()) 
 				sstr
-				<< NamedGenerator::generate(prefix.name, !prefix.name.get_templates().empty())
-				<< generate_template_args(prefix.name.get_templates())
+				<< NamedGenerator::generate(prefix.name, !prefix.name.get_template_parametrs().empty())
+				<< TemplateEntityGenerator::generate(prefix.name, true)
 				<< "::";
 		}
 
@@ -123,20 +130,5 @@ namespace cg::generate {
 		const std::vector<cgs::NamespacePrefix>& pref = n.get_namespace();
 		for (auto& prefix : pref) { if (prefix.name.is_template()) return true; }
 		return false;
-	}
-
-	inline std::string Generator::generate_template_args(const std::vector<cgs::TypeName>& templates) {
-		if (templates.empty()) return "";
-
-		std::stringstream sstr;
-		sstr << "<";
-
-		for (size_t i = 0; i < templates.size(); i++) {
-			if (i > 0) sstr << ", ";
-			sstr << TypeNameGenerator::generate(templates[i]);
-		}
-
-		sstr << ">";
-		return sstr.str();
 	}
 }
