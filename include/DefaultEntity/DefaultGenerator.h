@@ -5,6 +5,22 @@
 #include <functional>
 
 namespace cg::generate {
+	std::string tabulate(size_t count, const std::string& str) {
+		std::string temp_str;
+
+		std::stringstream sstr(str);
+		std::string token;
+		while (std::getline(sstr, token, '\n')) {
+			temp_str += std::string(count, '\t') + token;
+
+			if (!sstr.eof()) {
+				temp_str += '\n';
+			}
+		}
+
+		return temp_str;
+	}
+
 	namespace cgs = cg::source;
 
 	class NamespaceGenerator {
@@ -30,11 +46,76 @@ namespace cg::generate {
 
 	class OptionalEntityGenerator {
 	public:
-		static std::string generate(const cgs::TemplateEntity& t, bool arguments = false);
+		static std::string generate(const cgs::OptionalEntity& t);
+	};
+
+	class VariableGenerator {
+	public:
+		static std::string generate(const cgs::Variable& v);
+	};
+
+	class ArgumentableEntityGenerator {
+	public:
+		static std::string generate(const cgs::ArgumentableEntity& a);
+	};
+
+	class FunctionGenerator {
+	public:
+		static std::string generate(const cgs::Function& f);
 	};
 }
 
 namespace cg::generate {
+	inline std::string FunctionGenerator::generate(const cgs::Function& f) {
+		std::stringstream sstr;
+
+		sstr << TemplateEntityGenerator::generate(f, false);
+		if (!f.get_template_parametrs().empty()) sstr << "\n";
+
+		sstr << OptionalEntityGenerator::generate(f)
+		<< ArgumentableEntityGenerator::generate(f);
+
+		return sstr.str();
+	}
+
+	inline std::string ArgumentableEntityGenerator::generate(const cgs::ArgumentableEntity& a) {
+		std::stringstream sstr;
+
+		auto& args = a.get_args();
+
+		sstr << "(";
+		for (size_t i = 0; i < args.size(); i++) {
+			if (i > 0) sstr << ", ";
+			sstr << VariableGenerator::generate(args[i]);
+		}
+		sstr << ")";
+
+		return sstr.str();
+	}
+
+	inline std::string VariableGenerator::generate(const cgs::Variable& v) {
+		std::stringstream sstr;
+
+		sstr << OptionalEntityGenerator::generate(v);
+		
+		if (!v.get_value().empty()) sstr << " = " << v.get_value();
+
+		return sstr.str();
+	}
+
+	inline std::string OptionalEntityGenerator::generate(const cgs::OptionalEntity& t) {
+		std::stringstream sstr;
+
+		if (t.is_constexpr()) sstr << "constexpr ";
+		if (t.is_inline()) sstr << "inline ";
+		if (t.is_constexpr()) sstr << "static ";
+
+		sstr << TypeNameGenerator::generate(t.get_type()) << " ";
+		sstr << NamedGenerator::generate(t);
+
+		return sstr.str();
+	}
+
 	inline std::string TemplateEntityGenerator::generate(const cgs::TemplateEntity& t, bool arguments) {
 		if (t.get_template_parametrs().empty()) return "";
 
@@ -46,12 +127,6 @@ namespace cg::generate {
 			throw std::invalid_argument("TemplateEntityGenerator: cannot generate from empty template parameters");
 		}
 
-		for (const auto& param : templates) {
-			if (param.get_typename().get_name().empty()) {
-				throw std::invalid_argument("TemplateEntityGenerator: template parameter has no type name");
-			}
-		}
-
 		if (arguments) {
 			sstr << "<";
 			for (size_t i = 0; i < templates.size(); i++) {
@@ -61,6 +136,11 @@ namespace cg::generate {
 			sstr << ">";
 		}
 		else {
+			for (const auto& param : templates) {
+				if (param.get_typename().get_name().empty()) {
+					throw std::invalid_argument("TemplateEntityGenerator: template parameter has no type name");
+				}
+			}
 			sstr << "template<";
 			for (size_t i = 0; i < templates.size(); i++) {
 				if (i > 0) sstr << ", ";

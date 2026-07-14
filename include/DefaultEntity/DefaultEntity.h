@@ -79,6 +79,8 @@ namespace cg::source {
         void add_template_parametr(const TypeName& type) const { template_parametrs.push_back(type); }
     };
 
+    class Alias;
+
     class TypeName : public NamedEntity, public TemplateEntity {
         std::unique_ptr<TypeName> type_name_ptr;
         Qualificator qual;
@@ -90,6 +92,8 @@ namespace cg::source {
         : NamedEntity(name_),
             constantable(false), variadic(false), qual(Qualificator::None)
         {}
+
+        TypeName(const Alias& a);
 
         TypeName& operator=(const TypeName& other) {
             if (this != &other) {
@@ -158,7 +162,7 @@ namespace cg::source {
             : name(t) {}
     };
 
-    class OptionalEntity : public NamedEntity, public TemplateEntity {
+    class OptionalEntity : public NamedEntity {
         TypeName type;
         bool constexpr_;
         bool static_;
@@ -166,7 +170,10 @@ namespace cg::source {
 
     public:
         OptionalEntity(const std::string& name_)
-        : NamedEntity(name_)
+        : NamedEntity(name_),
+        constexpr_(false),
+        static_(false),
+        inline_(false)
         {}
 
         OptionalEntity(const OptionalEntity&) = default;
@@ -210,7 +217,7 @@ namespace cg::source {
         const std::vector<Variable>& get_args() const { return arguments; }
     };
 
-    class Function : public OptionalEntity, public ArgumentableEntity {
+    class Function : public OptionalEntity, public ArgumentableEntity, public TemplateEntity {
     public:
         Function(const std::string& name_)
         : OptionalEntity(name_)

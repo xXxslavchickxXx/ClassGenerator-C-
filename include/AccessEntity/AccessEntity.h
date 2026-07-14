@@ -46,12 +46,15 @@ namespace cg::source {
         void set_underlying_type(const TypeName& t) { underlying_type = t; }
     };
 
+    inline TypeName::TypeName(const Alias& a)
+        : TypeName(build::TypeBuilder(a.get_name()).build()) {}
+
     class Field : public Variable, public AccessEntity {
         bool mutablable;
 
     public:
         Field(const std::string& name_)
-        : Variable(name_) {}
+        : Variable(name_), mutablable(false) {}
 
         bool is_mutable() const { return mutablable; }
         void toggle_mutable() { mutablable = !mutablable; }

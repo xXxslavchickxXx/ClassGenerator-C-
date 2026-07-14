@@ -5,7 +5,7 @@ cg::source::Class build_base_proxy() {
     using namespace cg::build;
 
     // ============================================================
-    // Шаблонные параметры
+    // 1. Шаблонные параметры
     // ============================================================
     auto attr_t = TypeBuilder("AttributeVectorT")
         .as_template()
@@ -25,17 +25,45 @@ cg::source::Class build_base_proxy() {
         .build();
 
     // ============================================================
-    // Типы для алиасов
+    // 2. Типы для алиасов
     // ============================================================
+
+    // vec_type = typename AttributeVectorT::template vec_type<typename Tag::type>
+    auto type_of_tag = TypeBuilder("type")
+        .ns(tag_t)  // Tag::type
+        .build();
+
     auto vec_type = TypeBuilder("vec_type")
-        .with_template(tag_t)
+        .as_template()
+        .with_template(type_of_tag)
+        .ns(attr_t)  // AttributeVectorT::vec_type
         .build();
 
-    auto pointer_type = TypeBuilder("PointerType")
+    // DataType = typename AttributeVectorT::data_type
+    auto data_type = TypeBuilder("data_type")
+        .ns(attr_t)
+        .build();
+
+    // PointerType = std::conditional_t<IsConst, const DataType*, DataType*>
+    auto data_ptr = TypeBuilder("DataType")
+        .as_ptr()
+        .build();
+    auto const_data_ptr = TypeBuilder("DataType")
+        .as_const()
+        .as_ptr()
+        .build();
+    auto is_const_type = TypeBuilder("IsConst")
+        .build();
+
+    auto pointer_type = TypeBuilder("conditional_t")
+        .ns(cg::source::NamespacePrefix("std"))
+        .with_template(is_const_type)
+        .with_template(const_data_ptr)
+        .with_template(data_ptr)
         .build();
 
     // ============================================================
-    // Класс base_proxy
+    // 3. Класс base_proxy
     // ============================================================
     auto cls = ClassBuilder("base_proxy")
         .as_public()
@@ -45,38 +73,36 @@ cg::source::Class build_base_proxy() {
         .build();
 
     // ============================================================
-    // Алиасы (нужна доработка в билдере)
+    // 4. Алиасы
     // ============================================================
-    // using vec_type = typename AttributeVectorT::template vec_type<typename Tag::type>;
-    // using DataType = typename AttributeVectorT::data_type;
-    // using PointerType = std::conditional_t<IsConst, const DataType*, DataType*>;
 
-    // Временное решение — добавим как поля, потом заменим на алиасы
+    // using vec_type = typename AttributeVectorT::template vec_type<typename Tag::type>;
+    auto vec_type_alias = AliasBuilder("vec_type")
+        .underlying_type(vec_type)
+        .as_public()
+        .build();
+    cls.add_alias(vec_type_alias);
+
+    // using DataType = typename AttributeVectorT::data_type;
     auto data_type_alias = AliasBuilder("DataType")
-        .underlying_type(
-            TypeBuilder("data_type")
-            .ns(cg::source::NamespacePrefix("AttributeVectorT"))
-            .build()
-        )
+        .underlying_type(data_type)
         .as_public()
         .build();
     cls.add_alias(data_type_alias);
 
+    // using PointerType = std::conditional_t<IsConst, const DataType*, DataType*>;
     auto pointer_type_alias = AliasBuilder("PointerType")
-        .underlying_type(
-            TypeBuilder("PointerType")
-            .build()
-        )
+        .underlying_type(pointer_type)
         .as_public()
         .build();
     cls.add_alias(pointer_type_alias);
 
     // ============================================================
-    // Поле data_
+    // 5. Поле data_
     // ============================================================
     auto data_field = FieldBuilder("data_")
         .with_type(
-            TypeBuilder("PointerType")
+            TypeBuilder(pointer_type_alias)
             .as_ptr()
             .build()
         )
@@ -85,43 +111,79 @@ cg::source::Class build_base_proxy() {
     cls.add_field(data_field);
 
     // ============================================================
-    // Конструктор
+    // 6. Конструкторы
     // ============================================================
-    auto ctor = ConstructorBuilder()
+
+    // base_proxy(PointerType data);
+    auto ctor1 = ConstructorBuilder()
         .as_public()
         .add_argument(
             VariableBuilder("data")
             .with_type(
-                TypeBuilder("PointerType")
+                TypeBuilder(pointer_type_alias)
                 .as_ptr()
                 .build()
             )
             .build()
         )
         .build();
-    cls.add_constructor(ctor);
+    cls.add_constructor(ctor1);
+
+    // base_proxy(DataType& data);
+    auto ctor2 = ConstructorBuilder()
+        .as_public()
+        .add_argument(
+            VariableBuilder("data")
+            .with_type(
+                TypeBuilder(data_type_alias)
+                .as_ref()
+                .build()
+            )
+            .build()
+        )
+        .build();
+    cls.add_constructor(ctor2);
+
+    // base_proxy(const DataType& data);
+    auto ctor3 = ConstructorBuilder()
+        .as_public()
+        .add_argument(
+            VariableBuilder("data")
+            .with_type(
+                TypeBuilder(data_type_alias)
+                .as_const()
+                .as_ref()
+                .build()
+            )
+            .build()
+        )
+        .build();
+    cls.add_constructor(ctor3);
 
     // ============================================================
-    // Метод vector()
+    // 7. Методы
     // ============================================================
+
+    // template<typename Tag> const vec_type<Tag>& vector() const;
     auto vec_method = MethodBuilder("vector")
         .with_type(
-            TypeBuilder(vec_type)
+            TypeBuilder(vec_type_alias)
+            .with_template(tag_t)
             .as_const()
             .as_ref()
             .build()
         )
         .as_public()
+        .as_const()
         .add_template_parametr(tag_t)
         .build();
     cls.add_method(vec_method);
 
-    // ============================================================
-    // Метод mutable_vector()
-    // ============================================================
+    // template<typename Tag> vec_type<Tag>& mutable_vector();
     auto mut_vec_method = MethodBuilder("mutable_vector")
         .with_type(
-            TypeBuilder(vec_type)
+            TypeBuilder(vec_type_alias)
+            .with_template(tag_t)
             .as_ref()
             .build()
         )
@@ -130,9 +192,7 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(mut_vec_method);
 
-    // ============================================================
-    // Метод size()
-    // ============================================================
+    // size_t size() const;
     auto size_method = MethodBuilder("size")
         .with_type(TypeBuilder("size_t").build())
         .as_public()
@@ -140,9 +200,7 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(size_method);
 
-    // ============================================================
-    // Метод capacity()
-    // ============================================================
+    // size_t capacity() const;
     auto capacity_method = MethodBuilder("capacity")
         .with_type(TypeBuilder("size_t").build())
         .as_public()
@@ -150,9 +208,7 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(capacity_method);
 
-    // ============================================================
-    // Метод empty()
-    // ============================================================
+    // bool empty() const;
     auto empty_method = MethodBuilder("empty")
         .with_type(TypeBuilder("bool").build())
         .as_public()
@@ -160,9 +216,7 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(empty_method);
 
-    // ============================================================
-    // Метод get_tag_index()
-    // ============================================================
+    // template<typename Tag> constexpr size_t get_tag_index() const;
     auto idx_method = MethodBuilder("get_tag_index")
         .with_type(TypeBuilder("size_t").build())
         .as_protected()
@@ -176,9 +230,7 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(idx_method);
 
-    // ============================================================
-    // Метод call()
-    // ============================================================
+    // template<typename Tag, typename F> constexpr inline void call(F&& f);
     auto call_method = MethodBuilder("call")
         .with_type(TypeBuilder("void").build())
         .as_protected()
@@ -209,69 +261,11 @@ cg::source::Class build_base_proxy() {
     return cls;
 }
 
-auto build_vec_type() {
-    auto tag_t = cg::build::TypeBuilder("Tag")
-        .as_template()
-        .build();
-    auto type_t = cg::build::TypeBuilder("type")
-        .ns(tag_t)
-        .build();
-    auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
-        .as_template()
-        .build();
-    auto vec_t = cg::build::TypeBuilder("vec_type")
-        .with_template(type_t)
-        .ns(attr_t)
-        .build();
-
-    return vec_t;
-}
-
-auto build_pointer_type() {
-    auto Data_t = cg::build::TypeBuilder("DataType")
-        .as_ptr()
-        .build();
-    auto c_Data_t = cg::build::TypeBuilder(Data_t)
-        .as_const()
-        .build();
-
-    auto IsConst_t = cg::build::TypeBuilder("IsConst")
-        .as_template(cg::build::TypeBuilder("bool").build())
-        .build();
-
-    auto cond_t = cg::build::TypeBuilder("conditional_t")
-        .with_template(IsConst_t)
-        .with_template(c_Data_t)
-        .with_template(Data_t)
-        .ns("std")
-        .build();
-
-    return cond_t;
-}
-
-auto build_data_type() {
-    auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
-        .as_template()
-        .build();
-    auto data_t = cg::build::TypeBuilder("data_type")
-        .ns(attr_t)
-        .build();
-
-    return data_t;
-}
-
 int main() {
-    // Строим класс
     auto cls = build_base_proxy();
 
-    auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
-        .as_template()
-        .build();
-    auto data_t = cg::build::TypeBuilder("data_type")
-        .ns(attr_t)
-        .build();
-
-    std::cout << cg::generate::TypeNameGenerator::generate(data_t) << "\n";
+    std::cout << "=== base_proxy CLASS ===\n";
+    std::cout << cg::generate::ClassGenerator::generate(cls) << "\n";
 
     return 0;
 }
