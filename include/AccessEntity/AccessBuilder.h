@@ -42,6 +42,7 @@ namespace cg::build {
 		FieldBuilder& as_static() { if (!field.is_static()) field.toggle_static(); return *this; }
 		FieldBuilder& as_const() { if (!field.get_type().is_const()) field.get_type().toggle_const(); return *this; }
 		FieldBuilder& as_constexpr() { if (!field.is_constexpr()) field.toggle_constexpr(); return *this; }
+		FieldBuilder& as_inline() { if (!field.is_inline()) field.toggle_inline(); return *this; }
 		FieldBuilder& as_mutable() { if (!field.is_mutable()) field.toggle_mutable(); return *this; }
 
 		FieldBuilder& as_private() { field.set_visibility(pls::Access::Private); return *this; }

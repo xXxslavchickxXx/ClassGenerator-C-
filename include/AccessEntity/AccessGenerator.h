@@ -1,303 +1,236 @@
-//#pragma once
-//
-//#include <AccessEntity/AccessEntity.h>
-//#include <DefaultEntity/DefaultEntity.h>
-//#include <DefaultEntity/DefaultGenerator.h>
-//#include <sstream>
-//#include <string>
-//
-//namespace cg::generate {
-//    namespace cgs = cg::source;
-//
-//    class AccessEntityGenerator {
-//    public:
-//        static std::string generate_access(const cgs::AccessEntity& entity) {
-//            switch (entity.get_visibility()) {
-//            case cgs::Access::Public:    return "public";
-//            case cgs::Access::Protected: return "protected";
-//            case cgs::Access::Private:   return "private";
-//            default: return "";
-//            }
-//        }
-//
-//        static std::string generate_access_label(const cgs::AccessEntity& entity) {
-//            auto access = generate_access(entity);
-//            if (access.empty()) return "";
-//            return access + ":";
-//        }
-//    };
-//
-//    class AliasGenerator {
-//    public:
-//        static std::string generate(const cgs::Alias& alias) {
-//            std::stringstream sstr;
-//
-//            sstr << TemplateEntityGenerator::generate(alias, false);
-//            if (!alias.get_template_parametrs().empty()) sstr << "\n";
-//
-//            sstr << "using " << NamedGenerator::generate(alias) << " = ";
-//            sstr << TypeNameGenerator::generate(alias.get_underlying_type());
-//
-//            return sstr.str();
-//        }
-//    };
-//
-//    class FieldGenerator {
-//    public:
-//        static std::string generate(const cgs::Field& field) {
-//            /*std::stringstream sstr;
-//
-//            if (field.is_mutable()) sstr << "mutable ";
-//
-//            sstr << VariableGenerator::generate(field);
-//
-//            return sstr.str();*/
-//        }
-//    };
-//
-//    class MethodGenerator {
-//    public:
-//        /*static std::string generate(const cgs::Method& method) {
-//            std::stringstream sstr;
-//
-//            sstr << TemplateEntityGenerator::generate(method, false);
-//            if (!method.get_template_parametrs().empty()) sstr << "\n";
-//
-//            if (method.get_method_type() == cgs::MethodType::VIRTUAL ||
-//                method.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {
-//                sstr << "virtual ";
-//            }
-//
-//            sstr << OptionalEntityGenerator::generate(method)
-//                << ArgumentableEntityGenerator::generate(method);
-//
-//            if (method.is_const()) {
-//                sstr << " const";
-//            }
-//
-//            if (method.get_method_type() == cgs::MethodType::OVERRIDE) {
-//                sstr << " override";
-//            }
-//
-//            if (method.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {
-//                sstr << " = 0";
-//            }
-//
-//            if (method.get_method_type() == cgs::MethodType::DEFAULT) {
-//                sstr << " = default";
-//            }
-//            else if (method.get_method_type() == cgs::MethodType::DELETED) {
-//                sstr << " = delete";
-//            }
-//
-//            return sstr.str();
-//        }*/
-//    };
-//
-//    class ConstructorGenerator {
-//    public:
-//        static std::string generate(const cgs::Constructor& ctor, const cgs::Class& class_) {
-//            /*std::stringstream sstr;
-//
-//            if (ctor.is_explicit()) {
-//                sstr << "explicit ";
-//            }
-//
-//            sstr << TemplateEntityGenerator::generate(ctor, false);
-//            if (!ctor.get_template_parametrs().empty()) sstr << "\n";
-//
-//            sstr << class_.get_name();
-//            sstr << ArgumentableEntityGenerator::generate(ctor);
-//
-//            if (ctor.is_default()) {
-//                sstr << " = default";
-//            }
-//            else if (ctor.is_delete()) {
-//                sstr << " = delete";
-//            }
-//
-//            const auto& init_list = ctor.get_init_list();
-//            if (!init_list.empty()) {
-//                sstr << " : ";
-//                for (size_t i = 0; i < init_list.size(); i++) {
-//                    if (i > 0) sstr << ", ";
-//                    sstr << init_list[i].get_name() << "(" << init_list[i].get_value() << ")";
-//                }
-//            }
-//
-//            return sstr.str();*/
-//        }
-//    };
-//
-//    class DestructorGenerator {
-//    public:
-//        static std::string generate(const cgs::Destructor& dtor, const cgs::Class& class_) {
-//            std::stringstream sstr;
-//
-//            if (dtor.is_virtual()) {
-//                sstr << "virtual ";
-//            }
-//
-//            sstr << "~" << class_.get_name() << "()";
-//
-//            if (dtor.is_default()) {
-//                sstr << " = default";
-//            }
-//
-//            return sstr.str();
-//        }
-//    };
-//
-//    class ClassGenerator {
-//    private:
-//        template<typename Entity, typename Generator>
-//        static void print_entities(
-//            std::stringstream& sstr,
-//            const std::vector<Entity>& entities,
-//            cgs::Access access,
-//            const cgs::Class& cls
-//        ) {
-//            std::vector<std::reference_wrapper<const Entity>> filtered;
-//            for (const auto& entity : entities) {
-//                if (entity.get_visibility() == access) {
-//                    filtered.push_back(std::cref(entity));
-//                }
-//            }
-//
-//            if (filtered.empty()) return;
-//
-//            std::vector<std::reference_wrapper<const Entity>> regular;
-//            std::vector<std::reference_wrapper<const Entity>> templated;
-//
-//            for (const auto& entity_ref : filtered) {
-//                const auto& entity = entity_ref.get();
-//                bool is_templated = false;
-//                if constexpr (std::is_base_of_v<cgs::TemplateEntity, std::decay_t<Entity>>) {
-//                    is_templated = !entity.get_template_parametrs().empty();
-//                }
-//
-//                if (is_templated) {
-//                    templated.push_back(entity_ref);
-//                }
-//                else {
-//                    regular.push_back(entity_ref);
-//                }
-//            }
-//
-//            for (const auto& entity_ref : regular) {
-//                const auto& entity = entity_ref.get();
-//                std::string code;
-//                if constexpr (requires { Generator::generate(entity, cls); }) {
-//                    code = Generator::generate(entity, cls);
-//                }
-//                else {
-//                    code = Generator::generate(entity);
-//                }
-//                if (!code.empty()) {
-//                    sstr << tabulate(1, code);
-//                    sstr << "\n";
-//                }
-//            }
-//
-//            if (!templated.empty()) {
-//                if (!regular.empty()) {
-//                    sstr << "\n";
-//                }
-//
-//                for (const auto& entity_ref : templated) {
-//                    const auto& entity = entity_ref.get();
-//                    std::string code;
-//                    if constexpr (requires { Generator::generate(entity, cls); }) {
-//                        code = Generator::generate(entity, cls);
-//                    }
-//                    else {
-//                        code = Generator::generate(entity);
-//                    }
-//                    if (!code.empty()) {
-//                        sstr << tabulate(1, code);
-//                        sstr << "\n";
-//                    }
-//                }
-//            }
-//        }
-//
-//    public:
-//        static std::string generate(const cgs::Class& cls) {
-//            std::stringstream sstr;
-//
-//            sstr << TemplateEntityGenerator::generate(cls, false);
-//            if (!cls.get_template_parametrs().empty()) sstr << "\n";
-//
-//            sstr << "class " << cls.get_name();
-//
-//            const auto& bases = cls.get_base_classes();
-//            if (!bases.empty()) {
-//                sstr << " : ";
-//                for (size_t i = 0; i < bases.size(); i++) {
-//                    if (i > 0) sstr << ", ";
-//                    sstr << AccessEntityGenerator::generate_access(bases[i]) << " ";
-//                    sstr << bases[i].get_name();
-//                }
-//            }
-//
-//            sstr << " {\n";
-//
-//            std::vector<cgs::Access> access_order = {
-//                cgs::Access::Public,
-//                cgs::Access::Protected,
-//                cgs::Access::Private
-//            };
-//
-//            for (auto access : access_order) {
-//                bool has_entities = false;
-//
-//                for (const auto& field : cls.get_fields()) {
-//                    if (field.get_visibility() == access) { has_entities = true; break; }
-//                }
-//                if (!has_entities) {
-//                    for (const auto& method : cls.get_methods()) {
-//                        if (method.get_visibility() == access) { has_entities = true; break; }
-//                    }
-//                }
-//                if (!has_entities) {
-//                    for (const auto& alias : cls.get_aliases()) {
-//                        if (alias.get_visibility() == access) { has_entities = true; break; }
-//                    }
-//                }
-//                if (!has_entities && cls.has_destructor()) {
-//                    if (cls.get_destructor().get_visibility() == access) { has_entities = true; }
-//                }
-//                if (!has_entities) {
-//                    for (const auto& ctor : cls.get_constructors()) {
-//                        if (ctor.get_visibility() == access) { has_entities = true; break; }
-//                    }
-//                }
-//
-//                if (!has_entities) continue;
-//
-//                sstr << cgs::to_string(access) << ":\n";
-//
-//                print_entities<cgs::Alias, AliasGenerator>(sstr, cls.get_aliases(), access, cls);
-//                sstr << "\n";
-//
-//                print_entities<cgs::Field, FieldGenerator>(sstr, cls.get_fields(), access, cls);
-//                sstr << "\n";
-//
-//                print_entities<cgs::Constructor, ConstructorGenerator>(sstr, cls.get_constructors(), access, cls);
-//                sstr << "\n";
-//
-//                if (cls.has_destructor() && cls.get_destructor().get_visibility() == access) {
-//                    sstr << tabulate(1, DestructorGenerator::generate(cls.get_destructor(), cls));
-//                    sstr << "\n\n";
-//                }
-//
-//                print_entities<cgs::Method, MethodGenerator>(sstr, cls.get_methods(), access, cls);
-//                sstr << "\n";
-//            }
-//
-//            sstr << "};";
-//
-//            return sstr.str();
-//        }
-//    };
-//}
+#pragma once
+
+#include <DefaultEntity/DefaultGenerator.h>
+#include <AccessEntity/AccessEntity.h>
+#include <AccessEntity/AccessBuilder.h>
+#include <sstream>
+
+namespace cg::generate {
+    namespace cgs = cg::source;
+
+    class FieldGenerator {
+    public:
+        static std::string generate(const cgs::Field& f, const cgs::Class& cls, GenStage g);
+    };
+
+    class MethodGenerator {
+    public:
+        static std::string generate(const cgs::Method& m, const cgs::Class& cls, GenStage g);
+    };
+
+    class ConstructorGenerator {
+    public:
+        static std::string generate(const cgs::Constructor& c, const cgs::Class& cls, GenStage g);
+    };
+
+    class DestructorGenerator {
+    public:
+        static std::string generate(const cgs::Destructor& d, const cgs::Class& cls, GenStage g);
+    };
+
+    class ClassGenerator {
+    public:
+        static std::string generate(const cgs::Class& cls, GenStage g);
+    };
+}
+
+namespace cg::generate {
+    inline std::string FieldGenerator::generate(const cgs::Field& f, const cgs::Class& cls, GenStage g) {
+        std::stringstream sstr;
+
+        if (g == GenStage::Realization) {
+            if (!f.is_static() || f.is_constexpr() || f.is_inline()) {
+                return "";
+            }
+
+            bool class_is_template = !cls.get_template_parametrs().empty();
+            if (class_is_template) {
+                sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
+            }
+
+            sstr << TypeNameGenerator::generate(f.get_type()) << " ";
+
+            sstr << NamedGenerator::generate(cls)
+                << TemplateEntityGenerator::generate(cls, true) << "::"
+                << f.get_name();
+
+            if (!f.get_value().empty()) {
+                sstr << " = " << f.get_value();
+            }
+            sstr << ";";
+            return sstr.str();
+        }
+
+        if (f.is_static()) {
+            sstr << "static ";
+        }
+        if (f.is_constexpr()) {
+            sstr << "constexpr ";
+        }
+        if (f.is_inline()) {
+            sstr << "inline ";
+        }
+        if (f.is_mutable()) {
+            sstr << "mutable ";
+        }
+
+        sstr << TypeNameGenerator::generate(f.get_type()) << " ";
+        sstr << f.get_name();
+
+        if (!f.get_value().empty()) {
+            sstr << " = " << f.get_value();
+        }
+
+        sstr << ";";
+        return sstr.str();
+    }
+
+    inline std::string MethodGenerator::generate(const cgs::Method& m, const cgs::Class& cls, GenStage g) {
+        std::stringstream sstr;
+
+        bool is_template = !m.get_template_parametrs().empty() || m.get_type().is_template();
+        bool class_is_template = !cls.get_template_parametrs().empty();
+
+        if (g == GenStage::Realization && (is_template || class_is_template)) {
+            auto m_inline = m;
+            // Если мы вынуждены делать реализацию inline из-за шаблонов, переключаем стадию на Inline.
+            // Но мы убираем дефолтные значения аргументов, так как реализация всё равно пишется ВНЕ объявления класса!
+            g = GenStage::Inline;
+        }
+
+        if (m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL ||
+            m.get_method_type() == cgs::MethodType::DEFAULT ||
+            m.get_method_type() == cgs::MethodType::DELETED)
+        {
+            if (g == GenStage::Realization) {
+                return "";
+            }
+            g = GenStage::Declaration;
+        }
+
+        if (g != GenStage::Declaration) {
+            if (class_is_template) {
+                sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
+            }
+        }
+        if (is_template) {
+            sstr << TemplateEntityGenerator::generate(m, false) << "\n";
+        }
+
+        if (g == GenStage::Declaration) {
+            if (m.is_static()) sstr << "static ";
+            if (m.get_method_type() == cgs::MethodType::VIRTUAL ||
+                m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {
+                sstr << "virtual ";
+            }
+        }
+
+        if (m.is_constexpr()) sstr << "constexpr ";
+        if (m.is_inline() && g == GenStage::Inline) sstr << "inline ";
+
+        sstr << TypeNameGenerator::generate(m.get_type()) << " ";
+
+        if (g != GenStage::Declaration) {
+            sstr << NamedGenerator::generate(cls)
+                << TemplateEntityGenerator::generate(cls, true) << "::"
+                << m.get_name();
+        }
+        else {
+            sstr << m.get_name();
+        }
+
+        sstr << ArgumentableEntityGenerator::generate(m, g == GenStage::Declaration);
+
+        if (m.is_const()) sstr << " const";
+
+        if (g == GenStage::Declaration) {
+            if (m.get_method_type() == cgs::MethodType::OVERRIDE) sstr << " override";
+
+            if (m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {
+                sstr << " = 0;";
+            }
+            else if (m.get_method_type() == cgs::MethodType::DEFAULT) {
+                sstr << " = default;";
+            }
+            else if (m.get_method_type() == cgs::MethodType::DELETED) {
+                sstr << " = delete;";
+            }
+            else if (m.is_inline() || m.is_constexpr()) {
+                sstr << " {\n\t//TODO...\n}";
+            }
+            else {
+                sstr << ";";
+            }
+        }
+        else {
+            sstr << " {\n\t//TODO...\n}";
+        }
+
+        return sstr.str();
+    }
+
+    inline std::string ConstructorGenerator::generate(const cgs::Constructor& c, const cgs::Class& cls, GenStage g) {
+        std::stringstream sstr;
+        bool class_is_template = !cls.get_template_parametrs().empty();
+
+        if (g == GenStage::Realization) {
+            if (class_is_template || c.is_default() || c.is_delete()) return "";
+
+            sstr << NamedGenerator::generate(cls) << "::" << cls.get_name();
+            sstr << ArgumentableEntityGenerator::generate(c, false);
+
+            auto& init = c.get_init_list();
+            if (!init.empty()) {
+                sstr << "\n\t: ";
+                for (size_t i = 0; i < init.size(); ++i) {
+                    if (i > 0) sstr << ", ";
+                    sstr << init[i].get_name() << "(" << init[i].get_value() << ")";
+                }
+            }
+
+            sstr << " {\n\t//TODO...\n}";
+            return sstr.str();
+        }
+
+        if (c.is_explicit()) sstr << "explicit ";
+
+        sstr << cls.get_name();
+        sstr << ArgumentableEntityGenerator::generate(c, true);
+
+        if (c.is_default()) {
+            sstr << " = default;";
+        }
+        else if (c.is_delete()) {
+            sstr << " = delete;";
+        }
+        else {
+            sstr << ";";
+        }
+
+        return sstr.str();
+    }
+
+    inline std::string DestructorGenerator::generate(const cgs::Destructor& d, const cgs::Class& cls, GenStage g) {
+        std::stringstream sstr;
+        bool class_is_template = !cls.get_template_parametrs().empty();
+
+        if (g == GenStage::Realization) {
+            if (class_is_template || d.is_default()) return "";
+
+            sstr << NamedGenerator::generate(cls) << "::~" << cls.get_name() << "() {\n\t//TODO...\n}";
+            return sstr.str();
+        }
+
+        if (d.is_virtual()) sstr << "virtual ";
+        sstr << "~" << cls.get_name() << "()";
+
+        if (d.is_default()) {
+            sstr << " = default;";
+        }
+        else {
+            sstr << ";";
+        }
+
+        return sstr.str();
+    }
+}

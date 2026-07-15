@@ -63,6 +63,7 @@ namespace cg::source {
     };
 
     enum class MethodType {
+        NOTHING,
         DEFAULT,
         DELETED,
         VIRTUAL,
@@ -76,7 +77,8 @@ namespace cg::source {
 
     public:
         Method(const std::string& name_)
-            : Function(name_) {}
+            : Function(name_),
+            constantable(false) {}
 
         MethodType get_method_type() const { return method_type; }
         void set_method_type(const MethodType& new_type) { method_type = new_type; }

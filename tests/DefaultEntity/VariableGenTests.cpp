@@ -4,11 +4,6 @@
 using namespace cg::build;
 using namespace cg::generate;
 
-// =====================================================================
-// Тесты генерации переменных (VariableGenerator)
-// =====================================================================
-
-// 1. Простая глобальная переменная (без инициализации)
 TEST(VariableGenerationTest, SimpleGlobalVariable) {
     auto var = VariableBuilder("global_counter")
         .with_type(TypeBuilder("int").build())
@@ -19,7 +14,6 @@ TEST(VariableGenerationTest, SimpleGlobalVariable) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int global_counter;");
 }
 
-// 2. Глобальная переменная с инициализацией
 TEST(VariableGenerationTest, GlobalVariableWithInit) {
     auto var = VariableBuilder("global_counter")
         .with_type(TypeBuilder("int").build())
@@ -31,7 +25,6 @@ TEST(VariableGenerationTest, GlobalVariableWithInit) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int global_counter = 10;");
 }
 
-// 3. Статическая переменная
 TEST(VariableGenerationTest, StaticVariable) {
     auto var = VariableBuilder("static_counter")
         .with_type(TypeBuilder("int").build())
@@ -43,7 +36,6 @@ TEST(VariableGenerationTest, StaticVariable) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static int static_counter;");
 }
 
-// 4. Статическая constexpr переменная
 TEST(VariableGenerationTest, StaticConstexpr) {
     auto var = VariableBuilder("MAX_SIZE")
         .with_type(TypeBuilder("int").build())
@@ -57,7 +49,6 @@ TEST(VariableGenerationTest, StaticConstexpr) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr int MAX_SIZE = 100;");
 }
 
-// 5. Статическая inline переменная
 TEST(VariableGenerationTest, StaticInline) {
     auto var = VariableBuilder("inline_counter")
         .with_type(TypeBuilder("int").build())
@@ -71,7 +62,6 @@ TEST(VariableGenerationTest, StaticInline) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static inline int inline_counter = 42;");
 }
 
-// 6. Глобальная constexpr переменная
 TEST(VariableGenerationTest, GlobalConstexpr) {
     auto var = VariableBuilder("PI")
         .with_type(TypeBuilder("float").build())
@@ -84,7 +74,6 @@ TEST(VariableGenerationTest, GlobalConstexpr) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "constexpr float PI = 3.14159f;");
 }
 
-// 7. Статическая constexpr с инициализацией (проверка дублирования логики)
 TEST(VariableGenerationTest, StaticConstexprInit) {
     auto var = VariableBuilder("VERSION")
         .with_type(TypeBuilder("int").build())
@@ -98,7 +87,6 @@ TEST(VariableGenerationTest, StaticConstexprInit) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr int VERSION = 1;");
 }
 
-// 8. Статическая inline constexpr переменная
 TEST(VariableGenerationTest, StaticInlineConstexpr) {
     auto var = VariableBuilder("DEFAULT_VALUE")
         .with_type(TypeBuilder("int").build())
@@ -113,7 +101,6 @@ TEST(VariableGenerationTest, StaticInlineConstexpr) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr inline int DEFAULT_VALUE = 0;");
 }
 
-// 9. Переменная внутри пространства имен (Namespace)
 TEST(VariableGenerationTest, VariableInNamespace) {
     auto var = VariableBuilder("app_version")
         .with_type(TypeBuilder("int").build())
@@ -126,7 +113,6 @@ TEST(VariableGenerationTest, VariableInNamespace) {
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int myapp::app_version = 1;");
 }
 
-// 10. Constexpr переменная внутри пространства имен
 TEST(VariableGenerationTest, ConstexprVariableInNamespace) {
     auto var = VariableBuilder("MAX_CONNECTIONS")
         .with_type(TypeBuilder("int").build())
