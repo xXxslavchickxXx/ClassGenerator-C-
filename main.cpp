@@ -5,7 +5,7 @@ cg::source::Class build_base_proxy() {
     using namespace cg::build;
 
     // ============================================================
-    // 1. Шаблонные параметры
+    // Шаблонные параметры
     // ============================================================
     auto attr_t = TypeBuilder("AttributeVectorT")
         .as_template()
@@ -25,45 +25,17 @@ cg::source::Class build_base_proxy() {
         .build();
 
     // ============================================================
-    // 2. Типы для алиасов
+    // Типы для алиасов
     // ============================================================
-
-    // vec_type = typename AttributeVectorT::template vec_type<typename Tag::type>
-    auto type_of_tag = TypeBuilder("type")
-        .ns(tag_t)  // Tag::type
-        .build();
-
     auto vec_type = TypeBuilder("vec_type")
-        .as_template()
-        .with_template(type_of_tag)
-        .ns(attr_t)  // AttributeVectorT::vec_type
+        .with_template(tag_t)
         .build();
 
-    // DataType = typename AttributeVectorT::data_type
-    auto data_type = TypeBuilder("data_type")
-        .ns(attr_t)
-        .build();
-
-    // PointerType = std::conditional_t<IsConst, const DataType*, DataType*>
-    auto data_ptr = TypeBuilder("DataType")
-        .as_ptr()
-        .build();
-    auto const_data_ptr = TypeBuilder("DataType")
-        .as_const()
-        .as_ptr()
-        .build();
-    auto is_const_type = TypeBuilder("IsConst")
-        .build();
-
-    auto pointer_type = TypeBuilder("conditional_t")
-        .ns(cg::source::NamespacePrefix("std"))
-        .with_template(is_const_type)
-        .with_template(const_data_ptr)
-        .with_template(data_ptr)
+    auto pointer_type = TypeBuilder("PointerType")
         .build();
 
     // ============================================================
-    // 3. Класс base_proxy
+    // Класс base_proxy
     // ============================================================
     auto cls = ClassBuilder("base_proxy")
         .as_public()
@@ -73,36 +45,38 @@ cg::source::Class build_base_proxy() {
         .build();
 
     // ============================================================
-    // 4. Алиасы
+    // Алиасы (нужна доработка в билдере)
     // ============================================================
-
     // using vec_type = typename AttributeVectorT::template vec_type<typename Tag::type>;
-    auto vec_type_alias = AliasBuilder("vec_type")
-        .underlying_type(vec_type)
-        .as_public()
-        .build();
-    cls.add_alias(vec_type_alias);
-
     // using DataType = typename AttributeVectorT::data_type;
+    // using PointerType = std::conditional_t<IsConst, const DataType*, DataType*>;
+
+    // Временное решение — добавим как поля, потом заменим на алиасы
     auto data_type_alias = AliasBuilder("DataType")
-        .underlying_type(data_type)
+        .underlying_type(
+            TypeBuilder("data_type")
+            .ns(cg::source::NamespacePrefix("AttributeVectorT"))
+            .build()
+        )
         .as_public()
         .build();
     cls.add_alias(data_type_alias);
 
-    // using PointerType = std::conditional_t<IsConst, const DataType*, DataType*>;
     auto pointer_type_alias = AliasBuilder("PointerType")
-        .underlying_type(pointer_type)
+        .underlying_type(
+            TypeBuilder("PointerType")
+            .build()
+        )
         .as_public()
         .build();
     cls.add_alias(pointer_type_alias);
 
     // ============================================================
-    // 5. Поле data_
+    // Поле data_
     // ============================================================
     auto data_field = FieldBuilder("data_")
         .with_type(
-            TypeBuilder(pointer_type_alias)
+            TypeBuilder("PointerType")
             .as_ptr()
             .build()
         )
@@ -111,79 +85,43 @@ cg::source::Class build_base_proxy() {
     cls.add_field(data_field);
 
     // ============================================================
-    // 6. Конструкторы
+    // Конструктор
     // ============================================================
-
-    // base_proxy(PointerType data);
-    auto ctor1 = ConstructorBuilder()
+    auto ctor = ConstructorBuilder()
         .as_public()
         .add_argument(
             VariableBuilder("data")
             .with_type(
-                TypeBuilder(pointer_type_alias)
+                TypeBuilder("PointerType")
                 .as_ptr()
                 .build()
             )
             .build()
         )
         .build();
-    cls.add_constructor(ctor1);
-
-    // base_proxy(DataType& data);
-    auto ctor2 = ConstructorBuilder()
-        .as_public()
-        .add_argument(
-            VariableBuilder("data")
-            .with_type(
-                TypeBuilder(data_type_alias)
-                .as_ref()
-                .build()
-            )
-            .build()
-        )
-        .build();
-    cls.add_constructor(ctor2);
-
-    // base_proxy(const DataType& data);
-    auto ctor3 = ConstructorBuilder()
-        .as_public()
-        .add_argument(
-            VariableBuilder("data")
-            .with_type(
-                TypeBuilder(data_type_alias)
-                .as_const()
-                .as_ref()
-                .build()
-            )
-            .build()
-        )
-        .build();
-    cls.add_constructor(ctor3);
+    cls.add_constructor(ctor);
 
     // ============================================================
-    // 7. Методы
+    // Метод vector()
     // ============================================================
-
-    // template<typename Tag> const vec_type<Tag>& vector() const;
     auto vec_method = MethodBuilder("vector")
         .with_type(
-            TypeBuilder(vec_type_alias)
-            .with_template(tag_t)
+            TypeBuilder(vec_type)
             .as_const()
             .as_ref()
             .build()
         )
         .as_public()
-        .as_const()
         .add_template_parametr(tag_t)
         .build();
     cls.add_method(vec_method);
 
-    // template<typename Tag> vec_type<Tag>& mutable_vector();
+    // ============================================================
+    // Метод mutable_vector()
+    // ============================================================
     auto mut_vec_method = MethodBuilder("mutable_vector")
         .with_type(
-            TypeBuilder(vec_type_alias)
-            .with_template(tag_t)
+            TypeBuilder(vec_type)
             .as_ref()
             .build()
         )
@@ -192,7 +130,9 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(mut_vec_method);
 
-    // size_t size() const;
+    // ============================================================
+    // Метод size()
+    // ============================================================
     auto size_method = MethodBuilder("size")
         .with_type(TypeBuilder("size_t").build())
         .as_public()
@@ -200,7 +140,9 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(size_method);
 
-    // size_t capacity() const;
+    // ============================================================
+    // Метод capacity()
+    // ============================================================
     auto capacity_method = MethodBuilder("capacity")
         .with_type(TypeBuilder("size_t").build())
         .as_public()
@@ -208,7 +150,9 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(capacity_method);
 
-    // bool empty() const;
+    // ============================================================
+    // Метод empty()
+    // ============================================================
     auto empty_method = MethodBuilder("empty")
         .with_type(TypeBuilder("bool").build())
         .as_public()
@@ -216,7 +160,9 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(empty_method);
 
-    // template<typename Tag> constexpr size_t get_tag_index() const;
+    // ============================================================
+    // Метод get_tag_index()
+    // ============================================================
     auto idx_method = MethodBuilder("get_tag_index")
         .with_type(TypeBuilder("size_t").build())
         .as_protected()
@@ -230,7 +176,9 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(idx_method);
 
-    // template<typename Tag, typename F> constexpr inline void call(F&& f);
+    // ============================================================
+    // Метод call()
+    // ============================================================
     auto call_method = MethodBuilder("call")
         .with_type(TypeBuilder("void").build())
         .as_protected()
@@ -261,11 +209,227 @@ cg::source::Class build_base_proxy() {
     return cls;
 }
 
+auto build_vec_type() {
+    auto tag_t = cg::build::TypeBuilder("Tag")
+        .as_template()
+        .build();
+    auto type_t = cg::build::TypeBuilder("type")
+        .ns(tag_t)
+        .build();
+    auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
+        .as_template()
+        .build();
+    auto vec_t = cg::build::TypeBuilder("vec_type")
+        .with_template(type_t)
+        .ns(attr_t)
+        .build();
+
+    return vec_t;
+}
+
+auto build_pointer_type() {
+    auto Data_t = cg::build::TypeBuilder("DataType")
+        .as_ptr()
+        .build();
+    auto c_Data_t = cg::build::TypeBuilder(Data_t)
+        .as_const()
+        .build();
+
+    auto IsConst_t = cg::build::TypeBuilder("IsConst")
+        .as_template(cg::build::TypeBuilder("bool").build())
+        .build();
+
+    auto cond_t = cg::build::TypeBuilder("conditional_t")
+        .with_template(IsConst_t)
+        .with_template(c_Data_t)
+        .with_template(Data_t)
+        .ns("std")
+        .build();
+
+    return cond_t;
+}
+
+auto build_data_type() {
+    auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
+        .as_template()
+        .build();
+    auto data_t = cg::build::TypeBuilder("data_type")
+        .ns(attr_t)
+        .build();
+
+    return data_t;
+}
+
+void test_variable_generation() {
+    using namespace cg::build;
+    using namespace cg::generate;
+
+    auto check = [](const std::string& actual, const std::string& expected, const std::string& test_name) {
+        if (actual != expected) {
+            std::cerr << "Failed: " << test_name << "\n";
+            std::cerr << "  Expected: \"" << expected << "\"\n";
+            std::cerr << "  Got:      \"" << actual << "\"\n";
+            std::abort();
+        }
+        std::cout << "Passed: " << test_name << "\n";
+        };
+    std::cout << "\tVariable generator:\n";
+
+    {
+        auto var = VariableBuilder("global_counter")
+            .with_type(TypeBuilder("int").build())
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "extern int global_counter", "1. Declaration (global)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "int global_counter", "1. Realization (global)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "int global_counter", "1. Inline (global)");
+    }
+
+    {
+        auto var = VariableBuilder("global_counter")
+            .with_type(TypeBuilder("int").build())
+            .with_value("10")
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "extern int global_counter = 10", "2. Declaration (global init)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "int global_counter = 10", "2. Realization (global init)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "int global_counter = 10", "2. Inline (global init)");
+    }
+
+    {
+        auto var = VariableBuilder("static_counter")
+            .with_type(TypeBuilder("int").build())
+            .as_static()
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "static int static_counter", "3. Declaration (static)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "", "3. Realization (static - skip)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "static int static_counter", "3. Inline (static)");
+    }
+
+    {
+        auto var = VariableBuilder("MAX_SIZE")
+            .with_type(TypeBuilder("int").build())
+            .with_value("100")
+            .as_static()
+            .as_constexpr()
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "static constexpr int MAX_SIZE = 100", "4. Declaration (static constexpr)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "", "4. Realization (static constexpr - skip)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "static constexpr int MAX_SIZE = 100", "4. Inline (static constexpr)");
+    }
+
+    {
+        auto var = VariableBuilder("inline_counter")
+            .with_type(TypeBuilder("int").build())
+            .with_value("42")
+            .as_inline()
+            .as_static()
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "static inline int inline_counter = 42", "5. Declaration (inline static)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "", "5. Realization (inline static - skip)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "static inline int inline_counter = 42", "5. Inline (inline static)");
+    }
+
+    {
+        auto var = VariableBuilder("PI")
+            .with_type(TypeBuilder("float").build())
+            .with_value("3.14159f")
+            .as_constexpr()
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "constexpr float PI = 3.14159f", "6. Declaration (constexpr global)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "", "6. Realization (constexpr global - skip)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "constexpr float PI = 3.14159f", "6. Inline (constexpr global)");
+    }
+
+    {
+        auto var = VariableBuilder("VERSION")
+            .with_type(TypeBuilder("int").build())
+            .with_value("1")
+            .as_static()
+            .as_constexpr()
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "static constexpr int VERSION = 1", "7. Declaration (static constexpr init)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "", "7. Realization (static constexpr init - skip)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "static constexpr int VERSION = 1", "7. Inline (static constexpr init)");
+    }
+
+    {
+        auto var = VariableBuilder("DEFAULT_VALUE")
+            .with_type(TypeBuilder("int").build())
+            .with_value("0")
+            .as_constexpr()
+            .as_inline()
+            .as_static()
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "static constexpr inline int DEFAULT_VALUE = 0", "8. Declaration (inline static constexpr)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "", "8. Realization (inline static constexpr - skip)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "static constexpr inline int DEFAULT_VALUE = 0", "8. Inline (inline static constexpr)");
+    }
+
+    {
+        auto var = VariableBuilder("app_version")
+            .with_type(TypeBuilder("int").build())
+            .with_value("1")
+            .ns(cg::source::NamespacePrefix("myapp"))
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "extern int myapp::app_version = 1", "9. Declaration (namespace)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "int myapp::app_version = 1", "9. Realization (namespace)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "int myapp::app_version = 1", "9. Inline (namespace)");
+    }
+
+    {
+        auto var = VariableBuilder("MAX_CONNECTIONS")
+            .with_type(TypeBuilder("int").build())
+            .with_value("1024")
+            .as_constexpr()
+            .ns(cg::source::NamespacePrefix("network"))
+            .build();
+
+        check(VariableGenerator::generate(var, GenStage::Declaration),
+            "constexpr int network::MAX_CONNECTIONS = 1024", "10. Declaration (constexpr namespace)");
+        check(VariableGenerator::generate(var, GenStage::Realization),
+            "", "10. Realization (constexpr namespace - skip)");
+        check(VariableGenerator::generate(var, GenStage::Inline),
+            "constexpr int network::MAX_CONNECTIONS = 1024", "10. Inline (constexpr namespace)");
+    }
+}
+
 int main() {
-    auto cls = build_base_proxy();
-
-    std::cout << "=== base_proxy CLASS ===\n";
-    std::cout << cg::generate::ClassGenerator::generate(cls) << "\n";
-
+    system("chcp 65001 > nul");
+    test_variable_generation();
     return 0;
 }

@@ -46,6 +46,7 @@ namespace cg::build {
 		VariableBuilder& as_static() { if (!var.is_static()) var.toggle_static(); return *this; }
 		VariableBuilder& as_const() { if (!var.get_type().is_const()) var.get_type().toggle_const(); return *this; }
 		VariableBuilder& as_constexpr() { if (!var.is_constexpr()) var.toggle_constexpr(); return *this; }
+		VariableBuilder& as_inline() { if (!var.is_inline()) var.toggle_inline(); return *this; }
 
 		pls::Variable build() {
 			return var;

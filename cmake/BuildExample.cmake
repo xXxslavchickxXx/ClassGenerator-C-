@@ -16,7 +16,13 @@ function(create_executable TARGET_NAME)
     endif()
     
     # Проверка: существует ли файл?
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_SOURCE}")
+    if(IS_ABSOLUTE "${ARG_SOURCE}")
+        set(REAL_SOURCE_PATH "${ARG_SOURCE}")
+    else()
+        set(REAL_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_SOURCE}")
+    endif()
+
+    if(NOT EXISTS "${REAL_SOURCE_PATH}")
         message(STATUS "[NOTICE] Исполняемый файл '${TARGET_NAME}' не будет собран: файл '${ARG_SOURCE}' не найден.")
         return()
     endif()
