@@ -14,7 +14,7 @@ namespace cg::source {
 	enum class Access {
 		Public, Protected, Private
 	};
-	std::string to_string(Access a) {
+	inline std::string to_string(Access a) {
 		switch (a) {
 		    case Access::Private:  return "private";
 		    case Access::Protected: return "protected";

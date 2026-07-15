@@ -162,6 +162,25 @@ namespace cg::source {
             : name(t) {}
     };
 
+    class Arguement : public NamedEntity {
+        TypeName type;
+        std::string value;
+
+    public:
+        Arguement(const std::string& name_)
+            : NamedEntity(name_)
+        {}
+
+        Arguement(const Arguement&) = default;
+        Arguement& operator=(const Arguement&) = default;
+
+        TypeName& get_type() { return type; }
+        const TypeName& get_type() const { return type; }
+
+        const std::string& get_value() const { return value; }
+        void set_value(const std::string& new_value) { value = new_value; }
+    };
+
     class OptionalEntity : public NamedEntity {
         TypeName type;
         bool constexpr_;
@@ -207,14 +226,24 @@ namespace cg::source {
         Variable& operator=(const Variable&) = default;
         Variable(Variable&&) = default;
         Variable& operator=(Variable&&) = default;
+
+        operator Arguement() const {
+            auto arg = Arguement(name);
+            arg.get_type() = get_type();
+            arg.set_value(value);
+            for (const auto& ns : namespace_prefix) {
+                arg.add_namespace_prefix(ns);
+            }
+            return arg;
+        }
     };
 
     class ArgumentableEntity {
-        std::vector<Variable> arguments;
+        std::vector<Arguement> arguments;
 
     public:
-        std::vector<Variable>& get_args() { return arguments; }
-        const std::vector<Variable>& get_args() const { return arguments; }
+        std::vector<Arguement>& get_args() { return arguments; }
+        const std::vector<Arguement>& get_args() const { return arguments; }
     };
 
     class Function : public OptionalEntity, public ArgumentableEntity, public TemplateEntity {

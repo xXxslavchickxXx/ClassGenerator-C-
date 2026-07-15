@@ -4,15 +4,19 @@
 using namespace cg::build;
 using namespace cg::generate;
 
+// =====================================================================
+// Тесты генерации переменных (VariableGenerator)
+// =====================================================================
+
 // 1. Простая глобальная переменная (без инициализации)
 TEST(VariableGenerationTest, SimpleGlobalVariable) {
     auto var = VariableBuilder("global_counter")
         .with_type(TypeBuilder("int").build())
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "extern int global_counter");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "int global_counter");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int global_counter");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "extern int global_counter;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "int global_counter;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int global_counter;");
 }
 
 // 2. Глобальная переменная с инициализацией
@@ -22,9 +26,9 @@ TEST(VariableGenerationTest, GlobalVariableWithInit) {
         .with_value("10")
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "extern int global_counter = 10");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "int global_counter = 10");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int global_counter = 10");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "extern int global_counter = 10;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "int global_counter = 10;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int global_counter = 10;");
 }
 
 // 3. Статическая переменная
@@ -34,9 +38,9 @@ TEST(VariableGenerationTest, StaticVariable) {
         .as_static()
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static int static_counter");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static int static_counter");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static int static_counter;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), ""); // Пустая строка без ";"
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static int static_counter;");
 }
 
 // 4. Статическая constexpr переменная
@@ -48,9 +52,9 @@ TEST(VariableGenerationTest, StaticConstexpr) {
         .as_constexpr()
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static constexpr int MAX_SIZE = 100");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr int MAX_SIZE = 100");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static constexpr int MAX_SIZE = 100;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), ""); // Пустая строка без ";"
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr int MAX_SIZE = 100;");
 }
 
 // 5. Статическая inline переменная
@@ -62,9 +66,9 @@ TEST(VariableGenerationTest, StaticInline) {
         .as_static()
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static inline int inline_counter = 42");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static inline int inline_counter = 42");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static inline int inline_counter = 42;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), ""); // Пустая строка без ";"
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static inline int inline_counter = 42;");
 }
 
 // 6. Глобальная constexpr переменная
@@ -75,9 +79,9 @@ TEST(VariableGenerationTest, GlobalConstexpr) {
         .as_constexpr()
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "constexpr float PI = 3.14159f");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "constexpr float PI = 3.14159f");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "constexpr float PI = 3.14159f;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), ""); // Пустая строка без ";"
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "constexpr float PI = 3.14159f;");
 }
 
 // 7. Статическая constexpr с инициализацией (проверка дублирования логики)
@@ -89,9 +93,9 @@ TEST(VariableGenerationTest, StaticConstexprInit) {
         .as_constexpr()
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static constexpr int VERSION = 1");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr int VERSION = 1");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static constexpr int VERSION = 1;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), ""); // Пустая строка без ";"
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr int VERSION = 1;");
 }
 
 // 8. Статическая inline constexpr переменная
@@ -104,9 +108,9 @@ TEST(VariableGenerationTest, StaticInlineConstexpr) {
         .as_static()
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static constexpr inline int DEFAULT_VALUE = 0");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr inline int DEFAULT_VALUE = 0");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "static constexpr inline int DEFAULT_VALUE = 0;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), ""); // Пустая строка без ";"
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "static constexpr inline int DEFAULT_VALUE = 0;");
 }
 
 // 9. Переменная внутри пространства имен (Namespace)
@@ -117,9 +121,9 @@ TEST(VariableGenerationTest, VariableInNamespace) {
         .ns(cg::source::NamespacePrefix("myapp"))
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "extern int myapp::app_version = 1");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "int myapp::app_version = 1");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int myapp::app_version = 1");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "extern int myapp::app_version = 1;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "int myapp::app_version = 1;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "int myapp::app_version = 1;");
 }
 
 // 10. Constexpr переменная внутри пространства имен
@@ -131,7 +135,7 @@ TEST(VariableGenerationTest, ConstexprVariableInNamespace) {
         .ns(cg::source::NamespacePrefix("network"))
         .build();
 
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "constexpr int network::MAX_CONNECTIONS = 1024");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), "");
-    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "constexpr int network::MAX_CONNECTIONS = 1024");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "constexpr int network::MAX_CONNECTIONS = 1024;");
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Realization), ""); // Пустая строка без ";"
+    EXPECT_EQ(VariableGenerator::generate(var, GenStage::Inline), "constexpr int network::MAX_CONNECTIONS = 1024;");
 }

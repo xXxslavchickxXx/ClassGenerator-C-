@@ -61,12 +61,17 @@ namespace cg::build {
 			: func(var_name){}
 
 		FunctionBuilder& with_type(pls::TypeName t) { func.get_type() = std::move(t); return *this; }
+		FunctionBuilder& add_argument(pls::Arguement a) { func.get_args().push_back(a); return *this; }
 		FunctionBuilder& ns(source::NamespacePrefix prefix) { func.add_namespace_prefix(std::move(prefix)); return *this; }
 
 		FunctionBuilder& as_static() { if (!func.is_static()) func.toggle_static(); return *this; }
 		FunctionBuilder& as_inline() { if (!func.is_inline()) func.toggle_inline(); return *this; }
 		FunctionBuilder& as_constexpr() { if (!func.is_constexpr()) func.toggle_constexpr(); return *this; }
 
+		FunctionBuilder& with_template(const pls::TypeName& t) {
+			func.add_template_parametr(t);
+			return *this;
+		}
 
 		pls::Function build() {
 			return func;

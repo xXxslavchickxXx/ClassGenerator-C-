@@ -11,7 +11,7 @@ namespace cg::generate {
 		Inline
 	};
 
-	std::string tabulate(size_t count, const std::string& str) {
+	inline std::string tabulate(size_t count, const std::string& str) {
 		std::string temp_str;
 
 		std::stringstream sstr(str);
@@ -60,9 +60,14 @@ namespace cg::generate {
 		static std::string generate(const cgs::Variable& v, GenStage g);
 	};
 
+	class ArgumentGenerator {
+	public:
+		static std::string generate(const cgs::Arguement& a, bool value = true);
+	};
+
 	class ArgumentableEntityGenerator {
 	public:
-		static std::string generate(const cgs::ArgumentableEntity& a, GenStage g);
+		static std::string generate(const cgs::ArgumentableEntity& a, bool values = true);
 	};
 
 	class FunctionGenerator {
@@ -72,19 +77,51 @@ namespace cg::generate {
 }
 
 namespace cg::generate {
-	/*inline std::string FunctionGenerator::generate(const cgs::Function& f, GenStage g) {
+	inline std::string FunctionGenerator::generate(const cgs::Function& f, GenStage g) {
 		std::stringstream sstr;
 
-		sstr << TemplateEntityGenerator::generate(f, false);
-		if (!f.get_template_parametrs().empty()) sstr << "\n";
+		// Условия скипа генерации
+		if (g == GenStage::Realization)
+			if(f.is_constexpr() || f.is_inline()) {
+				return "";
+		}
 
-		sstr << OptionalEntityGenerator::generate(f)
-		<< ArgumentableEntityGenerator::generate(f);
+		bool is_template = !f.get_template_parametrs().empty() || f.get_type().is_template();
+
+		if (is_template)
+			sstr << TemplateEntityGenerator::generate(f, false) << '\n';
+
+
+		if (is_template && g == GenStage::Realization && !f.is_inline()) {
+			auto f_inline = f;
+			f_inline.toggle_inline();
+			sstr << OptionalEntityGenerator::generate(f_inline, GenStage::Inline);
+		}
+		else
+			sstr << OptionalEntityGenerator::generate(f, g);
+
+		sstr << ArgumentableEntityGenerator::generate(f, g != GenStage::Realization);
+		if (f.is_inline() || f.is_constexpr() || g != GenStage::Declaration) sstr << " {\n\t//TODO...\n}";
+		else sstr << ";";
+		return sstr.str();
 
 		return sstr.str();
 	}
 
-	inline std::string ArgumentableEntityGenerator::generate(const cgs::ArgumentableEntity& a, GenStage g) {
+	inline std::string ArgumentGenerator::generate(const cgs::Arguement& a, bool value) {
+		std::stringstream sstr;
+
+		sstr << TypeNameGenerator::generate(a.get_type()) << " ";
+		sstr << NamedGenerator::generate(a);
+		if (!a.get_value().empty() && value) {
+			sstr << " = " << a.get_value();
+		}
+		return sstr.str();
+
+		return sstr.str();
+	}
+
+	inline std::string ArgumentableEntityGenerator::generate(const cgs::ArgumentableEntity& a, bool values) {
 		std::stringstream sstr;
 
 		auto& args = a.get_args();
@@ -92,12 +129,12 @@ namespace cg::generate {
 		sstr << "(";
 		for (size_t i = 0; i < args.size(); i++) {
 			if (i > 0) sstr << ", ";
-			sstr << VariableGenerator::generate(args[i]);
+			sstr << ArgumentGenerator::generate(args[i], values);
 		}
 		sstr << ")";
 
 		return sstr.str();
-	}*/
+	}
 
 	inline std::string VariableGenerator::generate(const cgs::Variable& v, GenStage g) {
 		std::stringstream sstr;
@@ -112,6 +149,9 @@ namespace cg::generate {
 			if (!v.get_value().empty()) {
 				sstr << " = " << v.get_value();
 			}
+
+			sstr << ";";
+
 			return sstr.str();
 		}
 
@@ -120,14 +160,13 @@ namespace cg::generate {
 			sstr << "extern ";
 		}
 
-		std::string opt_part = OptionalEntityGenerator::generate(v, g);
-		if (opt_part.empty()) return "";
-		sstr << opt_part;
+		sstr << OptionalEntityGenerator::generate(v, g);
 
-		bool print_value = !v.get_value().empty() && g != GenStage::Realization;
-		if (print_value) {
+		if (!v.get_value().empty()) {
 			sstr << " = " << v.get_value();
 		}
+
+		sstr << ";";
 
 		return sstr.str();
 	}
