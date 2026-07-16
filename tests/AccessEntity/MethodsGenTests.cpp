@@ -129,7 +129,7 @@ TEST(MethodGeneratorTest, StaticMethod) {
 TEST(MethodGeneratorTest, TemplateMethod) {
     auto method = MethodBuilder("cast")
         .with_type(TypeBuilder("U").build())
-        .add_template_parametr(TypeBuilder("U").as_template().build())
+        .with_template(TypeBuilder("U").as_template().build())
         .build();
 
     auto cls = ClassBuilder("Converter").build();
@@ -154,7 +154,7 @@ TEST(MethodGeneratorTest, MethodInTemplateClass) {
         .build();
 
     auto cls = ClassBuilder("Stack")
-        .add_template_parametr(TypeBuilder("T").as_template().build())
+        .with_template(TypeBuilder("T").as_template().build())
         .build();
 
     EXPECT_EQ(MethodGenerator::generate(method, cls, GenStage::Declaration), "void push(const T& value);");

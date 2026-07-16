@@ -1,12 +1,50 @@
 ﻿#include <ClassGen.h>
 #include <iostream>
 
+using namespace cg::build;
+using namespace cg::generate;
+
+cg::source::Class build_base_proxy();
+auto build_vec_type() -> cg::source::TypeName;
+auto build_pointer_type();
+auto build_data_type();
+
+int main() {
+    system("chcp 65001 > nul");
+
+    auto tag_t = cg::build::TypeBuilder("Tag")
+        .as_template()
+        .build();
+    auto type_t = cg::build::TypeBuilder("type")
+        .ns(tag_t)
+        .build();
+    auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
+        .as_template()
+        .build();
+    auto vec_t = cg::build::TypeBuilder("vec_type")
+        .with_template(type_t)
+        .ns(attr_t)
+        .build();
+
+    auto cls = ClassBuilder("Class")
+        .with_template(tag_t)
+        .with_template(attr_t)
+        .build();
+
+    std::cout << ClassGenerator::generate(build_base_proxy(), GenStage::Inline);
+
+    auto vec_type_alias = AliasBuilder("vec_type")
+        .underlying_type(build_vec_type())
+        .build();
+
+    std::cout << AliasGenerator::generate(vec_type_alias);
+
+    return 0;
+}
+
 cg::source::Class build_base_proxy() {
     using namespace cg::build;
 
-    // ============================================================
-    // Шаблонные параметры
-    // ============================================================
     auto attr_t = TypeBuilder("AttributeVectorT")
         .as_template()
         .build();
@@ -24,9 +62,6 @@ cg::source::Class build_base_proxy() {
         .as_template()
         .build();
 
-    // ============================================================
-    // Типы для алиасов
-    // ============================================================
     auto vec_type = TypeBuilder("vec_type")
         .with_template(tag_t)
         .build();
@@ -34,22 +69,12 @@ cg::source::Class build_base_proxy() {
     auto pointer_type = TypeBuilder("PointerType")
         .build();
 
-    // ============================================================
-    // Класс base_proxy
-    // ============================================================
     auto cls = ClassBuilder("base_proxy")
         .as_public()
-        .add_template_parametr(attr_t)
-        .add_template_parametr(const_t)
-        .add_template_parametr(tags_t)
+        .with_template(attr_t)
+        .with_template(const_t)
+        .with_template(tags_t)
         .build();
-
-    // ============================================================
-    // Алиасы (нужна доработка в билдере)
-    // ============================================================
-    // using vec_type = typename AttributeVectorT::template vec_type<typename Tag::type>;
-    // using DataType = typename AttributeVectorT::data_type;
-    // using PointerType = std::conditional_t<IsConst, const DataType*, DataType*>;
 
     // Временное решение — добавим как поля, потом заменим на алиасы
     auto data_type_alias = AliasBuilder("DataType")
@@ -71,9 +96,6 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_alias(pointer_type_alias);
 
-    // ============================================================
-    // Поле data_
-    // ============================================================
     auto data_field = FieldBuilder("data_")
         .with_type(
             TypeBuilder("PointerType")
@@ -84,9 +106,6 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_field(data_field);
 
-    // ============================================================
-    // Конструктор
-    // ============================================================
     auto ctor = ConstructorBuilder()
         .as_public()
         .add_argument(
@@ -101,9 +120,6 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_constructor(ctor);
 
-    // ============================================================
-    // Метод vector()
-    // ============================================================
     auto vec_method = MethodBuilder("vector")
         .with_type(
             TypeBuilder(vec_type)
@@ -112,13 +128,10 @@ cg::source::Class build_base_proxy() {
             .build()
         )
         .as_public()
-        .add_template_parametr(tag_t)
+        .with_template(tag_t)
         .build();
     cls.add_method(vec_method);
 
-    // ============================================================
-    // Метод mutable_vector()
-    // ============================================================
     auto mut_vec_method = MethodBuilder("mutable_vector")
         .with_type(
             TypeBuilder(vec_type)
@@ -126,13 +139,10 @@ cg::source::Class build_base_proxy() {
             .build()
         )
         .as_public()
-        .add_template_parametr(tag_t)
+        .with_template(tag_t)
         .build();
     cls.add_method(mut_vec_method);
 
-    // ============================================================
-    // Метод size()
-    // ============================================================
     auto size_method = MethodBuilder("size")
         .with_type(TypeBuilder("size_t").build())
         .as_public()
@@ -140,9 +150,6 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(size_method);
 
-    // ============================================================
-    // Метод capacity()
-    // ============================================================
     auto capacity_method = MethodBuilder("capacity")
         .with_type(TypeBuilder("size_t").build())
         .as_public()
@@ -150,9 +157,6 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(capacity_method);
 
-    // ============================================================
-    // Метод empty()
-    // ============================================================
     auto empty_method = MethodBuilder("empty")
         .with_type(TypeBuilder("bool").build())
         .as_public()
@@ -160,15 +164,12 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(empty_method);
 
-    // ============================================================
-    // Метод get_tag_index()
-    // ============================================================
     auto idx_method = MethodBuilder("get_tag_index")
         .with_type(TypeBuilder("size_t").build())
         .as_protected()
         .as_constexpr()
         .as_const()
-        .add_template_parametr(
+        .with_template(
             TypeBuilder("Tag")
             .as_template()
             .build()
@@ -176,20 +177,17 @@ cg::source::Class build_base_proxy() {
         .build();
     cls.add_method(idx_method);
 
-    // ============================================================
-    // Метод call()
-    // ============================================================
     auto call_method = MethodBuilder("call")
         .with_type(TypeBuilder("void").build())
         .as_protected()
         .as_constexpr()
         .as_inline()
-        .add_template_parametr(
+        .with_template(
             TypeBuilder("Tag")
             .as_template()
             .build()
         )
-        .add_template_parametr(
+        .with_template(
             TypeBuilder("F")
             .as_template()
             .build()
@@ -209,7 +207,7 @@ cg::source::Class build_base_proxy() {
     return cls;
 }
 
-auto build_vec_type() {
+auto build_vec_type() -> cg::source::TypeName {
     auto tag_t = cg::build::TypeBuilder("Tag")
         .as_template()
         .build();
@@ -258,12 +256,4 @@ auto build_data_type() {
         .build();
 
     return data_t;
-}
-
-int main() {
-    system("chcp 65001 > nul");
-
-
-
-    return 0;
 }

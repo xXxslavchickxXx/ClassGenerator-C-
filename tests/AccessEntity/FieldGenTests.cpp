@@ -91,7 +91,7 @@ TEST(FieldGeneratorTest, StaticFieldInTemplateClass) {
         .build();
 
     auto cls = ClassBuilder("Repository")
-        .add_template_parametr(TypeBuilder("T").as_template().build())
+        .with_template(TypeBuilder("T").as_template().build())
         .build();
 
     EXPECT_EQ(FieldGenerator::generate(field, cls, GenStage::Declaration), "static T s_default_value;");

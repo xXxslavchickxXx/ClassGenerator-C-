@@ -17,7 +17,7 @@ namespace cg::build {
 		AliasBuilder& ns(pls::NamespacePrefix prefix) { alias.add_namespace_prefix(std::move(prefix)); return *this; }
 		AliasBuilder& underlying_type(pls::TypeName t) { alias.set_underlying_type(std::move(t)); return *this; }
 
-		AliasBuilder& add_template_parametr(pls::TypeName t) { alias.add_template_parametr(std::move(t)); return *this; }
+		AliasBuilder& with_template(pls::TypeName t) { alias.add_template_parametr(std::move(t)); return *this; }
 
 		AliasBuilder& as_private() { alias.set_visibility(pls::Access::Private); return *this; }
 		AliasBuilder& as_public() { alias.set_visibility(pls::Access::Public); return *this; }
@@ -65,7 +65,7 @@ namespace cg::build {
 		MethodBuilder& ns(pls::NamespacePrefix prefix) { method.add_namespace_prefix(std::move(prefix)); return *this; }
 
 		MethodBuilder& add_argument(pls::Variable arg) { method.get_args().push_back(std::move(arg)); return *this; }
-		MethodBuilder& add_template_parametr(pls::TypeName t) { method.add_template_parametr(std::move(t)); return *this; }
+		MethodBuilder& with_template(pls::TypeName t) { method.add_template_parametr(std::move(t)); return *this; }
 
 		MethodBuilder& as_static() { if (!method.is_static()) method.toggle_static(); return *this; }
 		MethodBuilder& as_inline() { if (!method.is_inline()) method.toggle_inline(); return *this; }
@@ -95,7 +95,7 @@ namespace cg::build {
 
 		ConstructorBuilder& add_argument(pls::Variable arg) { ctor.get_args().push_back(std::move(arg)); return *this; }
 		ConstructorBuilder& add_init(pls::Field field) { ctor.add_init(std::move(field)); return *this; }
-		ConstructorBuilder& add_template_parametr(pls::TypeName t) { ctor.add_template_parametr(std::move(t)); return *this; }
+		ConstructorBuilder& with_template(pls::TypeName t) { ctor.add_template_parametr(std::move(t)); return *this; }
 
 		ConstructorBuilder& as_default() { ctor.toggle_default(); return *this; }
 		ConstructorBuilder& as_delete() { ctor.toggle_delete(); return *this; }
@@ -116,7 +116,7 @@ namespace cg::build {
 	public:
 		DestructorBuilder() = default;
 
-		DestructorBuilder& add_template_parametr(pls::TypeName t) { dtor.add_template_parametr(std::move(t)); return *this; }
+		DestructorBuilder& with_template(pls::TypeName t) { dtor.add_template_parametr(std::move(t)); return *this; }
 
 		DestructorBuilder& as_default() { dtor.toggle_default(); return *this; }
 		DestructorBuilder& as_virtual(bool is_virtual = true) {
@@ -151,7 +151,7 @@ namespace cg::build {
 		ClassBuilder& with_constructor(pls::Constructor c) { cls.add_constructor(std::move(c)); return *this; }
 		ClassBuilder& with_destructor(pls::Destructor d) { cls.set_destructor(std::move(d)); return *this; }
 
-		ClassBuilder& add_template_parametr(pls::TypeName t) { cls.add_template_parametr(std::move(t)); return *this; }
+		ClassBuilder& with_template(pls::TypeName t) { cls.add_template_parametr(std::move(t)); return *this; }
 		ClassBuilder& add_base_class(pls::Class c) { cls.add_base_class(std::move(c)); return *this; }
 
 		pls::Class build() {

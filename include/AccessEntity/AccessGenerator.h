@@ -28,6 +28,11 @@ namespace cg::generate {
         static std::string generate(const cgs::Destructor& d, const cgs::Class& cls, GenStage g);
     };
 
+    class AliasGenerator {
+    public:
+        static std::string generate(const cgs::Alias& a);
+    };
+
     class ClassGenerator {
     public:
         static std::string generate(const cgs::Class& cls, GenStage g);
@@ -35,6 +40,25 @@ namespace cg::generate {
 }
 
 namespace cg::generate {
+    inline std::string AliasGenerator::generate(const cgs::Alias& a) {
+        std::stringstream sstr;
+
+        bool is_template = !a.get_template_parametrs().empty() || a.get_underlying_type().is_template();
+        if (is_template) {
+            sstr << TemplateEntityGenerator::generate(a) << "\n";
+        }
+
+        sstr << "using " << a.get_name() << " = " << TypeNameGenerator::generate(a.get_underlying_type()) << ";";
+
+        return sstr.str();
+    }
+
+    inline std::string ClassGenerator::generate(const cgs::Class& cls, GenStage g) {
+        std::stringstream sstr;
+
+        return sstr.str();
+    }
+
     inline std::string FieldGenerator::generate(const cgs::Field& f, const cgs::Class& cls, GenStage g) {
         std::stringstream sstr;
 
@@ -93,8 +117,6 @@ namespace cg::generate {
 
         if (g == GenStage::Realization && (is_template || class_is_template)) {
             auto m_inline = m;
-            // Если мы вынуждены делать реализацию inline из-за шаблонов, переключаем стадию на Inline.
-            // Но мы убираем дефолтные значения аргументов, так как реализация всё равно пишется ВНЕ объявления класса!
             g = GenStage::Inline;
         }
 
