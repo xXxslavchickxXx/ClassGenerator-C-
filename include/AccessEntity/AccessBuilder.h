@@ -69,6 +69,7 @@ namespace cg::build {
 
 		MethodBuilder& as_static() { if (!method.is_static()) method.toggle_static(); return *this; }
 		MethodBuilder& as_inline() { if (!method.is_inline()) method.toggle_inline(); return *this; }
+		MethodBuilder& as_friend() { if (!method.is_friend()) method.toggle_friend(); return *this; }
 		MethodBuilder& as_const() { if (!method.is_const()) method.toggle_const(); return *this; }
 		MethodBuilder& as_constexpr() { if (!method.is_constexpr()) method.toggle_constexpr(); return *this; }
 
@@ -115,8 +116,6 @@ namespace cg::build {
 
 	public:
 		DestructorBuilder() = default;
-
-		DestructorBuilder& with_template(pls::TypeName t) { dtor.add_template_parametr(std::move(t)); return *this; }
 
 		DestructorBuilder& as_default() { dtor.toggle_default(); return *this; }
 		DestructorBuilder& as_virtual(bool is_virtual = true) {

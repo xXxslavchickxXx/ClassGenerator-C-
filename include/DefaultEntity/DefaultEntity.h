@@ -123,7 +123,7 @@ namespace cg::source {
 
         bool is_variadic() const { return variadic; }
         void toggle_variadic() {
-            if (!is_template()) throw std::runtime_error("[Error] this type cant be variadic. He is doesn't templateable");
+            if (!is_template()) toggle_templatebale();
             variadic = !variadic;
         }
 
@@ -186,13 +186,15 @@ namespace cg::source {
         bool constexpr_;
         bool static_;
         bool inline_;
+        bool friend_;
 
     public:
         OptionalEntity(const std::string& name_)
         : NamedEntity(name_),
         constexpr_(false),
         static_(false),
-        inline_(false)
+        inline_(false),
+        friend_(false)
         {}
 
         OptionalEntity(const OptionalEntity&) = default;
@@ -206,6 +208,9 @@ namespace cg::source {
 
         bool is_inline() const { return inline_; }
         void toggle_inline() { inline_ = !inline_; }
+
+        bool is_friend() const { return friend_; }
+        void toggle_friend() { friend_ = !friend_; }
 
         TypeName& get_type() { return type; }
         const TypeName& get_type() const { return type; }

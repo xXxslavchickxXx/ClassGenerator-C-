@@ -125,8 +125,8 @@ namespace cg::source {
             }
         }
 
-        std::vector<Field> get_init_list() { return init_list; }
-        const std::vector<Field> get_init_list() const { return init_list; }
+        std::vector<Field>& get_init_list() { return init_list; }
+        const std::vector<Field>& get_init_list() const { return init_list; }
 
         bool is_explicit() const { return explicit_; }
         void toggle_explicit() { explicit_ = !explicit_; }
@@ -140,7 +140,7 @@ namespace cg::source {
         bool is_template() const { return !get_template_parametrs().empty(); }
     };
 
-    class Destructor : public AccessEntity, public TemplateEntity {
+    class Destructor : public AccessEntity {
         bool default_;
         bool virtual_;
 
@@ -156,8 +156,6 @@ namespace cg::source {
 
         bool is_virtual() const { return virtual_; }
         void toggle_virtual() { virtual_ = !virtual_; }
-
-        bool is_template() const { return !get_template_parametrs().empty(); }
     };
 
     class Class : public NamedEntity, public AccessEntity, public TemplateEntity {
