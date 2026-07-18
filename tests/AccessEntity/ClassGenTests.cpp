@@ -9,5 +9,5 @@ using namespace cg::generate;
 TEST(ClassGenTest, Declaration) {
 	auto cls = ClassBuilder("Class").build();
 
-	EXPECT_EQ(ClassGenerator::generate(cls, GenStage::Declaration), "class Class {\n\n};");
+	EXPECT_EQ(ClassGenerator::generate(cls, GenStage::Declaration), "class Class {\n};");
 }

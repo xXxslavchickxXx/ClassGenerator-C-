@@ -6,38 +6,13 @@ using namespace cg::generate;
 
 cg::source::Class build_base_proxy();
 auto build_vec_type() -> cg::source::TypeName;
-auto build_pointer_type();
-auto build_data_type();
+auto build_pointer_type() -> cg::source::TypeName;
+auto build_data_type() -> cg::source::TypeName;
 
 int main() {
     system("chcp 65001 > nul");
 
-    auto tag_t = cg::build::TypeBuilder("Tag")
-        .as_template()
-        .build();
-    auto type_t = cg::build::TypeBuilder("type")
-        .ns(tag_t)
-        .build();
-    auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
-        .as_template()
-        .build();
-    auto vec_t = cg::build::TypeBuilder("vec_type")
-        .with_template(type_t)
-        .ns(attr_t)
-        .build();
-
-    auto cls = ClassBuilder("Class")
-        .with_template(tag_t)
-        .with_template(attr_t)
-        .build();
-
-    std::cout << ClassGenerator::generate(build_base_proxy(), GenStage::Inline);
-
-    auto vec_type_alias = AliasBuilder("vec_type")
-        .underlying_type(build_vec_type())
-        .build();
-
-    std::cout << AliasGenerator::generate(vec_type_alias);
+    std::cout << ClassGenerator::generate(build_base_proxy(), GenStage::Declaration);
 
     return 0;
 }
@@ -89,8 +64,7 @@ cg::source::Class build_base_proxy() {
 
     auto pointer_type_alias = AliasBuilder("PointerType")
         .underlying_type(
-            TypeBuilder("PointerType")
-            .build()
+            build_pointer_type()
         )
         .as_public()
         .build();
@@ -225,7 +199,7 @@ auto build_vec_type() -> cg::source::TypeName {
     return vec_t;
 }
 
-auto build_pointer_type() {
+auto build_pointer_type() -> cg::source::TypeName {
     auto Data_t = cg::build::TypeBuilder("DataType")
         .as_ptr()
         .build();
@@ -247,7 +221,7 @@ auto build_pointer_type() {
     return cond_t;
 }
 
-auto build_data_type() {
+auto build_data_type() -> cg::source::TypeName {
     auto attr_t = cg::build::TypeBuilder("AttributeVectorT")
         .as_template()
         .build();

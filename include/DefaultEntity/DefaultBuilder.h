@@ -23,9 +23,20 @@ namespace cg::build {
 		TypeBuilder& as_ref() { type.set_qualificator(pls::Qualificator::Reference); return *this; }
 		TypeBuilder& as_uni_ref() { type.set_qualificator(pls::Qualificator::UniversalReference); return *this; }
 		TypeBuilder& ns(const source::NamespacePrefix& namespace_prefix) { type.add_namespace_prefix(namespace_prefix); return *this; }
+		TypeBuilder& ns(const std::vector<source::NamespacePrefix>& namespace_prefixes) {
+			for (auto ns : namespace_prefixes)
+				type.add_namespace_prefix(ns);
+			return *this;
+		}
 
 		TypeBuilder& with_template(const pls::TypeName& t) {
 			type.add_template_parametr(t);
+			return *this;
+		}
+
+		TypeBuilder& with_template(const std::vector<pls::TypeName>& ts) {
+			for (auto& t : ts)
+				type.add_template_parametr(t);
 			return *this;
 		}
 

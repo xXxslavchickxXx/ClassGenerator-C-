@@ -213,7 +213,8 @@ namespace cg::generate {
 			for (size_t i = 0; i < templates.size(); i++) {
 				if (i > 0) sstr << ", ";
 				sstr << TypeNameGenerator::generate(templates[i].get_typename())
-				<< " " << TypeNameGenerator::generate(templates[i]);
+				<< (templates[i].is_variadic() ? "... " : " ")
+				<< NamedGenerator::generate(templates[i]);
 			}
 			sstr << ">";
 		}
@@ -240,6 +241,8 @@ namespace cg::generate {
 		case cg::source::Qualificator::UniversalReference: sstr << "&&"; break;
 		default: break;
 		}
+
+		if (t.is_variadic()) sstr << "...";
 
 		return sstr.str();
 	}

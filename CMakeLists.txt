@@ -20,7 +20,8 @@ file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP
 file(GLOB_RECURSE ${PROJECT_NAME}_TESTS
     CMAKE_CONFIGURE_DEPENDS
     #"tests/*.cpp"
-    "tests/AliasGenTests.cpp"
+    #"tests/AliasGenTests.cpp"
+    "tests/ClassGenTests.cpp"
 )
 
 set(${PROJECT_NAME}_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)

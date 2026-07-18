@@ -40,6 +40,112 @@ namespace cg::generate {
 }
 
 namespace cg::generate {
+    inline std::string ClassGenerator::generate(const cgs::Class& cls, GenStage g) {
+        std::stringstream sstr;
+
+        bool is_template_cls = !cls.get_template_parametrs().empty();
+        if (is_template_cls) {
+            sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
+        }
+
+        if (g == GenStage::Declaration || g == GenStage::Inline) {
+            sstr << "class " << cls.get_name();
+
+            if (!cls.get_base_classes().empty()) {
+                sstr << " : ";
+                for (size_t i = 0; i < cls.get_base_classes().size(); i++) {
+                    const auto& class_ = cls.get_base_classes()[i];
+                    if (i > 0) sstr << ", ";
+                    sstr << to_string(class_.get_visibility())
+                        << " " << TypeNameGenerator::generate(class_);
+                }
+            }
+
+            sstr << " {\n";
+
+            std::stringstream body_sstr;
+
+            std::stringstream priv_top;
+            for (auto& f : cls.get_fields())
+                if (f.get_visibility() == cgs::Access::Private) priv_top << FieldGenerator::generate(f, cls, g) << "\n";
+            for (auto& a : cls.get_aliases()) 
+                if (a.get_visibility() == cgs::Access::Private) priv_top << AliasGenerator::generate(a) << "\n";
+            for (auto& c : cls.get_constructors())
+                if (c.get_visibility() == cgs::Access::Private) priv_top << ConstructorGenerator::generate(c, cls, g) << "\n";
+            if (cls.has_destructor() && cls.get_destructor().get_visibility() == cgs::Access::Private) {
+                priv_top << DestructorGenerator::generate(cls.get_destructor(), cls, g) << "\n";
+            }
+            if (!priv_top.str().empty()) body_sstr << "private:\n" << tabulate(1, priv_top.str());
+
+            std::stringstream pub;
+            for (auto& f : cls.get_fields())
+                if (f.get_visibility() == cgs::Access::Public) pub << FieldGenerator::generate(f, cls, g) << "\n";
+            for (auto& a : cls.get_aliases())
+                if (a.get_visibility() == cgs::Access::Public) pub << AliasGenerator::generate(a) << "\n";
+            for (auto& c : cls.get_constructors())
+                if (c.get_visibility() == cgs::Access::Public) pub << ConstructorGenerator::generate(c, cls, g) << "\n";
+            if (cls.has_destructor() && cls.get_destructor().get_visibility() == cgs::Access::Public) {
+                pub << DestructorGenerator::generate(cls.get_destructor(), cls, g) << "\n";
+            }
+            for (auto& m : cls.get_methods())
+                if (m.get_visibility() == cgs::Access::Public) pub << MethodGenerator::generate(m, cls, g) << "\n";
+            if (!pub.str().empty()) body_sstr << "public:\n" << tabulate(1, pub.str());
+
+            std::stringstream prot;
+            for (auto& a : cls.get_aliases())
+                if (a.get_visibility() == cgs::Access::Protected) prot << AliasGenerator::generate(a) << "\n";
+            for (auto& f : cls.get_fields())
+                if (f.get_visibility() == cgs::Access::Protected) prot << FieldGenerator::generate(f, cls, g) << "\n";
+            for (auto& c : cls.get_constructors())
+                if (c.get_visibility() == cgs::Access::Protected) prot << ConstructorGenerator::generate(c, cls, g) << "\n";
+            if (cls.has_destructor() && cls.get_destructor().get_visibility() == cgs::Access::Protected) {
+                prot << DestructorGenerator::generate(cls.get_destructor(), cls, g) << "\n";
+            }
+            for (auto& m : cls.get_methods())
+                if (m.get_visibility() == cgs::Access::Protected) prot << MethodGenerator::generate(m, cls, g) << "\n";
+            if (!prot.str().empty()) body_sstr << "protected:\n" << tabulate(1, prot.str());
+
+            std::stringstream priv_bot;
+            for (auto& m : cls.get_methods())
+                if (m.get_visibility() == cgs::Access::Private) priv_bot << MethodGenerator::generate(m, cls, g) << "\n";
+            if (!priv_bot.str().empty()) body_sstr << "private:\n" << tabulate(1, priv_bot.str());
+           
+            sstr << body_sstr.str();
+            sstr << "};";
+        }
+        else {
+            for (auto& field : cls.get_fields()) {
+                bool is_template = is_template_cls && field.is_template();
+                sstr << FieldGenerator::generate(field, cls, g) << (is_template ? "\n\n" : "\n");
+            }
+
+            sstr << "\n";
+
+            for (auto& constructor : cls.get_constructors()) {
+                bool is_template = is_template_cls && constructor.is_template();
+                sstr << ConstructorGenerator::generate(constructor, cls, g) << (is_template ? "\n\n" : "\n");
+            }
+
+            sstr << "\n";
+
+            if (cls.has_destructor()) {
+                bool is_template = is_template_cls && cls.get_destructor().is_template();
+                sstr << DestructorGenerator::generate(cls.get_destructor(), cls, g) << (is_template ? "\n\n" : "\n");
+            }
+
+            sstr << "\n";
+
+            for (auto& method : cls.get_methods()) {
+                bool is_template = is_template_cls && method.is_template();
+                sstr << MethodGenerator::generate(method, cls, g) << (is_template ? "\n\n" : "\n");
+            }
+
+            sstr << "\n";
+        }
+
+        return sstr.str();
+    }
+    
     inline std::string AliasGenerator::generate(const cgs::Alias& a) {
         std::stringstream sstr;
 
@@ -49,12 +155,6 @@ namespace cg::generate {
         }
 
         sstr << "using " << a.get_name() << " = " << TypeNameGenerator::generate(a.get_underlying_type()) << ";";
-
-        return sstr.str();
-    }
-
-    inline std::string ClassGenerator::generate(const cgs::Class& cls, GenStage g) {
-        std::stringstream sstr;
 
         return sstr.str();
     }

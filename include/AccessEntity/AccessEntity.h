@@ -78,7 +78,8 @@ namespace cg::source {
     public:
         Method(const std::string& name_)
             : Function(name_),
-            constantable(false) {}
+            constantable(false),
+            method_type(MethodType::NOTHING) {}
 
         MethodType get_method_type() const { return method_type; }
         void set_method_type(const MethodType& new_type) { method_type = new_type; }
@@ -135,6 +136,8 @@ namespace cg::source {
 
         bool is_delete() const { return delete_; }
         void toggle_delete() { delete_ = !delete_; }
+
+        bool is_template() const { return !get_template_parametrs().empty(); }
     };
 
     class Destructor : public AccessEntity, public TemplateEntity {
@@ -153,6 +156,8 @@ namespace cg::source {
 
         bool is_virtual() const { return virtual_; }
         void toggle_virtual() { virtual_ = !virtual_; }
+
+        bool is_template() const { return !get_template_parametrs().empty(); }
     };
 
     class Class : public NamedEntity, public AccessEntity, public TemplateEntity {
@@ -172,6 +177,15 @@ namespace cg::source {
         Class& operator=(Class&&) noexcept = default;
         Class(const Class&) = default;
         Class& operator=(const Class&) = default;
+
+        operator TypeName() const {
+            auto type = plb::TypeBuilder(name)
+                .ns(get_namespace())
+                .with_template(get_template_parametrs())
+                .build();
+
+            return type;
+        }
 
         std::vector<Constructor>& get_constructors() { return constructors; }
         const std::vector<Constructor>& get_constructors() const { return constructors; }
