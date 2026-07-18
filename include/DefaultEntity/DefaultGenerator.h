@@ -174,6 +174,7 @@ namespace cg::generate {
 	inline std::string OptionalEntityGenerator::generate(const cgs::OptionalEntity& t, GenStage g) {
 		std::stringstream sstr;
 
+		if (t.is_friend() && g != GenStage::Realization) sstr << "friend ";
 		if (t.is_static() && g != GenStage::Realization) sstr << "static ";
 		if (t.is_constexpr()) sstr << "constexpr ";
 		if (t.is_inline() && g != GenStage::Realization) sstr << "inline ";

@@ -40,6 +40,12 @@ namespace cg::generate {
 }
 
 namespace cg::generate {
+    // Может и странно но мне так нравится
+    // Структура генерации такая:
+    // 1. генерация приватных полей -> алиасов -> конструкторов
+    // 2. генерация публичных полей -> алиасов -> конструкторов -> деструктора -> методы
+    // 3. генерация протектных всех сущнойтей
+    // 4. и только потом приватные методы
     inline std::string ClassGenerator::generate(const cgs::Class& cls, GenStage g) {
         std::stringstream sstr;
 
@@ -56,91 +62,156 @@ namespace cg::generate {
                 for (size_t i = 0; i < cls.get_base_classes().size(); i++) {
                     const auto& class_ = cls.get_base_classes()[i];
                     if (i > 0) sstr << ", ";
-                    sstr << to_string(class_.get_visibility())
-                        << " " << TypeNameGenerator::generate(class_);
+                    sstr << to_string(class_.get_visibility()) << " " << TypeNameGenerator::generate(class_);
                 }
             }
 
             sstr << " {\n";
-
             std::stringstream body_sstr;
 
-            std::stringstream priv_top;
-            for (auto& f : cls.get_fields())
-                if (f.get_visibility() == cgs::Access::Private) priv_top << FieldGenerator::generate(f, cls, g) << "\n";
-            for (auto& a : cls.get_aliases()) 
-                if (a.get_visibility() == cgs::Access::Private) priv_top << AliasGenerator::generate(a) << "\n";
-            for (auto& c : cls.get_constructors())
-                if (c.get_visibility() == cgs::Access::Private) priv_top << ConstructorGenerator::generate(c, cls, g) << "\n";
-            if (cls.has_destructor() && cls.get_destructor().get_visibility() == cgs::Access::Private) {
-                priv_top << DestructorGenerator::generate(cls.get_destructor(), cls, g) << "\n";
-            }
-            if (!priv_top.str().empty()) body_sstr << "private:\n" << tabulate(1, priv_top.str());
+            auto generate_section = [&](cgs::Access target_access, bool only_methods) -> std::string {
+                std::stringstream section_stream;
+                bool need_newline = false;       // Флаг для отступа между группами
+                bool prev_was_templated = false; // Флаг для отступа между шаблонами внутри одной группы
+                bool is_first_in_group = true;   // Флаг начала текущей группы
 
-            std::stringstream pub;
-            for (auto& f : cls.get_fields())
-                if (f.get_visibility() == cgs::Access::Public) pub << FieldGenerator::generate(f, cls, g) << "\n";
-            for (auto& a : cls.get_aliases())
-                if (a.get_visibility() == cgs::Access::Public) pub << AliasGenerator::generate(a) << "\n";
-            for (auto& c : cls.get_constructors())
-                if (c.get_visibility() == cgs::Access::Public) pub << ConstructorGenerator::generate(c, cls, g) << "\n";
-            if (cls.has_destructor() && cls.get_destructor().get_visibility() == cgs::Access::Public) {
-                pub << DestructorGenerator::generate(cls.get_destructor(), cls, g) << "\n";
-            }
-            for (auto& m : cls.get_methods())
-                if (m.get_visibility() == cgs::Access::Public) pub << MethodGenerator::generate(m, cls, g) << "\n";
-            if (!pub.str().empty()) body_sstr << "public:\n" << tabulate(1, pub.str());
+                if (!only_methods) {
+                    // Поля
+                    is_first_in_group = true;
+                    prev_was_templated = false;
+                    for (auto& f : cls.get_fields()) {
+                        if (f.get_visibility() == target_access) {
+                            if (!is_first_in_group && (f.is_template() || prev_was_templated)) section_stream << "\n";
+                            section_stream << FieldGenerator::generate(f, cls, g) << "\n";
+                            need_newline = true;
+                            is_first_in_group = false;
+                            prev_was_templated = f.is_template();
+                        }
+                    }
 
-            std::stringstream prot;
-            for (auto& a : cls.get_aliases())
-                if (a.get_visibility() == cgs::Access::Protected) prot << AliasGenerator::generate(a) << "\n";
-            for (auto& f : cls.get_fields())
-                if (f.get_visibility() == cgs::Access::Protected) prot << FieldGenerator::generate(f, cls, g) << "\n";
-            for (auto& c : cls.get_constructors())
-                if (c.get_visibility() == cgs::Access::Protected) prot << ConstructorGenerator::generate(c, cls, g) << "\n";
-            if (cls.has_destructor() && cls.get_destructor().get_visibility() == cgs::Access::Protected) {
-                prot << DestructorGenerator::generate(cls.get_destructor(), cls, g) << "\n";
-            }
-            for (auto& m : cls.get_methods())
-                if (m.get_visibility() == cgs::Access::Protected) prot << MethodGenerator::generate(m, cls, g) << "\n";
-            if (!prot.str().empty()) body_sstr << "protected:\n" << tabulate(1, prot.str());
+                    // Алиасы
+                    if (need_newline) { section_stream << "\n"; need_newline = false; }
+                    is_first_in_group = true;
+                    prev_was_templated = false;
+                    for (auto& a : cls.get_aliases()) {
+                        if (a.get_visibility() == target_access) {
+                            bool is_tmpl = !a.get_template_parametrs().empty();
+                            if (!is_first_in_group && (is_tmpl || prev_was_templated)) section_stream << "\n";
+                            section_stream << AliasGenerator::generate(a) << "\n";
+                            need_newline = true;
+                            is_first_in_group = false;
+                            prev_was_templated = is_tmpl;
+                        }
+                    }
 
-            std::stringstream priv_bot;
-            for (auto& m : cls.get_methods())
-                if (m.get_visibility() == cgs::Access::Private) priv_bot << MethodGenerator::generate(m, cls, g) << "\n";
-            if (!priv_bot.str().empty()) body_sstr << "private:\n" << tabulate(1, priv_bot.str());
-           
+                    // Конструкторы
+                    if (need_newline) { section_stream << "\n"; need_newline = false; }
+                    is_first_in_group = true;
+                    prev_was_templated = false;
+                    for (auto& c : cls.get_constructors()) {
+                        if (c.get_visibility() == target_access) {
+                            bool is_tmpl = !c.get_template_parametrs().empty();
+                            if (!is_first_in_group && (is_tmpl || prev_was_templated)) section_stream << "\n";
+                            section_stream << ConstructorGenerator::generate(c, cls, g) << "\n";
+                            need_newline = true;
+                            is_first_in_group = false;
+                            prev_was_templated = is_tmpl;
+                        }
+                    }
+
+                    // Деструктор
+                    if (need_newline) { section_stream << "\n"; need_newline = false; }
+                    if (cls.has_destructor() && cls.get_destructor().get_visibility() == target_access) {
+                        section_stream << DestructorGenerator::generate(cls.get_destructor(), cls, g) << "\n";
+                    }
+                }
+
+                // Методы
+                is_first_in_group = true;
+                prev_was_templated = false;
+                for (auto& m : cls.get_methods()) {
+                    if (m.get_visibility() == target_access) {
+                        bool matches_context = only_methods ? (target_access == cgs::Access::Private) : (target_access != cgs::Access::Private);
+                        if (matches_context) {
+                            bool is_tmpl = !m.get_template_parametrs().empty();
+                            if (!is_first_in_group && (is_tmpl || prev_was_templated)) section_stream << "\n";
+                            section_stream << MethodGenerator::generate(m, cls, g) << "\n";
+                            is_first_in_group = false;
+                            prev_was_templated = is_tmpl;
+                        }
+                    }
+                }
+
+                return section_stream.str();
+                };
+
+            bool has_previous_section = false;
+
+            auto append_section_to_body = [&](const std::string& name, const std::string& content) {
+                if (content.empty()) return;
+                if (has_previous_section) body_sstr << "\n";
+                body_sstr << name << ":\n" << tabulate(1, content);
+                has_previous_section = true;
+                };
+
+            append_section_to_body("private", generate_section(cgs::Access::Private, false));
+            append_section_to_body("public", generate_section(cgs::Access::Public, false));
+            append_section_to_body("protected", generate_section(cgs::Access::Protected, false));
+            append_section_to_body("private", generate_section(cgs::Access::Private, true));
+
             sstr << body_sstr.str();
             sstr << "};";
         }
         else {
-            for (auto& field : cls.get_fields()) {
-                bool is_template = is_template_cls && field.is_template();
-                sstr << FieldGenerator::generate(field, cls, g) << (is_template ? "\n\n" : "\n");
-            }
+            bool need_group_newline = false;
 
-            sstr << "\n";
+            auto print_realiz_group = [&](const auto& entities, auto gen_func, auto is_tmpl_func) {
+                bool generated = false;
+                bool is_first = true;
+                bool prev_was_templated = false;
 
-            for (auto& constructor : cls.get_constructors()) {
-                bool is_template = is_template_cls && constructor.is_template();
-                sstr << ConstructorGenerator::generate(constructor, cls, g) << (is_template ? "\n\n" : "\n");
-            }
+                for (const auto& e : entities) {
+                    std::string code = gen_func(e);
+                    if (code.empty()) continue;
 
-            sstr << "\n";
+                    if (need_group_newline && !generated) {
+                        sstr << "\n";
+                        need_group_newline = false;
+                    }
+
+                    bool current_is_tmpl = is_tmpl_func(e);
+                    if (!is_first && (current_is_tmpl || prev_was_templated)) {
+                        sstr << "\n";
+                    }
+
+                    sstr << code << "\n";
+                    generated = true;
+                    is_first = false;
+                    prev_was_templated = current_is_tmpl;
+                }
+                if (generated) need_group_newline = true;
+                };
+
+            print_realiz_group(cls.get_fields(),
+                [&](auto& f) { return FieldGenerator::generate(f, cls, g); },
+                [&](auto& f) { return is_template_cls && f.is_template(); });
+
+            print_realiz_group(cls.get_constructors(),
+                [&](auto& c) { return ConstructorGenerator::generate(c, cls, g); },
+                [&](auto& c) { return is_template_cls && !c.get_template_parametrs().empty(); });
 
             if (cls.has_destructor()) {
-                bool is_template = is_template_cls && cls.get_destructor().is_template();
-                sstr << DestructorGenerator::generate(cls.get_destructor(), cls, g) << (is_template ? "\n\n" : "\n");
+                std::string dtor = DestructorGenerator::generate(cls.get_destructor(), cls, g);
+                if (!dtor.empty()) {
+                    if (need_group_newline) sstr << "\n";
+                    sstr << dtor << "\n";
+                    need_group_newline = true;
+                }
             }
 
-            sstr << "\n";
-
-            for (auto& method : cls.get_methods()) {
-                bool is_template = is_template_cls && method.is_template();
-                sstr << MethodGenerator::generate(method, cls, g) << (is_template ? "\n\n" : "\n");
-            }
-
-            sstr << "\n";
+            print_realiz_group(cls.get_methods(),
+                [&](auto& m) { return MethodGenerator::generate(m, cls, g); },
+                [&](auto& m) { return is_template_cls && !m.get_template_parametrs().empty(); });
         }
 
         return sstr.str();
@@ -240,6 +311,7 @@ namespace cg::generate {
         }
 
         if (g == GenStage::Declaration) {
+            if (m.is_friend()) sstr << "friend ";
             if (m.is_static()) sstr << "static ";
             if (m.get_method_type() == cgs::MethodType::VIRTUAL ||
                 m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {

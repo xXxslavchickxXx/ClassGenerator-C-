@@ -18,165 +18,169 @@ int main() {
 }
 
 cg::source::Class build_base_proxy() {
-    using namespace cg::build;
-
+    // 1. Создаем параметры шаблона класса
     auto attr_t = TypeBuilder("AttributeVectorT")
-        .as_template()
+        .as_template(TypeBuilder("IsAttributeVector")
+            .build()) // Шаблонный концепт
         .build();
 
     auto const_t = TypeBuilder("IsConst")
-        .as_template(TypeBuilder("bool").build())
+        .as_template(TypeBuilder("bool").build()) // bool IsConst
         .build();
 
     auto tags_t = TypeBuilder("SelectedTags")
-        .as_template()
-        .as_variadic()
+        .as_variadic() // typename... SelectedTags
         .build();
 
-    auto tag_t = TypeBuilder("Tag")
-        .as_template()
-        .build();
-
-    auto vec_type = TypeBuilder("vec_type")
-        .with_template(tag_t)
-        .build();
-
-    auto pointer_type = TypeBuilder("PointerType")
-        .build();
-
+    // Создаем сам класс и вешаем на него шаблоны
     auto cls = ClassBuilder("base_proxy")
-        .as_public()
         .with_template(attr_t)
         .with_template(const_t)
         .with_template(tags_t)
         .build();
 
-    // Временное решение — добавим как поля, потом заменим на алиасы
+    // 2. СЕКЦИЯ PROTECTED (Алиасы и поля верхнего блока)
+
+    // Шаблонный параметр для алиаса vec_type
+    auto tag_param = TypeBuilder("Tag")
+        .as_template()
+        .build();
+
+    auto vec_t = build_vec_type();
+
+    auto vec_type_alias = AliasBuilder("vec_type")
+        .with_template(tag_param)
+        .underlying_type(vec_t)
+        .as_protected()
+        .build();
+    cls.add_alias(vec_type_alias);
+
+    // using DataType = typename AttributeVectorT::data_type;
+    auto data_t = build_data_type();
+
     auto data_type_alias = AliasBuilder("DataType")
-        .underlying_type(
-            TypeBuilder("data_type")
-            .ns(cg::source::NamespacePrefix("AttributeVectorT"))
-            .build()
-        )
-        .as_public()
+        .underlying_type(data_t)
+        .as_protected()
         .build();
     cls.add_alias(data_type_alias);
 
+    // using PointerType = std::conditional_t<IsConst, const DataType*, DataType*>;
+    auto pointer_t = build_pointer_type();
+
     auto pointer_type_alias = AliasBuilder("PointerType")
-        .underlying_type(
-            build_pointer_type()
-        )
-        .as_public()
+        .underlying_type(pointer_t)
+        .as_protected()
         .build();
     cls.add_alias(pointer_type_alias);
 
-    auto data_field = FieldBuilder("data_")
-        .with_type(
-            TypeBuilder("PointerType")
-            .as_ptr()
-            .build()
+    // 3. СЕКЦИЯ PUBLIC (Алиасы типов тегов)
+
+    // using tags = std::tuple<SelectedTags...>;
+    auto tags_alias = AliasBuilder("tags")
+        .underlying_type(
+            TypeBuilder("tuple").ns("std").with_template(TypeBuilder("SelectedTags...").build()).build()
         )
+        .as_public()
+        .build();
+    cls.add_alias(tags_alias);
+
+    // using owner_tags = typename AttributeVectorT::tags;
+    auto owner_tags_alias = AliasBuilder("owner_tags")
+        .underlying_type(
+            TypeBuilder("tags")
+                .ns(attr_t)
+                .build()
+        )
+        .as_public()
+        .build();
+    cls.add_alias(owner_tags_alias);
+
+    // 4. ДАННЫЕ КЛАССА (PROTECTED)
+
+    // PointerType data_;
+    auto data_field = FieldBuilder("data_")
+        .with_type(pointer_type_alias)
         .as_protected()
         .build();
     cls.add_field(data_field);
 
-    auto ctor = ConstructorBuilder()
-        .as_public()
-        .add_argument(
-            VariableBuilder("data")
-            .with_type(
-                TypeBuilder("PointerType")
-                .as_ptr()
-                .build()
-            )
-            .build()
-        )
-        .build();
-    cls.add_constructor(ctor);
+    // 5. КОНСТРУКТОРЫ И МЕТОДЫ (PUBLIC)
 
+    // base_proxy(PointerType data);
+    cls.add_constructor(ConstructorBuilder().as_public().add_argument(VariableBuilder("data").with_type(TypeBuilder("PointerType").build()).build()).build());
+    // base_proxy(DataType& data);
+    cls.add_constructor(ConstructorBuilder().as_public().add_argument(VariableBuilder("data").with_type(TypeBuilder("DataType").as_ref().build()).build()).build());
+    // base_proxy(const DataType& data);
+    cls.add_constructor(ConstructorBuilder().as_public().add_argument(VariableBuilder("data").with_type(TypeBuilder("DataType").as_ref().as_const().build()).build()).build());
+
+    // template<typename Tag> const vec_type<Tag>& vector() const;
     auto vec_method = MethodBuilder("vector")
-        .with_type(
-            TypeBuilder(vec_type)
+        .with_type(TypeBuilder(vec_type_alias)
             .as_const()
             .as_ref()
+            .with_template(tag_param)
             .build()
         )
+        .with_template(tag_param)
         .as_public()
-        .with_template(tag_t)
+        .as_const()
         .build();
     cls.add_method(vec_method);
 
+    // size_t size() const;
+    cls.add_method(MethodBuilder("size").with_type(TypeBuilder("size_t").build()).as_public().as_const().build());
+    // size_t capacity() const;
+    cls.add_method(MethodBuilder("capacity").with_type(TypeBuilder("size_t").build()).as_public().as_const().build());
+    // bool empty() const;
+    cls.add_method(MethodBuilder("empty").with_type(TypeBuilder("bool").build()).as_public().as_const().build());
+
+    // template<typename Tag> vec_type<Tag>& mutable_vector();
     auto mut_vec_method = MethodBuilder("mutable_vector")
-        .with_type(
-            TypeBuilder(vec_type)
+        .with_type(TypeBuilder(vec_type_alias)
+            .with_template(tag_param)
             .as_ref()
-            .build()
-        )
+            .build())
+        .with_template(tag_param)
         .as_public()
-        .with_template(tag_t)
         .build();
     cls.add_method(mut_vec_method);
 
-    auto size_method = MethodBuilder("size")
-        .with_type(TypeBuilder("size_t").build())
-        .as_public()
-        .as_const()
-        .build();
-    cls.add_method(size_method);
+    // 6. МЕТОДЫ (PROTECTED)
 
-    auto capacity_method = MethodBuilder("capacity")
-        .with_type(TypeBuilder("size_t").build())
-        .as_public()
-        .as_const()
-        .build();
-    cls.add_method(capacity_method);
-
-    auto empty_method = MethodBuilder("empty")
-        .with_type(TypeBuilder("bool").build())
-        .as_public()
-        .as_const()
-        .build();
-    cls.add_method(empty_method);
-
+    // template<typename Tag> constexpr size_t get_tag_index() const;
     auto idx_method = MethodBuilder("get_tag_index")
         .with_type(TypeBuilder("size_t").build())
+        .with_template(tag_param)
         .as_protected()
         .as_constexpr()
         .as_const()
-        .with_template(
-            TypeBuilder("Tag")
-            .as_template()
-            .build()
-        )
         .build();
     cls.add_method(idx_method);
 
+    // template<typename Tag, typename F> constexpr void call(F&& f);
+    auto t_f = TypeBuilder("F")
+        .as_template()
+        .build();
     auto call_method = MethodBuilder("call")
         .with_type(TypeBuilder("void").build())
+        .with_template(tag_param)
+        .with_template(t_f)
+        .add_argument(VariableBuilder("f").with_type(TypeBuilder("F").as_uni_ref().build()).build())
         .as_protected()
         .as_constexpr()
-        .as_inline()
-        .with_template(
-            TypeBuilder("Tag")
-            .as_template()
-            .build()
-        )
-        .with_template(
-            TypeBuilder("F")
-            .as_template()
-            .build()
-        )
-        .add_argument(
-            VariableBuilder("f")
-            .with_type(
-                TypeBuilder("F")
-                .as_uni_ref()
-                .build()
-            )
-            .build()
-        )
         .build();
     cls.add_method(call_method);
+
+    // 7. ДРУЖЕСТВЕННЫЙ ОПЕРАТОР ВЫВОДА (Friend inline)
+    // Разметка оператора «<<» добавляется как инлайн метод-друг внутри класса
+    auto friend_stream_op = MethodBuilder("operator<<")
+        .with_type(TypeBuilder("std::ostream&").build())
+        .as_friend()
+        .as_inline() // Определение прямо в теле класса
+        .add_argument(VariableBuilder("os").with_type(TypeBuilder("std::ostream&").build()).build())
+        .add_argument(VariableBuilder("proxy").with_type(TypeBuilder("base_proxy").as_ref().as_const().build()).build())
+        .build();
+    cls.add_method(friend_stream_op);
 
     return cls;
 }

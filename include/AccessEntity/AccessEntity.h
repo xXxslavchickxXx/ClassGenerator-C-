@@ -140,7 +140,7 @@ namespace cg::source {
         bool is_template() const { return !get_template_parametrs().empty(); }
     };
 
-    class Destructor : public AccessEntity, public TemplateEntity {
+    class Destructor : public AccessEntity {
         bool default_;
         bool virtual_;
 
@@ -156,8 +156,6 @@ namespace cg::source {
 
         bool is_virtual() const { return virtual_; }
         void toggle_virtual() { virtual_ = !virtual_; }
-
-        bool is_template() const { return !get_template_parametrs().empty(); }
     };
 
     class Class : public NamedEntity, public AccessEntity, public TemplateEntity {
