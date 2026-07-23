@@ -4,6 +4,23 @@
 #include <unordered_map>
 #include <concepts>
 
+namespace cg::validate {
+    // Типы ошибки
+    enum class CGError {
+        FieldMutableAndStatic,
+        TypeNotTemplate,
+        TypeShouldNotBeTemplate,
+        TemplateTypeIsNotLinked_Local,
+        TemplateTypeIsNotLinked_External
+    };
+
+    // Конфликт контекст
+    struct CGContext {
+        CGError type;
+        std::string message;
+    };
+}
+
 namespace pl::error {
 
     // 1. Enum для стратегий

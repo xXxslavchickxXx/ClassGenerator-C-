@@ -86,7 +86,7 @@ namespace cg::generate {
 				return "";
 		}
 
-		bool is_template = !f.get_template_parametrs().empty() || f.get_type().is_template();
+		bool is_template = !f.get_template_parametrs().empty();
 
 		if (is_template)
 			sstr << TemplateEntityGenerator::generate(f, false) << '\n';

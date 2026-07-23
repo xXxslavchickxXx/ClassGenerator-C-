@@ -4,3 +4,6 @@
 #include <DefaultEntity/DefaultBuilder.h>
 #include <DefaultEntity/DefaultEntity.h>
 #include <DefaultEntity/DefaultGenerator.h>
+#include <DefaultEntity/DefaultValidator.h>
+
+#include <ConsoleResolver.h>

@@ -171,11 +171,15 @@ TEST(FunctionGeneratorTest, FunctionWithNamespace) {
 }
 
 TEST(FunctionGeneratorTest, TemplateFunction) {
+    auto T_t = TypeBuilder("T")
+        .as_template()
+        .build();
+
     auto func = FunctionBuilder("max")
-        .with_type(TypeBuilder("T").build())
-        .with_template(TypeBuilder("T").as_template().build())
-        .add_argument(VariableBuilder("a").with_type(TypeBuilder("T").build()).build())
-        .add_argument(VariableBuilder("b").with_type(TypeBuilder("T").build()).build())
+        .with_type(T_t)
+        .with_template(T_t)
+        .add_argument(VariableBuilder("a").with_type(T_t).build())
+        .add_argument(VariableBuilder("b").with_type(T_t).build())
         .build();
 
     EXPECT_EQ(

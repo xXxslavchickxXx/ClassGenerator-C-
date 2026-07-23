@@ -49,6 +49,8 @@ namespace cg::build {
 	public:
 		VariableBuilder(const std::string& var_name)
 			: var(var_name) {}
+		VariableBuilder(const source::Variable& var_)
+			: var(var_) {}
 
 		VariableBuilder& with_type(pls::TypeName t) { var.get_type() = std::move(t); return *this; }
 		VariableBuilder& with_value(std::string val) { var.set_value(std::move(val)); return *this; }
