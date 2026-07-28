@@ -1,29 +1,30 @@
 #include <FileGenerator/FileCreator.h>
 
-#include <Windows.h>
+#include <iostream>
+#include <string>
+#include <filesystem>
+#include <nfd.hpp>
 
 namespace fs = std::filesystem;
 
 namespace cg::file {
-	std::string open_geometry_path_dialog(const std::string& win_name) {
-		char filename[MAX_PATH] = "";
+	std::string open_geometry_path_dialog(const nfdu8char_t* defaultPath) {
+        NFD::Guard nfdGuard;
 
-		OPENFILENAMEA ofn;
-		ZeroMemory(&ofn, sizeof(ofn));
-		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = NULL;
-		ofn.lpstrFile = filename;
-		ofn.nMaxFile = MAX_PATH;
+        // auto-freeing memory
+        NFD::UniquePath outPath;
 
-		ofn.lpstrFilter = "CSV Propeller Geometry (*.csv)\0*.csv\0All Files (*.*)\0*.*\0";
-		ofn.nFilterIndex = 1;
-		ofn.lpstrTitle = win_name.c_str();
-
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
-
-		if (GetOpenFileNameA(&ofn)) {
-			return std::string(ofn.lpstrFile);
-		}
-		return "";
+        // show the dialog
+        nfdresult_t result = NFD::PickFolder(outPath, defaultPath);
+        if (result == NFD_OKAY) {
+            return outPath.get();
+        }
+        else if (result == NFD_CANCEL) {
+            return "";
+        }
+        else {
+            std::cout << "Error: " << NFD::GetError() << std::endl;
+            return "";
+        }
 	}
 }

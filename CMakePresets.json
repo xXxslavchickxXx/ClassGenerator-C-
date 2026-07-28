@@ -10,7 +10,8 @@
         "cacheVariables": {
           "CMAKE_C_COMPILER": "cl.exe",
           "CMAKE_CXX_COMPILER": "cl.exe",
-          "CMAKE_TOOLCHAIN_FILE": "C:\\Users\\kornello\\Documents\\vcpkg/scripts/buildsystems/vcpkg.cmake"
+          "CMAKE_TOOLCHAIN_FILE": "C:\\Users\\kornello\\Documents\\vcpkg/scripts/buildsystems/vcpkg.cmake",
+          "NFD_OVERRIDE_RECENT_WITH_DEFAULT": true
         },
         "condition": {
           "type": "equals",
