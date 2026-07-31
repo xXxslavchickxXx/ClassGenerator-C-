@@ -151,6 +151,7 @@ namespace cg::build {
 		ClassBuilder& with_destructor(pls::Destructor d) { cls.set_destructor(std::move(d)); return *this; }
 
 		ClassBuilder& with_template(pls::TypeName t) { cls.add_template_parametr(std::move(t)); return *this; }
+		ClassBuilder& with_class(pls::Class c) { cls.add_class(std::move(c)); return *this; }
 		ClassBuilder& add_base_class(pls::Class c) { cls.add_base_class(std::move(c)); return *this; }
 
 		pls::Class build() {

@@ -158,15 +158,17 @@ namespace cg::source {
         void toggle_virtual() { virtual_ = !virtual_; }
     };
 
+    using class_entities =
+        std::variant<
+        Field, Method, Alias,
+        Constructor, Class
+        >;
+
     class Class : public NamedEntity, public AccessEntity, public TemplateEntity {
-        std::vector<Field> fields;
-        std::vector<Method> methods;
-        std::vector<Alias> aliases;
-
-        std::vector<Constructor> constructors;
-        std::optional<Destructor> destructor;
-
         std::vector<Class> base_classes;
+        
+        std::vector<class_entities> entities;
+        std::optional<Destructor> destructor;
 
     public:
         Class(const std::string& name_) : NamedEntity(name_) {}
@@ -185,9 +187,6 @@ namespace cg::source {
             return type;
         }
 
-        std::vector<Constructor>& get_constructors() { return constructors; }
-        const std::vector<Constructor>& get_constructors() const { return constructors; }
-        
         Destructor& get_destructor() {
             if (!destructor) {
                 throw std::runtime_error("Class has no destructor");
@@ -203,60 +202,22 @@ namespace cg::source {
         void set_destructor(const Destructor& dtor) { destructor = dtor; }
         bool has_destructor() const { return destructor.has_value(); }
 
-        void add_field(const Field& v) { fields.push_back(v); }
-        void add_method(const Method& m) { methods.push_back(m); }
-        void add_alias(const Alias& a) { aliases.push_back(a); }
-        void add_constructor(const Constructor& c) { constructors.push_back(c); }
+        void add_field(const Field& v) { entities.push_back(v); }
+        void add_method(const Method& m) { entities.push_back(m); }
+        void add_alias(const Alias& a) { entities.push_back(a); }
+        void add_constructor(const Constructor& c) { entities.push_back(c); }
+        void add_class(const Class& class_) { entities.push_back(class_); }
         void add_base_class(const Class& base) { base_classes.push_back(base); }
 
+        std::vector<class_entities>& get_entities() { return entities; }
+        const std::vector<class_entities>& get_entities() const { return entities; }
+        std::vector<Class>& get_base_classes() { return base_classes; }
         const std::vector<Class>& get_base_classes() const { return base_classes; }
-        const std::vector<Field>& get_fields() const { return fields; }
-        const std::vector<Method>& get_methods() const { return methods; }
-        const std::vector<Alias>& get_aliases() const { return aliases; }
-
-        Field& get_field(const std::string& name) { 
-            auto it = std::find_if(fields.begin(), fields.end(), [&name](const Field& field) {
-                return field.get_name() == name;
-            });
-
-            if (it == fields.end()) {
-                throw std::runtime_error("this variable doesn't exist");
-            }
-
-            return (*it);
-        }
-        const Field& get_field(const std::string& name) const {
-            auto it = std::find_if(fields.begin(), fields.end(), [&name](const Field& field) {
-                return field.get_name() == name;
-                });
-
-            if (it == fields.end()) {
-                throw std::runtime_error("this variable doesn't exist");
-            }
-
-            return (*it);
-        }
-        Method& get_method(const std::string& name) {
-            auto it = std::find_if(methods.begin(), methods.end(), [&name](const Method& method) {
-                return method.get_name() == name;
-            });
-
-            if (it == methods.end()) {
-                throw std::runtime_error("this method doesn't exist");
-            }
-
-            return (*it);
-        }
-        const Method& get_method(const std::string& name) const {
-            auto it = std::find_if(methods.begin(), methods.end(), [&name](const Method& method) {
-                return method.get_name() == name;
-            });
-
-            if (it == methods.end()) {
-                throw std::runtime_error("this method doesn't exist");
-            }
-
-            return (*it);
+        
+        void swap_entities(size_t i, size_t j) {
+            if (i == j || i >= entities.size() ||
+            j >= entities.size()) return;
+            std::iter_swap(entities.begin() + i, entities.begin() + j);
         }
     };
 }

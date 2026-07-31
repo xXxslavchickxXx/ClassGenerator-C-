@@ -6,6 +6,8 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <variant>
+#include <algorithm>
 
 namespace cg::source {
     enum class DeclSpecifiers : uint8_t {
@@ -77,6 +79,13 @@ namespace cg::source {
         const std::vector<TypeName>& get_template_parametrs() const { return template_parametrs; }
 
         void add_template_parametr(const TypeName& type) const { template_parametrs.push_back(type); }
+        
+        void swap_templates(size_t i, size_t j) {
+            if (i == j || i >= template_parametrs.size() ||
+                j >= template_parametrs.size()) return;
+            std::iter_swap(template_parametrs.begin() + i,
+                template_parametrs.begin() + j);
+        }
     };
 
     class Alias;
@@ -239,6 +248,13 @@ namespace cg::source {
     public:
         std::vector<Arguement>& get_args() { return arguments; }
         const std::vector<Arguement>& get_args() const { return arguments; }
+
+        void swap_args(size_t i, size_t j) {
+            if (i == j || i >= arguments.size() ||
+            j >= arguments.size()) return;
+            std::iter_swap(arguments.begin() + i,
+                arguments.begin() + j);
+        }
     };
 
     class Function : public OptionalEntity, public ArgumentableEntity, public TemplateEntity {
@@ -255,6 +271,9 @@ namespace cg::source {
 
     class Class;
     class Alias;
+
+    using NamespaceEntities =
+        std::variant<Variable>;
 
     class Namespace {
         TypeName name;

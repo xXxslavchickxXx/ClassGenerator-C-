@@ -51,22 +51,41 @@ namespace cg::validate {
 namespace cg::validate {
 	void AliasValidator::verify(source::Alias& alias, source::Class* class_) {
 		std::vector<source::TypeName> req_list;
-		for (const auto& ns : alias.get_namespace()) { req_list.push_back(ns.name); }
+		for (const auto& ns : alias.get_namespace()) { req_list.push_back(ns.get_name()); }
 		req_list.push_back(alias.get_underlying_type());
 
 		if (class_) template_bind_validate(req_list, alias, *class_);
 		else template_bind_validate(req_list, alias);
 	}
 
-	void ClassValidator::verify(source::Class& class_) {
-		tvalidator.verify(class_);
+	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+	template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-		for (auto field : class_.get_fields()) fvalidator.verify(field, class_);
-		for (auto alias : class_.get_aliases()) avalidator.verify(alias, &class_);
-		for (auto method : class_.get_methods()) mvalidator.verify(method, class_);
-		for (auto constructor : class_.get_constructors()) cvalidator.verify(constructor, class_);
-		for (auto base_class : class_.get_base_classes()) verify(base_class);
-	}
+	void ClassValidator::verify(source::Class& class_) {
+		/*tvalidator.verify(class_);
+
+		for (auto& entity : class_.get_entities()) {
+			std::visit(overloaded{
+				[&](source::Field& f) {
+					fvalidator.verify(f, class_);
+				},
+				[&](source::Method& m) {
+					mvalidator.verify(m, class_);
+				},
+				[&](source::Alias& a) {
+					avalidator.verify(a, &class_);
+				},
+				[&](source::Constructor& c) {
+					cvalidator.verify(c, class_);
+				},
+				[&](source::Class& c) {
+					verify(c);
+				}
+			}, entity);
+		}
+
+		for (auto& base_class : class_.get_base_classes()) verify(base_class);
+	*/}
 
 	void FieldValidator::verify(source::Field& field, source::Class& class_) {
 		if (field.is_static() && field.is_mutable()) {
@@ -89,7 +108,7 @@ namespace cg::validate {
 		}
 
 		std::vector<source::TypeName> req_list;
-		for (const auto& ns : field.get_namespace()) { req_list.push_back(ns.name); }
+		for (const auto& ns : field.get_namespace()) { req_list.push_back(ns.get_name()); }
 		req_list.push_back(field.get_type());
 
 		template_bind_validate(req_list, class_);
@@ -106,7 +125,7 @@ namespace cg::validate {
 
 	void MethodValidator::verify(source::Method& method, source::Class& class_) {
 		std::vector<source::TypeName> req_list;
-		for (const auto& ns : method.get_namespace()) { req_list.push_back(ns.name); }
+		for (const auto& ns : method.get_namespace()) { req_list.push_back(ns.get_name()); }
 		for (const auto& arg : method.get_args()) { req_list.push_back(arg.get_type()); }
 		req_list.push_back(method.get_type());
 
