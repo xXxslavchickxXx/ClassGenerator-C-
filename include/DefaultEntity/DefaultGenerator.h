@@ -17,7 +17,11 @@ namespace cg::generate {
 		std::stringstream sstr(str);
 		std::string token;
 		while (std::getline(sstr, token, '\n')) {
-			temp_str += std::string(count, '\t') + token;
+			std::string space;
+			for (size_t i = 0; i < count; i++) space += "    ";
+			temp_str += 
+				space
+			+ token;
 
 			if (!sstr.eof()) {
 				temp_str += '\n';
@@ -101,7 +105,8 @@ namespace cg::generate {
 			sstr << OptionalEntityGenerator::generate(f, g);
 
 		sstr << ArgumentableEntityGenerator::generate(f, g != GenStage::Realization);
-		if (f.is_inline() || f.is_constexpr() || g != GenStage::Declaration) sstr << " {\n\t//TODO...\n}";
+		if (f.is_inline() || f.is_constexpr() || g != GenStage::Declaration)
+			sstr << " {\n" << tabulate(1, "//TODO...") << "\n }";
 		else sstr << ";";
 		return sstr.str();
 

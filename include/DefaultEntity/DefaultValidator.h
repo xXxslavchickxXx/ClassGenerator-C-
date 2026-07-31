@@ -68,10 +68,81 @@ namespace cg::validate {
 	public:
 		void verify(source::Variable& var);
 	};
+
+	class ArguementValidator : public Validator {
+	public:
+		void verify(source::ArgumentableEntity& args);
+	};
 }
 
 namespace cg::validate {
 /// Реализации
+	inline void ArguementValidator::verify(source::ArgumentableEntity& args) {
+		auto& list = args.get_args();
+
+		int variadic_type = -1;
+
+		for (size_t i = 0; i < list.size(); i++) {
+			if (list[i].get_type().is_variadic()) {
+				if (variadic_type == -1) {
+					variadic_type = i;
+				}
+				else {
+					CGContext ctx;
+					ctx.type = CGError::MuchVariadicTemplates;
+					ctx.message = "entity: \"" +
+						list[i].get_name() +
+						"\" and \"" +
+						list[variadic_type].get_name() +
+						"\" can't be variadic at the same time!";
+
+					switch (cr.resolve(ctx)) {
+					case pl::error::ResolutionStrategy::ApplyOptionA:
+						std::cout << list[i].get_name()
+							<< " toggle to non variadic type!\n";
+						list[i].get_type().toggle_variadic();
+						break;
+					case pl::error::ResolutionStrategy::ApplyOptionB:
+						std::cout << list[variadic_type].get_name()
+							<< " toggle to non variadic type!\n";
+						list[variadic_type].get_type().toggle_variadic();
+						break;
+					default:
+						break;
+					}
+
+					variadic_type = -1;
+					i = -1;
+				}
+			}
+		}
+		
+		for (size_t i = 0; i < list.size(); i++) {
+			if (list[i].get_type().is_variadic() && i < list.size() - 1) {
+				CGContext ctx;
+				ctx.type = CGError::VariadicDoNotOnTheEnd;
+				ctx.message = "entity: \"" +
+					list[i].get_name()
+					+ "\" " + "would be on the end!";
+
+				switch (cr.resolve(ctx)) {
+				case pl::error::ResolutionStrategy::ApplyOptionA:
+					std::cout << list[i].get_name()
+						<< " moved to the end!\n";
+					args.swap_args(i, list.size() - 1);
+					break;
+				case pl::error::ResolutionStrategy::ApplyOptionB:
+					std::cout << list[i].get_name()
+						<< " toggle to non variadic!\n";
+					list[i].get_type().toggle_variadic();
+					break;
+				default:
+					break;
+				};
+			}
+		}
+	}
+
 	inline void FunctionValidator::verify(source::Function& func) {
 		std::vector<source::TypeName> req_list;
 
@@ -82,6 +153,8 @@ namespace cg::validate {
 		temp_valid.verify(func);
 
 		template_bind_validate(req_list, func);
+
+		ArguementValidator().verify(func);
 	}
 
 	inline void VariableValidator::verify(source::Variable& var) {

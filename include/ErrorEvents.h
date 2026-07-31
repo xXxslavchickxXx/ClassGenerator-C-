@@ -14,7 +14,9 @@ namespace cg::validate {
         TemplateTypeIsNotLinked_External,
         MuchVariadicTemplates,
         VariadicDoNotOnTheEnd,
-        MissMatchVariadic
+        MissMatchVariadic,
+        FieldIsVariadic,
+        VariadicInArgsDoNotLast
     };
 
     // Конфликт контекст

@@ -54,8 +54,11 @@ namespace cg::validate {
 		for (const auto& ns : alias.get_namespace()) { req_list.push_back(ns.get_name()); }
 		req_list.push_back(alias.get_underlying_type());
 
-		if (class_) template_bind_validate(req_list, alias, *class_);
-		else template_bind_validate(req_list, alias);
+		if (class_)
+			if (template_bind_validate(req_list, alias, *class_))
+				ClassValidator().verify(*class_);
+		else if(template_bind_validate(req_list, alias))
+			verify(alias);
 	}
 
 	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -107,11 +110,31 @@ namespace cg::validate {
 			}
 		}
 
+		if (field.get_type().is_variadic()) {
+			CGContext ctx;
+			ctx.type = CGError::FieldIsVariadic;
+			ctx.message = "field: \"" +
+				field.get_type().get_name()
+				+ "\" " + "can't be variadic (only template)!";
+
+			switch (cr.resolve(ctx)) {
+			case pl::error::ResolutionStrategy::ApplyOptionA:
+				field.get_type().toggle_variadic();
+				break;
+			default:
+				break;
+			}
+		}
+
+		// Проверка на шаблоны
 		std::vector<source::TypeName> req_list;
-		for (const auto& ns : field.get_namespace()) { req_list.push_back(ns.get_name()); }
+		for (const auto& ns : field.get_namespace())
+			req_list.push_back(ns.get_name());
+
 		req_list.push_back(field.get_type());
 
-		template_bind_validate(req_list, class_);
+		if (template_bind_validate(req_list, class_))
+			ClassValidator().verify(class_);
 	}
 
 	void ConstructorValidator::verify(source::Constructor& constructor, source::Class& class_) {
@@ -120,7 +143,10 @@ namespace cg::validate {
 
 		temp_valid.verify(constructor);
 
-		template_bind_validate(req_list, constructor, class_);
+		if (template_bind_validate(req_list, constructor, class_))
+			verify(constructor, class_);
+
+		ArguementValidator().verify(constructor);
 	}
 
 	void MethodValidator::verify(source::Method& method, source::Class& class_) {
@@ -131,6 +157,9 @@ namespace cg::validate {
 
 		temp_valid.verify(method);
 
-		template_bind_validate(req_list, method, class_);
+		if (template_bind_validate(req_list, method, class_))
+			ClassValidator().verify(class_);
+
+		ArguementValidator().verify(method);
 	}
 }

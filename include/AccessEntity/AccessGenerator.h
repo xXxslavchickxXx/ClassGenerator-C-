@@ -86,36 +86,34 @@ namespace cg::generate {
                         switch_access(f.get_visibility());
                         std::string code = FieldGenerator::generate(f, cls, g);
                         if (!code.empty()) {
-                            sstr << "\t" << code << "\n";
+                            sstr << tabulate(1, code) << "\n";
                         }
                     },
                     [&](const cgs::Alias& a) {
                         switch_access(a.get_visibility());
                         std::string code = AliasGenerator::generate(a);
                         if (!code.empty()) {
-                            sstr << "\t" << code << "\n";
+                            sstr << tabulate(1, code) << "\n";
                         }
                     },
                     [&](const cgs::Method& m) {
                         switch_access(m.get_visibility());
                         std::string code = MethodGenerator::generate(m, cls, g);
                         if (!code.empty()) {
-                            sstr << "\t" << code << "\n";
+                            sstr << tabulate(1, code) << "\n";
                         }
                     },
                     [&](const cgs::Constructor& c) {
                         switch_access(c.get_visibility());
                         std::string code = ConstructorGenerator::generate(c, cls, g);
                         if (!code.empty()) {
-                            sstr << "\t" << code << "\n";
+                            sstr << tabulate(1, code) << "\n";
                         }
                     },
                     [&](const cgs::Class& nested_cls) {
-                        // Вложенный класс генерируется как отдельный класс
                         switch_access(nested_cls.get_visibility());
                         std::string code = generate(nested_cls, g);
                         if (!code.empty()) {
-                            // Используем tabulate для добавления отступа к каждой строке
                             sstr << tabulate(1, code) << "\n";
                         }
                     }
@@ -128,7 +126,7 @@ namespace cg::generate {
                 switch_access(d.get_visibility());
                 std::string code = DestructorGenerator::generate(d, cls, g);
                 if (!code.empty()) {
-                    sstr << "\t" << code << "\n";
+                    sstr << tabulate(1, code) << "\n";
                 }
             }
 
@@ -327,14 +325,14 @@ namespace cg::generate {
                 sstr << " = delete;";
             }
             else if (m.is_inline() || m.is_constexpr()) {
-                sstr << " {\n\t//TODO...\n}";
+                sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
             }
             else {
                 sstr << ";";
             }
         }
         else {
-            sstr << " {\n\t//TODO...\n}";
+            sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
         }
 
         return sstr.str();
@@ -352,14 +350,14 @@ namespace cg::generate {
 
             auto& init = c.get_init_list();
             if (!init.empty()) {
-                sstr << "\n\t: ";
+                sstr << "\n" << tabulate(1, ": ");
                 for (size_t i = 0; i < init.size(); ++i) {
                     if (i > 0) sstr << ", ";
                     sstr << init[i].get_name() << "(" << init[i].get_value() << ")";
                 }
             }
 
-            sstr << " {\n\t//TODO...\n}";
+            sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
             return sstr.str();
         }
 
@@ -388,7 +386,8 @@ namespace cg::generate {
         if (g == GenStage::Realization) {
             if (class_is_template || d.is_default()) return "";
 
-            sstr << NamedGenerator::generate(cls) << "::~" << cls.get_name() << "() {\n\t//TODO...\n}";
+            sstr << NamedGenerator::generate(cls) << "::~"
+            << cls.get_name() << "() {\n" << tabulate(1, "//TODO...") << "\n }";
             return sstr.str();
         }
 
