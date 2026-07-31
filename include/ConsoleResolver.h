@@ -29,6 +29,49 @@ namespace cg::validate {
 					}
 				},
 				{
+					CGError::VariadicInArgsDoNotLast, [](const auto& ctx) {
+						std::cout
+						<< "1. swap to end\n"
+						<< "2. toggle to non variadic\n"
+						<< "3. ignore (Danger - can throw extension)\n";
+
+						while (true) {
+							char c;
+							std::cin >> c;
+							switch (c) {
+								case '1':
+									return pl::error::ResolutionStrategy::ApplyOptionA;
+								case '2':
+									return pl::error::ResolutionStrategy::Ignore;
+								default:
+									std::cout << "incorrect choise! try again\n";
+									break;
+							}
+						}
+					}
+				},
+				{
+					CGError::FieldIsVariadic, [](const auto& ctx) {
+						std::cout
+						<< "1. toggle to non variadic\n"
+						<< "2. ignore (Danger - the generated code may not be compilable)\n";
+
+						while (true) {
+							char c;
+							std::cin >> c;
+							switch (c) {
+								case '1':
+									return pl::error::ResolutionStrategy::ApplyOptionA;
+								case '2':
+									return pl::error::ResolutionStrategy::Ignore;
+								default:
+									std::cout << "incorrect choise! try again\n";
+									break;
+							}
+						}
+					}
+				},
+				{
 					CGError::MissMatchVariadic, [](const auto& ctx) {
 						std::cout
 						<< "1. toggle declare parameter variadic status\n"

@@ -19,12 +19,12 @@ TEST(FunctionGeneratorTest, RegularFunction) {
     // Тело функции начинается с пробела " {" вместо переноса строки
     EXPECT_EQ(
         FunctionGenerator::generate(func, GenStage::Realization),
-        "void foo() {\n\t//TODO...\n}"
+        "void foo() {\n    //TODO...\n}"
     );
 
     EXPECT_EQ(
         FunctionGenerator::generate(func, GenStage::Inline),
-        "void foo() {\n\t//TODO...\n}"
+        "void foo() {\n    //TODO...\n}"
     );
 }
 
