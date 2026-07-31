@@ -11,7 +11,10 @@ namespace cg::validate {
         TypeNotTemplate,
         TypeShouldNotBeTemplate,
         TemplateTypeIsNotLinked_Local,
-        TemplateTypeIsNotLinked_External
+        TemplateTypeIsNotLinked_External,
+        MuchVariadicTemplates,
+        VariadicDoNotOnTheEnd,
+        MissMatchVariadic
     };
 
     // Конфликт контекст

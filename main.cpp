@@ -12,14 +12,28 @@ namespace fs = std::filesystem;
 int main() {
     system("chcp 65001 > nul");
 
+    auto t_t = TypeBuilder("T")
+        .as_variadic()
+        .build();
+    auto u_t = TypeBuilder("U")
+        .as_variadic()
+        //.as_template()
+        .build();
+
     // Внешний класс
     auto outer = ClassBuilder("Outer")
+        .with_template(t_t)
+        .with_template(u_t)
         .with_field(FieldBuilder("x").with_type(TypeBuilder("int").build()).as_private().build())
+        .with_field(FieldBuilder("t").with_type(t_t).as_private().build())
         .with_class(ClassBuilder("Inner")
             .with_field(FieldBuilder("y").with_type(TypeBuilder("float").build()).as_public().build())
             .as_public()
             .build())
         .build();
+
+    cg::validate::ClassValidator cv;
+    cv.verify(outer);
 
     // Генерация с правильными отступами:
     std::cout << ClassGenerator::generate(outer, GenStage::Declaration);

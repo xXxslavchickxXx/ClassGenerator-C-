@@ -157,7 +157,7 @@ namespace cg::source {
 
         const TypeName& get_typename() const {
             if (!type_name_ptr) {
-                throw std::runtime_error("Type name is not set");
+                throw std::runtime_error("Type isn't template");
             }
             return *type_name_ptr;
         }

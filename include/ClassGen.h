@@ -1,6 +1,7 @@
 #include <AccessEntity/AccessEntity.h>
 #include <AccessEntity/AccessBuilder.h>
 #include <AccessEntity/AccessGenerator.h>
+#include <AccessEntity/AccessValidator.h>
 #include <DefaultEntity/DefaultBuilder.h>
 #include <DefaultEntity/DefaultEntity.h>
 #include <DefaultEntity/DefaultGenerator.h>

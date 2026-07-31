@@ -62,7 +62,7 @@ namespace cg::validate {
 	template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 	void ClassValidator::verify(source::Class& class_) {
-		/*tvalidator.verify(class_);
+		tvalidator.verify(class_);
 
 		for (auto& entity : class_.get_entities()) {
 			std::visit(overloaded{
@@ -85,7 +85,7 @@ namespace cg::validate {
 		}
 
 		for (auto& base_class : class_.get_base_classes()) verify(base_class);
-	*/}
+	}
 
 	void FieldValidator::verify(source::Field& field, source::Class& class_) {
 		if (field.is_static() && field.is_mutable()) {
