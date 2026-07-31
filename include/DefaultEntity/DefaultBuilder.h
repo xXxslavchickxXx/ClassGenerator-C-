@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DefaultEntity/DefaultEntity.h>
+#include <AccessEntity/AccessEntity.h>
 
 namespace cg::build {
 	namespace pls = cg::source;
@@ -22,8 +22,8 @@ namespace cg::build {
 		TypeBuilder& as_ptr() { type.set_qualificator(pls::Qualificator::Pointer); return *this; }
 		TypeBuilder& as_ref() { type.set_qualificator(pls::Qualificator::Reference); return *this; }
 		TypeBuilder& as_uni_ref() { type.set_qualificator(pls::Qualificator::UniversalReference); return *this; }
-		TypeBuilder& ns(const source::NamespacePrefix& namespace_prefix) { type.add_namespace_prefix(namespace_prefix); return *this; }
-		TypeBuilder& ns(const std::vector<source::NamespacePrefix>& namespace_prefixes) {
+		TypeBuilder& ns(const source::Namespace& namespace_prefix) { type.add_namespace_prefix(namespace_prefix); return *this; }
+		TypeBuilder& ns(const std::vector<source::Namespace>& namespace_prefixes) {
 			for (auto ns : namespace_prefixes)
 				type.add_namespace_prefix(ns);
 			return *this;
@@ -54,7 +54,7 @@ namespace cg::build {
 
 		VariableBuilder& with_type(pls::TypeName t) { var.get_type() = std::move(t); return *this; }
 		VariableBuilder& with_value(std::string val) { var.set_value(std::move(val)); return *this; }
-		VariableBuilder& ns(source::NamespacePrefix prefix) { var.add_namespace_prefix(std::move(prefix)); return *this; }
+		VariableBuilder& ns(source::Namespace prefix) { var.add_namespace_prefix(std::move(prefix)); return *this; }
 
 		VariableBuilder& as_static() { if (!var.is_static()) var.toggle_static(); return *this; }
 		VariableBuilder& as_const() { if (!var.get_type().is_const()) var.get_type().toggle_const(); return *this; }
@@ -75,7 +75,7 @@ namespace cg::build {
 
 		FunctionBuilder& with_type(pls::TypeName t) { func.get_type() = std::move(t); return *this; }
 		FunctionBuilder& add_argument(pls::Arguement a) { func.get_args().push_back(a); return *this; }
-		FunctionBuilder& ns(source::NamespacePrefix prefix) { func.add_namespace_prefix(std::move(prefix)); return *this; }
+		FunctionBuilder& ns(source::Namespace prefix) { func.add_namespace_prefix(std::move(prefix)); return *this; }
 
 		FunctionBuilder& as_static() { if (!func.is_static()) func.toggle_static(); return *this; }
 		FunctionBuilder& as_inline() { if (!func.is_inline()) func.toggle_inline(); return *this; }

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <DefaultEntity/DefaultEntity.h>
+#include <AccessEntity/AccessEntity.h>
 #include <sstream>
 #include <functional>
 
@@ -263,15 +263,16 @@ namespace cg::generate {
 	inline std::string NamespaceGenerator::generate(
 		const cgs::NamedEntity& n)
 	{
-		const std::vector<cgs::NamespacePrefix>& pref = n.get_namespace();
+		const std::vector<cgs::Namespace>& pref = n.get_namespace();
 		if (pref.empty()) return "";
 
 		std::stringstream sstr;
 		for (auto& prefix : pref) {
-			if (!prefix.name.get_name().empty()) 
+			if (!prefix.get_name().get_name().empty())
 				sstr
-				<< NamedGenerator::generate(prefix.name, !prefix.name.get_template_parametrs().empty())
-				<< TemplateEntityGenerator::generate(prefix.name, true)
+				<< NamedGenerator::generate(prefix.get_name(),
+				!prefix.get_name().get_template_parametrs().empty())
+				<< TemplateEntityGenerator::generate(prefix.get_name(), true)
 				<< "::";
 		}
 
@@ -279,8 +280,10 @@ namespace cg::generate {
 	}
 	inline bool NamespaceGenerator::dependent_path(const cgs::NamedEntity& n)
 	{
-		const std::vector<cgs::NamespacePrefix>& pref = n.get_namespace();
-		for (auto& prefix : pref) { if (prefix.name.is_template()) return true; }
+		const std::vector<cgs::Namespace>& pref = n.get_namespace();
+		for (auto& prefix : pref) {
+			if (prefix.get_name().is_template()) return true;
+		}
 		return false;
 	}
 }

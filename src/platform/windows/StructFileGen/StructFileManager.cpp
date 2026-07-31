@@ -33,7 +33,8 @@ namespace cg::file {
     {}
 
     bool struct_file_manager::create_structure() {
-        fs::path header_path = parent_path / "include" / abstract_path / (class_name + ".h");
+        fs::path header_path = parent_path / "include" /
+        abstract_path / (class_name + ".h");
         if (!afm.safe_create_file(header_path)) {
             afm.rollback();
             return false;
@@ -59,7 +60,8 @@ namespace cg::file {
         };
 
         if (cpp_definition != DEFINITION_TYPE::NO_DEFINITION) {
-            if (has_platform(cpp_definition, DEFINITION_TYPE::CROSSPLATOFORM)) {
+            if (has_platform(cpp_definition,
+            DEFINITION_TYPE::CROSSPLATOFORM)) {
                 fs::path cpp_path = parent_path / "src" /
                 abstract_path / (class_name + ".cpp");
                 if (!safe_file_creator(cpp_path)) return false;
@@ -68,23 +70,26 @@ namespace cg::file {
             for (const auto& [type, folder] : platforms) {
                 if (has_platform(cpp_definition, type)) {
                     fs::path cpp_path = parent_path / "src" /
-                    "platform" / folder / abstract_path / (class_name + ".cpp");
+                    "platform" / folder / abstract_path /
+                    (class_name + ".cpp");
                     if (!safe_file_creator(cpp_path)) return false;
                 }
             }
         }
 
         if (inline_definition != DEFINITION_TYPE::NO_DEFINITION) {
-            if (has_platform(inline_definition, DEFINITION_TYPE::CROSSPLATOFORM)) {
-                fs::path inline_path = parent_path / "include" /
-                abstract_path / (class_name + ".inl");
+            if (has_platform(inline_definition,
+            DEFINITION_TYPE::CROSSPLATOFORM)) {
+                fs::path inline_path = parent_path / "src" /
+                    abstract_path / (class_name + ".inl");
                 if (!safe_file_creator(inline_path)) return false;
             }
 
             for (const auto& [type, folder] : platforms) {
                 if (has_platform(inline_definition, type)) {
-                    fs::path inline_path = parent_path / "include" /
-                    abstract_path / folder / (class_name + ".inl");
+                    fs::path inline_path = parent_path / "src" /
+                    "platform" / folder / abstract_path /
+                    (class_name + ".inl");
                     if (!safe_file_creator(inline_path)) return false;
                 }
             }

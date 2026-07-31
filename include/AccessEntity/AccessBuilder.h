@@ -14,7 +14,7 @@ namespace cg::build {
 		AliasBuilder(const std::string& var_name)
 			: alias(var_name) {}
 
-		AliasBuilder& ns(pls::NamespacePrefix prefix) { alias.add_namespace_prefix(std::move(prefix)); return *this; }
+		AliasBuilder& ns(pls::Namespace prefix) { alias.add_namespace_prefix(std::move(prefix)); return *this; }
 		AliasBuilder& underlying_type(pls::TypeName t) { alias.set_underlying_type(std::move(t)); return *this; }
 
 		AliasBuilder& with_template(pls::TypeName t) { alias.add_template_parametr(std::move(t)); return *this; }
@@ -37,7 +37,7 @@ namespace cg::build {
 
 		FieldBuilder& with_type(pls::TypeName t) { field.get_type() = std::move(t); return *this; }
 		FieldBuilder& with_value(std::string val) { field.set_value(std::move(val)); return *this; }
-		FieldBuilder& ns(pls::NamespacePrefix prefix) { field.add_namespace_prefix(std::move(prefix)); return *this; }
+		FieldBuilder& ns(pls::Namespace prefix) { field.add_namespace_prefix(std::move(prefix)); return *this; }
 
 		FieldBuilder& as_static() { if (!field.is_static()) field.toggle_static(); return *this; }
 		FieldBuilder& as_const() { if (!field.get_type().is_const()) field.get_type().toggle_const(); return *this; }
@@ -62,7 +62,7 @@ namespace cg::build {
 			: method(var_name) {}
 
 		MethodBuilder& with_type(pls::TypeName t) { method.get_type() = std::move(t); return *this; }
-		MethodBuilder& ns(pls::NamespacePrefix prefix) { method.add_namespace_prefix(std::move(prefix)); return *this; }
+		MethodBuilder& ns(pls::Namespace prefix) { method.add_namespace_prefix(std::move(prefix)); return *this; }
 
 		MethodBuilder& add_argument(pls::Variable arg) { method.get_args().push_back(std::move(arg)); return *this; }
 		MethodBuilder& with_template(pls::TypeName t) { method.add_template_parametr(std::move(t)); return *this; }

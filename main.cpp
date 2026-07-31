@@ -12,15 +12,15 @@ namespace fs = std::filesystem;
 int main() {
     system("chcp 65001 > nul");
 
-    auto path = fs::current_path();
+    /*auto path = fs::current_path();
 
-    auto fm = cg::file::struct_file_manager("class_",
+    auto file_manager = cg::file::struct_file_manager("class_",
     path,
     "LibA",
     cgf::DEFINITION_TYPE::WINDOWS,
     cgf::DEFINITION_TYPE::LINUX | cgf::DEFINITION_TYPE::CROSSPLATOFORM);
 
-    fm.create_structure();
+    file_manager.create_structure();*/
     //std::cout << cg::file::open_geometry_path_dialog(path.string().c_str()) << "\n";
 
     return 0;

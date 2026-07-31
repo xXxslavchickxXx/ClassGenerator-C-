@@ -105,7 +105,7 @@ TEST(VariableGenerationTest, VariableInNamespace) {
     auto var = VariableBuilder("app_version")
         .with_type(TypeBuilder("int").build())
         .with_value("1")
-        .ns(cg::source::NamespacePrefix("myapp"))
+        .ns(cg::source::Namespace("myapp"))
         .build();
 
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "extern int myapp::app_version = 1;");
@@ -118,7 +118,7 @@ TEST(VariableGenerationTest, ConstexprVariableInNamespace) {
         .with_type(TypeBuilder("int").build())
         .with_value("1024")
         .as_constexpr()
-        .ns(cg::source::NamespacePrefix("network"))
+        .ns(cg::source::Namespace("network"))
         .build();
 
     EXPECT_EQ(VariableGenerator::generate(var, GenStage::Declaration), "constexpr int network::MAX_CONNECTIONS = 1024;");

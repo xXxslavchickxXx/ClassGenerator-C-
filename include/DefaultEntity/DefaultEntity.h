@@ -29,12 +29,12 @@ namespace cg::source {
         return a;
     }
 
-    struct NamespacePrefix;
+    class Namespace;
 
     class NamedEntity {
     protected:
         std::string name;
-        std::vector<NamespacePrefix> namespace_prefix;
+        std::vector<Namespace> namespace_prefix;
 
     public:
         NamedEntity(const std::string& name_)
@@ -44,9 +44,9 @@ namespace cg::source {
         const std::string& get_name() const { return name; }
         void set_name(const std::string& new_name) { name = new_name; }
         
-        const std::vector<NamespacePrefix>& get_namespace() const { return namespace_prefix; }
-        std::vector<NamespacePrefix>& get_namespace() { return namespace_prefix; }
-        void add_namespace_prefix(const NamespacePrefix& prefix) { namespace_prefix.push_back(prefix); }
+        const std::vector<Namespace>& get_namespace() const { return namespace_prefix; }
+        std::vector<Namespace>& get_namespace() { return namespace_prefix; }
+        void add_namespace_prefix(const Namespace& prefix) { namespace_prefix.push_back(prefix); }
 
         NamedEntity(const NamedEntity&) = default;
         NamedEntity& operator=(const NamedEntity&) = default;
@@ -160,17 +160,6 @@ namespace cg::source {
         Qualificator get_qualificator() const { return qual; }
     };
 
-    struct NamespacePrefix {
-        TypeName name;
-
-        NamespacePrefix(const std::string& name_)
-            : name(name_) {}
-        NamespacePrefix(const char* name_)
-            : name(std::string(name_)) {}
-        NamespacePrefix(const TypeName& t)
-            : name(t) {}
-    };
-
     class Arguement : public NamedEntity {
         TypeName type;
         std::string value;
@@ -241,15 +230,7 @@ namespace cg::source {
         Variable(Variable&&) = default;
         Variable& operator=(Variable&&) = default;
 
-        operator Arguement() const {
-            auto arg = Arguement(name);
-            arg.get_type() = get_type();
-            arg.set_value(value);
-            for (const auto& ns : namespace_prefix) {
-                arg.add_namespace_prefix(ns);
-            }
-            return arg;
-        }
+        operator Arguement() const;
     };
 
     class ArgumentableEntity {
@@ -270,5 +251,34 @@ namespace cg::source {
         Function& operator=(const Function&) = default;
         Function(Function&&) = default;
         Function& operator=(Function&&) = default;
+    };
+
+    class Class;
+    class Alias;
+
+    class Namespace {
+        TypeName name;
+
+        std::vector<Variable> variables;
+        std::vector<Alias> aliases;
+        std::vector<Function> functions;
+        std::vector<Class> classes;
+    
+    public:
+        Namespace(const std::string& name_);
+        Namespace(const char* name_);
+        Namespace(const TypeName& t);
+
+        TypeName& get_name();
+        std::vector<Variable>& get_vars();
+        std::vector<Alias>& get_aliases();
+        std::vector<Function>& get_functions();
+        std::vector<Class>& get_classes();
+
+        const TypeName& get_name() const;
+        const std::vector<Variable>& get_vars() const;
+        const std::vector<Alias>& get_aliases() const;
+        const std::vector<Function>& get_functions() const;
+        const std::vector<Class>& get_classes() const;
     };
 }

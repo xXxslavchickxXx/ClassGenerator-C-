@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ErrorEvents.h>
-#include <DefaultEntity/DefaultEntity.h>
+#include <AccessEntity/AccessEntity.h>
 #include <DefaultEntity/DefaultGenerator.h>
 #include <iostream>
 #include <concepts>
@@ -75,7 +75,7 @@ namespace cg::validate {
 	inline void FunctionValidator::verify(source::Function& func) {
 		std::vector<source::TypeName> req_list;
 
-		for (const auto& ns : func.get_namespace()) { req_list.push_back(ns.name); }
+		for (const auto& ns : func.get_namespace()) { req_list.push_back(ns.get_name()); }
 		for (const auto& arg : func.get_args()) { req_list.push_back(arg.get_type()); }
 		req_list.push_back(func.get_type());
 
@@ -211,7 +211,7 @@ namespace cg::validate {
 				accumulator.push_back(type);
 			}
 		}
-		for (auto& t : type.get_namespace()) recursive_template_collector(t.name, accumulator);
+		for (auto& t : type.get_namespace()) recursive_template_collector(t.get_name(), accumulator);
 
 		// А теперь идем вглубь по всем вложенным шаблонным аргументам
 		// Например, для vec_type<Tag> мы зайдем в Tag

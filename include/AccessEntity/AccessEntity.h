@@ -258,6 +258,5 @@ namespace cg::source {
 
             return (*it);
         }
-
     };
 }

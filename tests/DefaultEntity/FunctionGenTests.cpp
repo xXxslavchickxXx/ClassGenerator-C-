@@ -156,7 +156,7 @@ TEST(FunctionGeneratorTest, ConstexprFunction) {
 TEST(FunctionGeneratorTest, FunctionWithNamespace) {
     auto func = FunctionBuilder("bar")
         .with_type(TypeBuilder("void").build())
-        .ns(NamespacePrefix("myapp"))
+        .ns(Namespace("myapp"))
         .build();
 
     EXPECT_EQ(
@@ -254,7 +254,7 @@ TEST(FunctionGeneratorTest, StaticFunctionWithNamespace) {
     auto func = FunctionBuilder("helper")
         .with_type(TypeBuilder("void").build())
         .as_static()
-        .ns(NamespacePrefix("utils"))
+        .ns(Namespace("utils"))
         .build();
 
     EXPECT_EQ(
