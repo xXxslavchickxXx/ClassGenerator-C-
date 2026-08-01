@@ -1,3 +1,5 @@
+#pragma once
+
 namespace cg::validate {
 	inline Validator::Validator() {
 		cr = pl::error::ConflictResolver<CGError, CGContext>(

@@ -272,16 +272,19 @@ namespace cg::source {
     class Class;
     class Alias;
 
-    using NamespaceEntities =
-        std::variant<Variable>;
+    using namespace_entities =
+        std::variant<
+            Namespace,
+            Variable,
+            Alias,
+            Function,
+            Class
+        >;
 
     class Namespace {
         TypeName name;
 
-        std::vector<Variable> variables;
-        std::vector<Alias> aliases;
-        std::vector<Function> functions;
-        std::vector<Class> classes;
+        std::vector<namespace_entities> entities;
     
     public:
         Namespace(const std::string& name_);
@@ -289,15 +292,17 @@ namespace cg::source {
         Namespace(const TypeName& t);
 
         TypeName& get_name();
-        std::vector<Variable>& get_vars();
-        std::vector<Alias>& get_aliases();
-        std::vector<Function>& get_functions();
-        std::vector<Class>& get_classes();
-
         const TypeName& get_name() const;
-        const std::vector<Variable>& get_vars() const;
-        const std::vector<Alias>& get_aliases() const;
-        const std::vector<Function>& get_functions() const;
-        const std::vector<Class>& get_classes() const;
+        
+        void add_variable(const Variable& v);
+        void add_method(const Function& f);
+        void add_alias(const Alias& a);
+        void add_class(const Class& class_);
+        void add_ns(const Namespace& ns);
+        
+        std::vector<namespace_entities>& get_entities();
+        const std::vector<namespace_entities>& get_entities() const;
+       
+        void swap_entities(size_t i, size_t j);
     };
 }

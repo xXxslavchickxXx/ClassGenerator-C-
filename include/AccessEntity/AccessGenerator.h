@@ -120,7 +120,7 @@ namespace cg::generate {
                     }, entity);
             }
 
-            // Деструктор генерируется отдельно (если есть)
+            // Деструктор генерируется отдельно
             if (cls.has_destructor()) {
                 const auto& d = cls.get_destructor();
                 switch_access(d.get_visibility());
@@ -132,7 +132,7 @@ namespace cg::generate {
 
             sstr << "};";
         }
-        else { // GenStage::Realization
+        else {
             bool first = true;
 
             // Реализация методов, конструкторов и деструктора

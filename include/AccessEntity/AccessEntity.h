@@ -160,8 +160,8 @@ namespace cg::source {
 
     using class_entities =
         std::variant<
-        Field, Method, Alias,
-        Constructor, Class
+            Field, Method, Alias,
+            Constructor, Class
         >;
 
     class Class : public NamedEntity, public AccessEntity, public TemplateEntity {
@@ -214,10 +214,6 @@ namespace cg::source {
         std::vector<Class>& get_base_classes() { return base_classes; }
         const std::vector<Class>& get_base_classes() const { return base_classes; }
         
-        void swap_entities(size_t i, size_t j) {
-            if (i == j || i >= entities.size() ||
-            j >= entities.size()) return;
-            std::iter_swap(entities.begin() + i, entities.begin() + j);
-        }
+        void swap_entities(size_t i, size_t j);
     };
 }
