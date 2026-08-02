@@ -9,6 +9,8 @@
 #include <variant>
 #include <algorithm>
 
+#include <DefinitionType/DefinitionType.h>
+
 namespace cg::source {
     enum class DeclSpecifiers : uint8_t {
         None = 0,
@@ -30,6 +32,21 @@ namespace cg::source {
         a = static_cast<DeclSpecifiers>(static_cast<int>(a) & static_cast<int>(b));
         return a;
     }
+    
+    class DefinitionEntity {
+        file::DEFINITION_TYPE type;
+
+    public:
+        DefinitionEntity(
+        const file::DEFINITION_TYPE& definition =
+            file::DEFINITION_TYPE::NO_DEFINITION)
+        : type(definition) {}
+
+        const file::DEFINITION_TYPE& get_type() const { return type; }
+        void set_type(const file::DEFINITION_TYPE& definition) {
+            type = definition;
+        }
+    };
 
     class Namespace;
 

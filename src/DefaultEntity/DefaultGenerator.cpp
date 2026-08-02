@@ -25,8 +25,7 @@ namespace cg::generate {
 
 	std::string
 		NamespaceGenerator::generate(
-			const cgs::Namespace& n,
-			GenStage g)
+			const cgs::Namespace& n, bool realization)
 	{
 		std::stringstream sstr;
 
@@ -40,7 +39,7 @@ namespace cg::generate {
 			std::visit(overloaded{
 				[&](const cgs::Variable& v) {
 					std::string code =
-						VariableGenerator::generate(v, g);
+						VariableGenerator::generate(v, realization);
 					if (!code.empty()) {
 						sstr << tabulate(1, code) << "\n";
 					}
@@ -53,22 +52,22 @@ namespace cg::generate {
 				},
 				[&](const cgs::Function& m) {
 					std::string code =
-						FunctionGenerator::generate(m, g);
+						FunctionGenerator::generate(m, realization);
 					if (!code.empty()) {
 						sstr << tabulate(1, code) << "\n";
 					}
 				},
 				[&](const cgs::Class& cls) {
-					if (g != cg::generate::GenStage::Realization) {
+					if (!realization) {
 						std::string code =
-							ClassGenerator::generate(cls, g);
+							ClassGenerator::generate(cls, realization);
 						if (!code.empty()) {
 							sstr << tabulate(1, code) << "\n";
 						}
 					}
 				},
 				[&](const cgs::Namespace& ns) {
-					std::string code = generate(ns, g);
+					std::string code = generate(ns, realization);
 					if (!code.empty()) {
 						sstr << tabulate(1, code) << "\n";
 					}
@@ -81,11 +80,12 @@ namespace cg::generate {
 		return sstr.str();
 	}
 
-	std::string FunctionGenerator::generate(const cgs::Function& f, GenStage g) {
+	std::string FunctionGenerator::generate(
+	const cgs::Function& f, bool realization) {
 		std::stringstream sstr;
 
 		// Условия скипа генерации
-		if (g == GenStage::Realization)
+		if (realization)
 			if (f.is_constexpr() || f.is_inline()) {
 				return "";
 			}
@@ -96,16 +96,16 @@ namespace cg::generate {
 			sstr << TemplateEntityGenerator::generate(f, false) << '\n';
 
 
-		if (is_template && g == GenStage::Realization && !f.is_inline()) {
+		if (is_template && realization && !f.is_inline()) {
 			auto f_inline = f;
 			f_inline.toggle_inline();
-			sstr << OptionalEntityGenerator::generate(f_inline, GenStage::Inline);
+			sstr << OptionalEntityGenerator::generate(f_inline, realization);
 		}
 		else
-			sstr << OptionalEntityGenerator::generate(f, g);
+			sstr << OptionalEntityGenerator::generate(f, realization);
 
-		sstr << ArgumentableEntityGenerator::generate(f, g != GenStage::Realization);
-		if (f.is_inline() || f.is_constexpr() || g != GenStage::Declaration)
+		sstr << ArgumentableEntityGenerator::generate(f, !realization);
+		if (f.is_inline() || f.is_constexpr() || realization)
 			sstr << " {\n" << tabulate(1, "//TODO...") << "\n }";
 		else sstr << ";";
 		return sstr.str();
@@ -141,10 +141,11 @@ namespace cg::generate {
 		return sstr.str();
 	}
 
-	std::string VariableGenerator::generate(const cgs::Variable& v, GenStage g) {
+	std::string VariableGenerator::generate(
+	const cgs::Variable& v, bool realization) {
 		std::stringstream sstr;
 
-		if (g == GenStage::Realization) {
+		if (realization) {
 			if (v.is_static() || v.is_constexpr() || v.is_inline()) {
 				return "";
 			}
@@ -161,11 +162,11 @@ namespace cg::generate {
 		}
 
 		bool is_global = !v.is_static() && !v.is_inline() && !v.is_constexpr();
-		if (g == GenStage::Declaration && is_global) {
+		if (!realization && is_global) {
 			sstr << "extern ";
 		}
 
-		sstr << OptionalEntityGenerator::generate(v, g);
+		sstr << OptionalEntityGenerator::generate(v, realization);
 
 		if (!v.get_value().empty()) {
 			sstr << " = " << v.get_value();
@@ -176,13 +177,14 @@ namespace cg::generate {
 		return sstr.str();
 	}
 
-	std::string OptionalEntityGenerator::generate(const cgs::OptionalEntity& t, GenStage g) {
+	std::string OptionalEntityGenerator::generate(
+	const cgs::OptionalEntity& t, bool realization) {
 		std::stringstream sstr;
 
-		if (t.is_friend() && g != GenStage::Realization) sstr << "friend ";
-		if (t.is_static() && g != GenStage::Realization) sstr << "static ";
+		if (t.is_friend() && !realization) sstr << "friend ";
+		if (t.is_static() && !realization) sstr << "static ";
 		if (t.is_constexpr()) sstr << "constexpr ";
-		if (t.is_inline() && g != GenStage::Realization) sstr << "inline ";
+		if (t.is_inline() && !realization) sstr << "inline ";
 
 		sstr << TypeNameGenerator::generate(t.get_type()) << " ";
 		sstr << NamedGenerator::generate(t);

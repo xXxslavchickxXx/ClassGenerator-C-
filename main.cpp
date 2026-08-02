@@ -17,7 +17,7 @@ int main() {
     ns.add_class(class_in_class);
 
     // Генерация с правильными отступами:
-    std::cout << NamespaceGenerator::generate(ns, GenStage::Declaration);
+    std::cout << NamespaceGenerator::generate(ns);
 
     return 0;
 }

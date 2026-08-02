@@ -10,22 +10,26 @@ namespace cg::generate {
 
     class FieldGenerator {
     public:
-        static std::string generate(const cgs::Field& f, const cgs::Class& cls, GenStage g);
+        static std::string generate(
+        const cgs::Field& f, const cgs::Class& cls, bool realization = false);
     };
 
     class MethodGenerator {
     public:
-        static std::string generate(const cgs::Method& m, const cgs::Class& cls, GenStage g);
+        static std::string generate(
+        const cgs::Method& m, const cgs::Class& cls, bool realization = false);
     };
 
     class ConstructorGenerator {
     public:
-        static std::string generate(const cgs::Constructor& c, const cgs::Class& cls, GenStage g);
+        static std::string generate(
+        const cgs::Constructor& c, const cgs::Class& cls, bool realization = false);
     };
 
     class DestructorGenerator {
     public:
-        static std::string generate(const cgs::Destructor& d, const cgs::Class& cls, GenStage g);
+        static std::string generate(
+        const cgs::Destructor& d, const cgs::Class& cls, bool realization = false);
     };
 
     class AliasGenerator {
@@ -35,7 +39,8 @@ namespace cg::generate {
 
     class ClassGenerator {
     public:
-        static std::string generate(const cgs::Class& cls, GenStage g);
+        static std::string generate(
+        const cgs::Class& cls, bool realization = false);
     };
 }
 
@@ -43,7 +48,8 @@ namespace cg::generate {
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    inline std::string ClassGenerator::generate(const cgs::Class& cls, GenStage g) {
+    inline std::string ClassGenerator::generate(
+    const cgs::Class& cls, bool realization) {
         std::stringstream sstr;
 
         bool is_template_cls = !cls.get_template_parametrs().empty();
@@ -51,7 +57,7 @@ namespace cg::generate {
             sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
         }
 
-        if (g == GenStage::Declaration || g == GenStage::Inline) {
+        if (!realization) {
             sstr << "class " << cls.get_name();
 
             // Генерация базовых классов
@@ -84,7 +90,7 @@ namespace cg::generate {
                 std::visit(overloaded{
                     [&](const cgs::Field& f) {
                         switch_access(f.get_visibility());
-                        std::string code = FieldGenerator::generate(f, cls, g);
+                        std::string code = FieldGenerator::generate(f, cls, realization);
                         if (!code.empty()) {
                             sstr << tabulate(1, code) << "\n";
                         }
@@ -98,21 +104,21 @@ namespace cg::generate {
                     },
                     [&](const cgs::Method& m) {
                         switch_access(m.get_visibility());
-                        std::string code = MethodGenerator::generate(m, cls, g);
+                        std::string code = MethodGenerator::generate(m, cls, realization);
                         if (!code.empty()) {
                             sstr << tabulate(1, code) << "\n";
                         }
                     },
                     [&](const cgs::Constructor& c) {
                         switch_access(c.get_visibility());
-                        std::string code = ConstructorGenerator::generate(c, cls, g);
+                        std::string code = ConstructorGenerator::generate(c, cls, realization);
                         if (!code.empty()) {
                             sstr << tabulate(1, code) << "\n";
                         }
                     },
                     [&](const cgs::Class& nested_cls) {
                         switch_access(nested_cls.get_visibility());
-                        std::string code = generate(nested_cls, g);
+                        std::string code = generate(nested_cls, realization);
                         if (!code.empty()) {
                             sstr << tabulate(1, code) << "\n";
                         }
@@ -124,7 +130,7 @@ namespace cg::generate {
             if (cls.has_destructor()) {
                 const auto& d = cls.get_destructor();
                 switch_access(d.get_visibility());
-                std::string code = DestructorGenerator::generate(d, cls, g);
+                std::string code = DestructorGenerator::generate(d, cls, realization);
                 if (!code.empty()) {
                     sstr << tabulate(1, code) << "\n";
                 }
@@ -139,7 +145,7 @@ namespace cg::generate {
             for (const auto& entity : cls.get_entities()) {
                 std::visit(overloaded{
                     [&](const cgs::Field& f) {
-                        std::string code = FieldGenerator::generate(f, cls, g);
+                        std::string code = FieldGenerator::generate(f, cls, realization);
                         if (!code.empty()) {
                             if (!first) sstr << "\n";
                             sstr << code;
@@ -147,7 +153,7 @@ namespace cg::generate {
                         }
                     },
                     [&](const cgs::Method& m) {
-                        std::string code = MethodGenerator::generate(m, cls, g);
+                        std::string code = MethodGenerator::generate(m, cls, realization);
                         if (!code.empty()) {
                             if (!first) sstr << "\n";
                             sstr << code;
@@ -155,7 +161,7 @@ namespace cg::generate {
                         }
                     },
                     [&](const cgs::Constructor& c) {
-                        std::string code = ConstructorGenerator::generate(c, cls, g);
+                        std::string code = ConstructorGenerator::generate(c, cls, realization);
                         if (!code.empty()) {
                             if (!first) sstr << "\n";
                             sstr << code;
@@ -164,7 +170,7 @@ namespace cg::generate {
                     },
                     [&](const cgs::Class& nested_cls) {
                         // Для вложенных классов реализация генерируется отдельно
-                        std::string code = generate(nested_cls, g);
+                        std::string code = generate(nested_cls, realization);
                         if (!code.empty()) {
                             if (!first) sstr << "\n";
                             sstr << code;
@@ -180,7 +186,7 @@ namespace cg::generate {
             // Реализация деструктора
             if (cls.has_destructor()) {
                 const auto& d = cls.get_destructor();
-                std::string code = DestructorGenerator::generate(d, cls, g);
+                std::string code = DestructorGenerator::generate(d, cls, realization);
                 if (!code.empty()) {
                     if (!first) sstr << "\n";
                     sstr << code;
@@ -205,10 +211,11 @@ namespace cg::generate {
         return sstr.str();
     }
 
-    inline std::string FieldGenerator::generate(const cgs::Field& f, const cgs::Class& cls, GenStage g) {
+    inline std::string FieldGenerator::generate(
+    const cgs::Field& f, const cgs::Class& cls, bool realization) {
         std::stringstream sstr;
 
-        if (g == GenStage::Realization) {
+        if (realization) {
             if (!f.is_static() || f.is_constexpr() || f.is_inline()) {
                 return "";
             }
@@ -255,28 +262,29 @@ namespace cg::generate {
         return sstr.str();
     }
 
-    inline std::string MethodGenerator::generate(const cgs::Method& m, const cgs::Class& cls, GenStage g) {
+    inline std::string MethodGenerator::generate(
+    const cgs::Method& m, const cgs::Class& cls, bool realization) {
         std::stringstream sstr;
 
         bool is_template = !m.get_template_parametrs().empty() || m.get_type().is_template();
         bool class_is_template = !cls.get_template_parametrs().empty();
 
-        if (g == GenStage::Realization && (is_template || class_is_template)) {
+        if (realization && (is_template || class_is_template)) {
             auto m_inline = m;
-            g = GenStage::Inline;
+            realization = false;
         }
 
         if (m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL ||
             m.get_method_type() == cgs::MethodType::DEFAULT ||
             m.get_method_type() == cgs::MethodType::DELETED)
         {
-            if (g == GenStage::Realization) {
+            if (realization) {
                 return "";
             }
-            g = GenStage::Declaration;
+            realization = false;
         }
 
-        if (g != GenStage::Declaration) {
+        if (realization) {
             if (class_is_template) {
                 sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
             }
@@ -285,7 +293,7 @@ namespace cg::generate {
             sstr << TemplateEntityGenerator::generate(m, false) << "\n";
         }
 
-        if (g == GenStage::Declaration) {
+        if (!realization) {
             if (m.is_friend()) sstr << "friend ";
             if (m.is_static()) sstr << "static ";
             if (m.get_method_type() == cgs::MethodType::VIRTUAL ||
@@ -295,11 +303,11 @@ namespace cg::generate {
         }
 
         if (m.is_constexpr()) sstr << "constexpr ";
-        if (m.is_inline() && g == GenStage::Inline) sstr << "inline ";
+        if (m.is_inline() && !realization) sstr << "inline ";
 
         sstr << TypeNameGenerator::generate(m.get_type()) << " ";
 
-        if (g != GenStage::Declaration) {
+        if (realization) {
             sstr << NamedGenerator::generate(cls)
                 << TemplateEntityGenerator::generate(cls, true) << "::"
                 << m.get_name();
@@ -308,11 +316,11 @@ namespace cg::generate {
             sstr << m.get_name();
         }
 
-        sstr << ArgumentableEntityGenerator::generate(m, g == GenStage::Declaration);
+        sstr << ArgumentableEntityGenerator::generate(m, !realization);
 
         if (m.is_const()) sstr << " const";
 
-        if (g == GenStage::Declaration) {
+        if (!realization) {
             if (m.get_method_type() == cgs::MethodType::OVERRIDE) sstr << " override";
 
             if (m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {
@@ -338,11 +346,12 @@ namespace cg::generate {
         return sstr.str();
     }
 
-    inline std::string ConstructorGenerator::generate(const cgs::Constructor& c, const cgs::Class& cls, GenStage g) {
+    inline std::string ConstructorGenerator::generate(
+    const cgs::Constructor& c, const cgs::Class& cls, bool realization) {
         std::stringstream sstr;
         bool class_is_template = !cls.get_template_parametrs().empty();
 
-        if (g == GenStage::Realization) {
+        if (realization) {
             if (class_is_template || c.is_default() || c.is_delete()) return "";
 
             sstr << NamedGenerator::generate(cls) << "::" << cls.get_name();
@@ -379,11 +388,12 @@ namespace cg::generate {
         return sstr.str();
     }
 
-    inline std::string DestructorGenerator::generate(const cgs::Destructor& d, const cgs::Class& cls, GenStage g) {
+    inline std::string DestructorGenerator::generate(
+    const cgs::Destructor& d, const cgs::Class& cls, bool realization) {
         std::stringstream sstr;
         bool class_is_template = !cls.get_template_parametrs().empty();
 
-        if (g == GenStage::Realization) {
+        if (realization) {
             if (class_is_template || d.is_default()) return "";
 
             sstr << NamedGenerator::generate(cls) << "::~"
