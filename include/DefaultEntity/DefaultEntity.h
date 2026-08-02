@@ -42,9 +42,13 @@ namespace cg::source {
             file::DEFINITION_TYPE::NO_DEFINITION)
         : type(definition) {}
 
-        const file::DEFINITION_TYPE& get_type() const { return type; }
-        void set_type(const file::DEFINITION_TYPE& definition) {
+        const file::DEFINITION_TYPE& get_definition() const { return type; }
+        void set_definition(const file::DEFINITION_TYPE& definition) {
             type = definition;
+        }
+
+        bool has_definition() const {
+            return type != file::DEFINITION_TYPE::NO_DEFINITION;
         }
     };
 
@@ -240,7 +244,7 @@ namespace cg::source {
         const TypeName& get_type() const { return type; }
     };
 
-    class Variable : public OptionalEntity {
+    class Variable : public OptionalEntity, public DefinitionEntity {
         std::string value;
 
     public:
@@ -274,7 +278,11 @@ namespace cg::source {
         }
     };
 
-    class Function : public OptionalEntity, public ArgumentableEntity, public TemplateEntity {
+    class Function
+    : public OptionalEntity,
+        public ArgumentableEntity,
+        public TemplateEntity,
+        public DefinitionEntity {
     public:
         Function(const std::string& name_)
         : OptionalEntity(name_)
@@ -312,7 +320,7 @@ namespace cg::source {
         const TypeName& get_name() const;
         
         void add_variable(const Variable& v);
-        void add_method(const Function& f);
+        void add_function(const Function& f);
         void add_alias(const Alias& a);
         void add_class(const Class& class_);
         void add_ns(const Namespace& ns);

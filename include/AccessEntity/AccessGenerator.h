@@ -90,7 +90,8 @@ namespace cg::generate {
                 std::visit(overloaded{
                     [&](const cgs::Field& f) {
                         switch_access(f.get_visibility());
-                        std::string code = FieldGenerator::generate(f, cls, realization);
+                        std::string code =
+                            FieldGenerator::generate(f, cls, realization);
                         if (!code.empty()) {
                             sstr << tabulate(1, code) << "\n";
                         }
@@ -104,14 +105,16 @@ namespace cg::generate {
                     },
                     [&](const cgs::Method& m) {
                         switch_access(m.get_visibility());
-                        std::string code = MethodGenerator::generate(m, cls, realization);
+                        std::string code =
+                            MethodGenerator::generate(m, cls, realization);
                         if (!code.empty()) {
                             sstr << tabulate(1, code) << "\n";
                         }
                     },
                     [&](const cgs::Constructor& c) {
                         switch_access(c.get_visibility());
-                        std::string code = ConstructorGenerator::generate(c, cls, realization);
+                        std::string code =
+                            ConstructorGenerator::generate(c, cls, realization);
                         if (!code.empty()) {
                             sstr << tabulate(1, code) << "\n";
                         }
@@ -145,7 +148,8 @@ namespace cg::generate {
             for (const auto& entity : cls.get_entities()) {
                 std::visit(overloaded{
                     [&](const cgs::Field& f) {
-                        std::string code = FieldGenerator::generate(f, cls, realization);
+                        std::string code =
+                            FieldGenerator::generate(f, cls, realization);
                         if (!code.empty()) {
                             if (!first) sstr << "\n";
                             sstr << code;
@@ -153,7 +157,8 @@ namespace cg::generate {
                         }
                     },
                     [&](const cgs::Method& m) {
-                        std::string code = MethodGenerator::generate(m, cls, realization);
+                        std::string code =
+                            MethodGenerator::generate(m, cls, realization);
                         if (!code.empty()) {
                             if (!first) sstr << "\n";
                             sstr << code;
@@ -161,7 +166,8 @@ namespace cg::generate {
                         }
                     },
                     [&](const cgs::Constructor& c) {
-                        std::string code = ConstructorGenerator::generate(c, cls, realization);
+                        std::string code =
+                            ConstructorGenerator::generate(c, cls, realization);
                         if (!code.empty()) {
                             if (!first) sstr << "\n";
                             sstr << code;
@@ -266,29 +272,36 @@ namespace cg::generate {
     const cgs::Method& m, const cgs::Class& cls, bool realization) {
         std::stringstream sstr;
 
+        // Идет проверка возможности генерации при реализации
+        // Если не проходит, то возвращаем пустую строку
+        if (realization)
+            // Если у метода нет определения, то он инлайн,
+            // а инлайн генерируется только в генерации определения
+            if (!m.has_definition() ||
+                // Если метод абсолютно виртуальный или удален, то у него
+                // нет ни тела, ни определения
+                (
+                    m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL ||
+                    m.get_method_type() == cgs::MethodType::DELETED
+                ) ||
+                // Если метод инлайн или констекспр, то он инлайн по умолчанию
+                (
+                    m.is_inline() ||
+                    m.is_constexpr()
+                )
+            ) return "";
+        
         bool is_template = !m.get_template_parametrs().empty() || m.get_type().is_template();
         bool class_is_template = !cls.get_template_parametrs().empty();
 
-        if (realization && (is_template || class_is_template)) {
-            auto m_inline = m;
-            realization = false;
-        }
-
-        if (m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL ||
-            m.get_method_type() == cgs::MethodType::DEFAULT ||
-            m.get_method_type() == cgs::MethodType::DELETED)
-        {
-            if (realization) {
-                return "";
-            }
-            realization = false;
-        }
-
+        // Если это реализация, то есть вероятность что класс шаблонный,
+        // а при определении вне объявления, расширение области требует шаблонов
         if (realization) {
             if (class_is_template) {
                 sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
             }
         }
+        // Если метод шаблонный генерируем список шаблонов
         if (is_template) {
             sstr << TemplateEntityGenerator::generate(m, false) << "\n";
         }
@@ -300,10 +313,9 @@ namespace cg::generate {
                 m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {
                 sstr << "virtual ";
             }
+            if (m.is_constexpr()) sstr << "constexpr ";
+            if (m.is_inline()) sstr << "inline ";
         }
-
-        if (m.is_constexpr()) sstr << "constexpr ";
-        if (m.is_inline() && !realization) sstr << "inline ";
 
         sstr << TypeNameGenerator::generate(m.get_type()) << " ";
 
@@ -317,7 +329,6 @@ namespace cg::generate {
         }
 
         sstr << ArgumentableEntityGenerator::generate(m, !realization);
-
         if (m.is_const()) sstr << " const";
 
         if (!realization) {
@@ -326,21 +337,18 @@ namespace cg::generate {
             if (m.get_method_type() == cgs::MethodType::ABSOLUTE_VIRTUAL) {
                 sstr << " = 0;";
             }
-            else if (m.get_method_type() == cgs::MethodType::DEFAULT) {
-                sstr << " = default;";
-            }
             else if (m.get_method_type() == cgs::MethodType::DELETED) {
                 sstr << " = delete;";
             }
-            else if (m.is_inline() || m.is_constexpr()) {
+            else if (!m.has_definition()) {
                 sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
             }
-            else {
-                sstr << ";";
-            }
+        }
+        if (realization) {
+            sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
         }
         else {
-            sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
+            sstr << ";";
         }
 
         return sstr.str();
@@ -351,7 +359,7 @@ namespace cg::generate {
         std::stringstream sstr;
         bool class_is_template = !cls.get_template_parametrs().empty();
 
-        if (realization) {
+        if (realization && c.has_definition()) {
             if (class_is_template || c.is_default() || c.is_delete()) return "";
 
             sstr << NamedGenerator::generate(cls) << "::" << cls.get_name();
@@ -381,6 +389,9 @@ namespace cg::generate {
         else if (c.is_delete()) {
             sstr << " = delete;";
         }
+        else if (!c.has_definition()) {
+            sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
+        }
         else {
             sstr << ";";
         }
@@ -393,7 +404,7 @@ namespace cg::generate {
         std::stringstream sstr;
         bool class_is_template = !cls.get_template_parametrs().empty();
 
-        if (realization) {
+        if (realization && d.has_definition()) {
             if (class_is_template || d.is_default()) return "";
 
             sstr << NamedGenerator::generate(cls) << "::~"
@@ -406,6 +417,9 @@ namespace cg::generate {
 
         if (d.is_default()) {
             sstr << " = default;";
+        }
+        else if (!d.has_definition()) {
+            sstr << " {\n" << tabulate(1, "//TODO...") << "\n }";
         }
         else {
             sstr << ";";

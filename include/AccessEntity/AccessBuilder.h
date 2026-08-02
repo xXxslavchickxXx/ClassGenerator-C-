@@ -76,7 +76,6 @@ namespace cg::build {
 		MethodBuilder& as_virtual() { method.set_method_type(pls::MethodType::VIRTUAL); return *this; }
 		MethodBuilder& as_abstract() { method.set_method_type(pls::MethodType::ABSOLUTE_VIRTUAL); return *this; }
 		MethodBuilder& as_override() { method.set_method_type(pls::MethodType::OVERRIDE); return *this; }
-		MethodBuilder& as_default() { method.set_method_type(pls::MethodType::DEFAULT); return *this; }
 		MethodBuilder& as_deleted() { method.set_method_type(pls::MethodType::DELETED); return *this; }
 
 		MethodBuilder& as_private() { method.set_visibility(pls::Access::Private); return *this; }
@@ -139,6 +138,8 @@ namespace cg::build {
 	public:
 		ClassBuilder(const std::string& class_name)
 			: cls(class_name) {}
+		ClassBuilder(const pls::Class& another_class)
+			: cls(another_class) {}
 
 		ClassBuilder& as_private() { cls.set_visibility(pls::Access::Private); return *this; }
 		ClassBuilder& as_public() { cls.set_visibility(pls::Access::Public); return *this; }
@@ -151,6 +152,9 @@ namespace cg::build {
 		ClassBuilder& with_destructor(pls::Destructor d) { cls.set_destructor(std::move(d)); return *this; }
 
 		ClassBuilder& with_template(pls::TypeName t) { cls.add_template_parametr(std::move(t)); return *this; }
+		ClassBuilder& with_templates(std::vector<pls::TypeName> ts) {
+			for (auto& t : ts) cls.add_template_parametr(std::move(t)); return *this;
+		}
 		ClassBuilder& with_class(pls::Class c) { cls.add_class(std::move(c)); return *this; }
 		ClassBuilder& add_base_class(pls::Class c) { cls.add_base_class(std::move(c)); return *this; }
 

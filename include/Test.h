@@ -24,3 +24,23 @@ inline cg::source::Class build_class_in_class() {
         .build();
 }
 
+inline cg::source::Function build_function_with_default() {
+    using namespace cg::build;
+
+    return FunctionBuilder("multiply")
+        .with_type(TypeBuilder("T").build())
+        .with_template(TypeBuilder("T").as_template().build())
+        .add_argument(VariableBuilder("a")
+            .with_type(TypeBuilder("T").build())
+            .with_value("2")
+            .build())
+        .add_argument(VariableBuilder("b")
+            .with_type(TypeBuilder("T").build())
+            .with_value("3")
+            .build())
+        .build();
+}
+
+inline cg::source::Method build_method_in_template_class() {
+    
+}

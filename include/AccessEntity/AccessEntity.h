@@ -35,7 +35,10 @@ namespace cg::source {
         void set_visibility(Access vis) { visibility = vis; }
     };
 
-    class Alias : public AccessEntity, public NamedEntity, public TemplateEntity {
+    class Alias : 
+    public AccessEntity,
+    public NamedEntity,
+    public TemplateEntity {
         TypeName underlying_type;
 
     public:
@@ -64,7 +67,6 @@ namespace cg::source {
 
     enum class MethodType {
         NOTHING,
-        DEFAULT,
         DELETED,
         VIRTUAL,
         ABSOLUTE_VIRTUAL,
@@ -96,7 +98,11 @@ namespace cg::source {
         void toggle_const() { constantable = !constantable; }
     };
 
-    class Constructor : public AccessEntity, public ArgumentableEntity, public TemplateEntity {
+    class Constructor :
+    public AccessEntity,
+    public ArgumentableEntity,
+    public TemplateEntity,
+    public DefinitionEntity {
         std::vector<Field> init_list;
 
         bool default_;
@@ -140,7 +146,8 @@ namespace cg::source {
         bool is_template() const { return !get_template_parametrs().empty(); }
     };
 
-    class Destructor : public AccessEntity {
+    class Destructor : public AccessEntity,
+    public DefinitionEntity {
         bool default_;
         bool virtual_;
 
@@ -164,7 +171,10 @@ namespace cg::source {
             Constructor, Class
         >;
 
-    class Class : public NamedEntity, public AccessEntity, public TemplateEntity {
+    class Class :
+    public NamedEntity,
+    public AccessEntity,
+    public TemplateEntity {
         std::vector<Class> base_classes;
         
         std::vector<class_entities> entities;

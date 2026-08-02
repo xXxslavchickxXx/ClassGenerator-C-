@@ -105,8 +105,9 @@ namespace cg::generate {
 			sstr << OptionalEntityGenerator::generate(f, realization);
 
 		sstr << ArgumentableEntityGenerator::generate(f, !realization);
-		if (f.is_inline() || f.is_constexpr() || realization)
-			sstr << " {\n" << tabulate(1, "//TODO...") << "\n }";
+		if (f.is_inline() || f.is_constexpr() ||
+			!f.has_definition() || realization)
+				sstr << " {\n" << tabulate(1, "//TODO...") << "\n}";
 		else sstr << ";";
 		return sstr.str();
 

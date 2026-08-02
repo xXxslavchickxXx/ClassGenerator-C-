@@ -27,7 +27,7 @@ namespace cg::source {
 	void Namespace::add_variable(const Variable& v) {
 		entities.push_back(v);
 	}
-	void Namespace::add_method(const Function& f) {
+	void Namespace::add_function(const Function& f) {
 		entities.push_back(f);
 	}
 	void Namespace::add_alias(const Alias& a) {
