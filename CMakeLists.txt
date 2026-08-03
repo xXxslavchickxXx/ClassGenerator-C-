@@ -8,27 +8,33 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependency.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/BuildLib.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/BuildExample.cmake)
 
+
+
+set(${PROJECT_NAME}_INCLUDE
+    "include/NEW"
+)
+
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_H
     CMAKE_CONFIGURE_DEPENDS
-    "include/*.h"
+    "include/NEW/*.h"
 )
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_BASE
     CMAKE_CONFIGURE_DEPENDS
-    "src/*.cpp"
+    "src/NEW/*.cpp"
 )
 
 # Платформо зависимые единицы трансляции
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_WINDOWS
     CMAKE_CONFIGURE_DEPENDS
-    "src/platform/windows/*.cpp"
+    "src/NEW/platform/windows/*.cpp"
 )
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_LINUX
     CMAKE_CONFIGURE_DEPENDS
-    "src/platform/linux/*.cpp"
+    "src/NEW/platform/linux/*.cpp"
 )
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_APPLE
     CMAKE_CONFIGURE_DEPENDS
-    "src/platform/apple/*.cpp"
+    "src/NEW/platform/apple/*.cpp"
 )
 
 list(REMOVE_ITEM ${PROJECT_NAME}_LIB_CPP_BASE ${${PROJECT_NAME}_LIB_CPP_WINDOWS})
@@ -54,8 +60,6 @@ file(GLOB_RECURSE ${PROJECT_NAME}_TESTS
     #"tests/AliasGenTests.cpp"
     #"tests/ClassGenTests.cpp"
 )
-
-set(${PROJECT_NAME}_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 find_package(glm REQUIRED)
 add_external_dependency(nfd https://github.com/btzy/nativefiledialog-extended

@@ -2,6 +2,18 @@
 
 #include <ClassGen.h>
 
+/*auto path = fs::current_path();
+
+auto file_manager = cg::file::struct_file_manager("class_",
+path,
+"LibA",
+cgf::DEFINITION_TYPE::WINDOWS,
+cgf::DEFINITION_TYPE::LINUX | cgf::DEFINITION_TYPE::CROSSPLATOFORM);
+
+file_manager.create_structure();*/
+//std::cout << cg::file::open_geometry_path_dialog(path.string().c_str()) << "\n";
+
+
 inline cg::source::Class build_class_in_class() {
     using namespace cg::build;
 
