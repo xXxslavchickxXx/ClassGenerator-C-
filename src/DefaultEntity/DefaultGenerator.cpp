@@ -58,12 +58,10 @@ namespace cg::generate {
 					}
 				},
 				[&](const cgs::Class& cls) {
-					if (!realization) {
-						std::string code =
-							ClassGenerator::generate(cls, realization);
-						if (!code.empty()) {
-							sstr << tabulate(1, code) << "\n";
-						}
+					std::string code =
+						ClassGenerator::generate(cls, realization);
+					if (!code.empty()) {
+						sstr << tabulate(1, code) << "\n";
 					}
 				},
 				[&](const cgs::Namespace& ns) {

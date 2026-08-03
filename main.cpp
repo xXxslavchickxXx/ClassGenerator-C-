@@ -19,21 +19,14 @@ int main() {
 
     auto ns = cg::source::Namespace("my");
     ns.add_class(class_in_class);
-    ns.add_function(func_with_default);
-
-    auto method = MethodBuilder("push")
-        .with_type(TypeBuilder("void").build())
-        .add_argument(VariableBuilder("value").with_type(TypeBuilder("T").as_const().as_ref().build()).build())
-        .build();
-
-    auto cls = ClassBuilder("Stack")
-        .with_template(TypeBuilder("T").as_template().build())
-        .build();
+    //ns.add_function(func_with_default);
 
     //std::cout << MethodGenerator::generate(method, cls);
 
     // Генерация с правильными отступами:
     std::cout << NamespaceGenerator::generate(ns);
+    std::cout << "\n\n\nRealization:\n\n";
+    std::cout << NamespaceGenerator::generate(ns, true);
 
     return 0;
 }

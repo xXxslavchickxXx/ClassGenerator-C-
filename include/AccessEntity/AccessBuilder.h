@@ -39,6 +39,14 @@ namespace cg::build {
 		FieldBuilder& with_value(std::string val) { field.set_value(std::move(val)); return *this; }
 		FieldBuilder& ns(pls::Namespace prefix) { field.add_namespace_prefix(std::move(prefix)); return *this; }
 
+		FieldBuilder& with_realization(
+			file::DEFINITION_TYPE platform =
+			cg::file::DEFINITION_TYPE::CROSSPLATOFORM)
+		{
+			field.set_definition(std::move(platform));
+			return *this;
+		}
+
 		FieldBuilder& as_static() { if (!field.is_static()) field.toggle_static(); return *this; }
 		FieldBuilder& as_const() { if (!field.get_type().is_const()) field.get_type().toggle_const(); return *this; }
 		FieldBuilder& as_constexpr() { if (!field.is_constexpr()) field.toggle_constexpr(); return *this; }
@@ -73,6 +81,14 @@ namespace cg::build {
 		MethodBuilder& as_const() { if (!method.is_const()) method.toggle_const(); return *this; }
 		MethodBuilder& as_constexpr() { if (!method.is_constexpr()) method.toggle_constexpr(); return *this; }
 
+		MethodBuilder& with_realization(
+			file::DEFINITION_TYPE platform =
+			cg::file::DEFINITION_TYPE::CROSSPLATOFORM)
+		{
+			method.set_definition(std::move(platform));
+			return *this;
+		}
+
 		MethodBuilder& as_virtual() { method.set_method_type(pls::MethodType::VIRTUAL); return *this; }
 		MethodBuilder& as_abstract() { method.set_method_type(pls::MethodType::ABSOLUTE_VIRTUAL); return *this; }
 		MethodBuilder& as_override() { method.set_method_type(pls::MethodType::OVERRIDE); return *this; }
@@ -101,6 +117,14 @@ namespace cg::build {
 		ConstructorBuilder& as_delete() { ctor.toggle_delete(); return *this; }
 		ConstructorBuilder& as_explicit() { ctor.toggle_explicit(); return *this; }
 
+		ConstructorBuilder& with_realization(
+			file::DEFINITION_TYPE platform =
+			cg::file::DEFINITION_TYPE::CROSSPLATOFORM)
+		{
+			ctor.set_definition(std::move(platform));
+			return *this;
+		}
+
 		ConstructorBuilder& as_private() { ctor.set_visibility(pls::Access::Private); return *this; }
 		ConstructorBuilder& as_public() { ctor.set_visibility(pls::Access::Public); return *this; }
 		ConstructorBuilder& as_protected() { ctor.set_visibility(pls::Access::Protected); return *this; }
@@ -120,6 +144,14 @@ namespace cg::build {
 		DestructorBuilder& as_virtual(bool is_virtual = true) {
 			if (is_virtual && !dtor.is_virtual()) dtor.toggle_virtual();
 			else if (!is_virtual && dtor.is_virtual()) dtor.toggle_virtual();
+			return *this;
+		}
+
+		DestructorBuilder& with_realization(
+			file::DEFINITION_TYPE platform =
+			cg::file::DEFINITION_TYPE::CROSSPLATOFORM)
+		{
+			dtor.set_definition(std::move(platform));
 			return *this;
 		}
 

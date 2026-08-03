@@ -11,14 +11,30 @@ inline cg::source::Class build_class_in_class() {
     auto u_t = TypeBuilder("U")
         .as_template()
         .build();
+    auto k_t = TypeBuilder("K")
+        .as_template()
+        .build();
     // Внешний класс
     return ClassBuilder("Outer")
-        .with_template(u_t)
         .with_template(t_t)
         .with_field(FieldBuilder("x").with_type(TypeBuilder("int").build()).as_private().build())
         .with_field(FieldBuilder("u").with_type(u_t).as_private().build())
         .with_class(ClassBuilder("Inner")
+            .with_template(u_t)
             .with_field(FieldBuilder("y").with_type(TypeBuilder("float").build()).as_public().build())
+            .with_method(MethodBuilder("method")
+                .with_template(k_t)
+                .with_realization()
+                .add_argument(VariableBuilder("a")
+                    .with_type(k_t)
+                    .build())
+                .build())
+            .with_method(MethodBuilder("classic_method")
+                .with_realization()
+                .add_argument(VariableBuilder("i")
+                    .with_type(TypeBuilder("int").build())
+                    .build())
+                .build())
             .as_public()
             .build())
         .build();
@@ -39,8 +55,4 @@ inline cg::source::Function build_function_with_default() {
             .with_value("3")
             .build())
         .build();
-}
-
-inline cg::source::Method build_method_in_template_class() {
-    
 }

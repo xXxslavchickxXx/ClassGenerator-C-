@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AccessEntity/AccessEntity.h>
+#include <DefinitionType/DefinitionType.h>
 
 namespace cg::build {
 	namespace pls = cg::source;
@@ -15,8 +16,18 @@ namespace cg::build {
 		TypeBuilder(const pls::TypeName& t)
 		: type(t) {}
 
-		TypeBuilder& as_const() { if (!type.is_const()) type.toggle_const(); return *this; }
-		TypeBuilder& as_template() { if (!type.is_template()) type.toggle_templatebale(); return *this; }
+		TypeBuilder& as_const() {
+			if (!type.is_const())
+				type.toggle_const();
+			
+			return *this;
+		}
+		TypeBuilder& as_template() {
+			if (!type.is_template())
+				type.toggle_templatebale();
+			
+			return *this;
+		}
 		TypeBuilder& as_variadic() { if (!type.is_variadic()) type.toggle_variadic(); return *this; }
 		TypeBuilder& as_template(const pls::TypeName& t) { type.set_typename(t); return *this; }
 		TypeBuilder& as_ptr() { type.set_qualificator(pls::Qualificator::Pointer); return *this; }
@@ -55,6 +66,14 @@ namespace cg::build {
 		VariableBuilder& with_type(pls::TypeName t) { var.get_type() = std::move(t); return *this; }
 		VariableBuilder& with_value(std::string val) { var.set_value(std::move(val)); return *this; }
 		VariableBuilder& ns(source::Namespace prefix) { var.add_namespace_prefix(std::move(prefix)); return *this; }
+		
+		VariableBuilder& with_realization(
+			file::DEFINITION_TYPE platform =
+			cg::file::DEFINITION_TYPE::CROSSPLATOFORM)
+		{
+			var.set_definition(std::move(platform));
+			return *this;
+		}
 
 		VariableBuilder& as_static() { if (!var.is_static()) var.toggle_static(); return *this; }
 		VariableBuilder& as_const() { if (!var.get_type().is_const()) var.get_type().toggle_const(); return *this; }
@@ -76,6 +95,14 @@ namespace cg::build {
 		FunctionBuilder& with_type(pls::TypeName t) { func.get_type() = std::move(t); return *this; }
 		FunctionBuilder& add_argument(pls::Arguement a) { func.get_args().push_back(a); return *this; }
 		FunctionBuilder& ns(source::Namespace prefix) { func.add_namespace_prefix(std::move(prefix)); return *this; }
+
+		FunctionBuilder& with_realization(
+			file::DEFINITION_TYPE platform =
+			cg::file::DEFINITION_TYPE::CROSSPLATOFORM)
+		{
+			func.set_definition(std::move(platform));
+			return *this;
+		}
 
 		FunctionBuilder& as_static() { if (!func.is_static()) func.toggle_static(); return *this; }
 		FunctionBuilder& as_inline() { if (!func.is_inline()) func.toggle_inline(); return *this; }

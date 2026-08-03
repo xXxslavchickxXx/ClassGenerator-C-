@@ -52,12 +52,11 @@ namespace cg::generate {
     const cgs::Class& cls, bool realization) {
         std::stringstream sstr;
 
-        bool is_template_cls = !cls.get_template_parametrs().empty();
-        if (is_template_cls) {
-            sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
-        }
-
         if (!realization) {
+            bool is_template_cls = !cls.get_template_parametrs().empty();
+            if (is_template_cls) {
+                sstr << TemplateEntityGenerator::generate(cls, false) << "\n";
+            }
             sstr << "class " << cls.get_name();
 
             // Генерация базовых классов
