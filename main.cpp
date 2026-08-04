@@ -3,7 +3,7 @@
 #endif // WIN32__
 
 #include <iostream>
-#include <DefaultEntity/Node.h>
+#include <Entity/AccessEntities.h>
 
 using namespace cg::source;
 
@@ -12,7 +12,7 @@ int main() {
     system("chcp 65001 > nul");
 #endif // _WIN32
 
-    auto root = NodeEntity<NodeType::CLASS>();
+    //auto root = Class("Class");
 
     std::cout << "hello class generator";
 

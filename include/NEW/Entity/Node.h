@@ -2,20 +2,30 @@
 
 #include <vector>
 #include <memory>
+#include <Entity/Mixins.h>
 
 namespace cg::source {
     enum class NodeType {
-        CLASS
+        CLASS,
+        FUNCTION,
+        METHOD,
+        VARIABLE,
+        ALIAS,
+        NAMESPACE,
+        FIELD
     };
 
     class NodeEntity
-    : public std::enable_shared_from_this<NodeEntity> {
+    : public std::enable_shared_from_this<NodeEntity>,
+    public NamedEntity {
     protected:
         NodeType type_;
+
         std::shared_ptr<NodeEntity> parent_;
         std::vector<std::shared_ptr<NodeEntity>> children_;
 
-        NodeEntity(NodeType type) : type_(type) {}
+        NodeEntity(NodeType type,
+            const std::string& name);
 
     public:
         NodeEntity(const NodeEntity&) = default;
@@ -25,8 +35,13 @@ namespace cg::source {
 
         virtual ~NodeEntity() = default;
 
-        void add_children(std::shared_ptr<NodeEntity> child);
-        void swap_nodes(size_t from, size_t to);
         NodeType get_node_type() const;
+
+        virtual bool can_be_child(const NodeType& type) = 0;
+
+    protected:
+        void add_child(std::shared_ptr<NodeEntity> child);
+        void erase_child(const std::string& name);
+        void swap_nodes(size_t from, size_t to);
     };
 }
