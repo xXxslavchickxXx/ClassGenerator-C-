@@ -18,6 +18,8 @@ namespace cg::source {
     class NodeEntity
     : public std::enable_shared_from_this<NodeEntity>,
     public NamedEntity {
+        virtual bool can_be_child(const NodeType& type) = 0;
+
     protected:
         NodeType type_;
 
@@ -37,7 +39,6 @@ namespace cg::source {
 
         NodeType get_node_type() const;
 
-        virtual bool can_be_child(const NodeType& type) = 0;
 
     protected:
         void add_child(std::shared_ptr<NodeEntity> child);

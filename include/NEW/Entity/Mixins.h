@@ -2,10 +2,17 @@
 
 #include <vector>
 #include <string>
+#include <variant>
 #include <optional>
 #include <memory>
 
-namespace cg::source {
+namespace cg::source {	
+	template<typename T>
+	class FabricEntity {
+	public:
+		static std::shared_ptr<T> create(const std::string& name);
+	};
+
 	class Class;
 
 	enum class Access {
@@ -33,15 +40,29 @@ namespace cg::source {
 	};
 
 	class TemplateArguement
-	: public NamedEntity {
+	: public NamedEntity,
+		public FabricEntity<TemplateArguement>
+	{
 		std::shared_ptr<Class> type;
+		std::shared_ptr<Class> instance_cls;
+		bool template_argument;
 		bool variadic;
 
 	public:
 		TemplateArguement(const std::string& name);
 
+		// Убирает инстанс неявно
 		void set_type(std::shared_ptr<Class> new_type);
 
+		// Инстанс убирает тайп неявно
+		void instance(std::shared_ptr<Class> inst_cls);
+		void reset_instance();
+
+		bool is_template_argument() const;
+		// Ресетает тип если такой был
+		void toggle_template_argument();
+
+		// тру если аргумент типовое имя, то есть typename
 		bool is_typename() const;
 		void reset_type();
 
@@ -51,15 +72,24 @@ namespace cg::source {
 	};
 
 	class TemplateEntity {
-		std::vector<TemplateArguement> templates;
+		std::vector<std::shared_ptr<TemplateArguement>> templates;
 
 	public:
-		void add_template(const TemplateArguement& arg);
+		void add_template(std::shared_ptr<TemplateArguement> arg);
+		std::shared_ptr<TemplateArguement>
+			get_template(const std::string& name);
 		void erase_template(const std::string& name);
 
-		std::vector<TemplateArguement>& get_templates();
-		const std::vector<TemplateArguement>& get_templates() const;
+		std::vector<std::shared_ptr<TemplateArguement>>& get_templates();
+		const std::vector<std::shared_ptr<TemplateArguement>>&
+			get_templates() const;
 		
 		void swap_templates(size_t from, size_t to);
+
+	private:
+		bool have_variadic() const;
+
 	};
 }
+
+#include <Entity/Mixins.inl>

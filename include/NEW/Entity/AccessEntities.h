@@ -4,16 +4,17 @@
 #include <Entity/Mixins.h>
 
 namespace cg::source {
+
 	class Class :
 	public NodeEntity,
 	public AccessEntity,
-	public TemplateEntity {
+	public TemplateEntity,
+	public FabricEntity<Class> {
 		using Base = NodeEntity;
 
+		bool can_be_child(const NodeType& type) override;
 	public:
 		Class(const std::string& name);
-
-		bool can_be_child(const NodeType& type) override;
 
 		using Base::add_child;
 		using Base::swap_nodes;
