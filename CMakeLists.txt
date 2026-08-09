@@ -8,72 +8,53 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchDependency.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/BuildLib.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/BuildExample.cmake)
 
+set(BASE_INCLUDE_DIR "include")
+set(BASE_SRC_DIR "src")
 
+# Здесь можно задавать путь к платформозависимым реализациям
+set(PLATFORMS
+    "WINDOWS|windows"
+    "LINUX|linux"
+    "APPLE|apple"
+)
 
 set(${PROJECT_NAME}_INCLUDE
-    "include/NEW"
-    "src/NEW/inline"
+    "include"
 )
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_H
     CMAKE_CONFIGURE_DEPENDS
-    "include/NEW/*.h"
+    "${BASE_INCLUDE_DIR}/*.h"
 )
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_BASE
     CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/*.cpp"
-)
-file(GLOB_RECURSE ${PROJECT_NAME}_LIB_INL_BASE
-    CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/inline/*.inl"
+    "${BASE_SRC_DIR}/*.cpp"
 )
 
 # Платформо зависимые единицы трансляции
-file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_WINDOWS
-    CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/platform/windows/*.cpp"
-)
-file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_LINUX
-    CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/platform/linux/*.cpp"
-)
-file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_APPLE
-    CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/platform/apple/*.cpp"
-)
-file(GLOB_RECURSE ${PROJECT_NAME}_LIB_INL_WINDOWS
-    CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/inline/platform/windows/*.inl"
-)
-file(GLOB_RECURSE ${PROJECT_NAME}_LIB_INL_LINUX
-    CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/inline/platform/linux/*.inl"
-)
-file(GLOB_RECURSE ${PROJECT_NAME}_LIB_INL_APPLE
-    CMAKE_CONFIGURE_DEPENDS
-    "src/NEW/inline/platform/apple/*.inl"
-)
-
-list(REMOVE_ITEM ${PROJECT_NAME}_LIB_CPP_BASE ${${PROJECT_NAME}_LIB_CPP_WINDOWS})
-list(REMOVE_ITEM ${PROJECT_NAME}_LIB_CPP_BASE ${${PROJECT_NAME}_LIB_CPP_LINUX})
-list(REMOVE_ITEM ${PROJECT_NAME}_LIB_CPP_BASE ${${PROJECT_NAME}_LIB_CPP_APPLE})
-list(REMOVE_ITEM ${PROJECT_NAME}_LIB_INL_BASE ${${PROJECT_NAME}_LIB_INL_WINDOWS})
-list(REMOVE_ITEM ${PROJECT_NAME}_LIB_INL_BASE ${${PROJECT_NAME}_LIB_INL_LINUX})
-list(REMOVE_ITEM ${PROJECT_NAME}_LIB_INL_BASE ${${PROJECT_NAME}_LIB_INL_APPLE})
+foreach(PLATFORM_PAIR ${PLATFORMS})
+    string(REPLACE "|" ";" PARTS ${PLATFORM_PAIR})
+    list(GET PARTS 0 PLATFORM_NAME)
+    list(GET PARTS 1 PLATFORM_PATH)
+    
+    # .cpp
+    file(GLOB_RECURSE ${PROJECT_NAME}_LIB_CPP_${PLATFORM_NAME}
+        "${BASE_SRC_DIR}/platform/${PLATFORM_PATH}/*.cpp"
+    )
+    
+    # Удаляем платформозависимые файлы из базовых списков
+    list(REMOVE_ITEM ${PROJECT_NAME}_LIB_CPP_BASE ${${PROJECT_NAME}_LIB_CPP_${PLATFORM_NAME}})
+endforeach()
 
 # Включяем только то что нужно
 if(WIN32)
     set(${PROJECT_NAME}_LIB_CPP ${${PROJECT_NAME}_LIB_CPP_BASE} ${${PROJECT_NAME}_LIB_CPP_WINDOWS})
-    set(${PROJECT_NAME}_LIB_INL ${${PROJECT_NAME}_LIB_INL_BASE} ${${PROJECT_NAME}_LIB_INL_WINDOWS})
 elseif(LINUX)
     set(${PROJECT_NAME}_LIB_CPP ${${PROJECT_NAME}_LIB_CPP_BASE} ${${PROJECT_NAME}_LIB_CPP_LINUX})
-    set(${PROJECT_NAME}_LIB_INL ${${PROJECT_NAME}_LIB_INL_BASE} ${${PROJECT_NAME}_LIB_INL_LINUX})
 elseif(APPLE)
     set(${PROJECT_NAME}_LIB_CPP ${${PROJECT_NAME}_LIB_CPP_BASE} ${${PROJECT_NAME}_LIB_CPP_APPLE})
-    set(${PROJECT_NAME}_LIB_INL ${${PROJECT_NAME}_LIB_INL_BASE} ${${PROJECT_NAME}_LIB_INL_APPLE})
 else()
     set(${PROJECT_NAME}_LIB_CPP ${${PROJECT_NAME}_LIB_CPP_BASE})
-    set(${PROJECT_NAME}_LIB_INL ${${PROJECT_NAME}_LIB_CPP_INL})
 endif()
 
 # Тесты пока что мертвы, надо сделать их с регексом, чтобы пробелы
@@ -98,7 +79,7 @@ option(${PROJECT_NAME}_BUILD_TESTS "Построить тесты для про�
 option(${PROJECT_NAME}_ASSET_TO_BUILD "Копировать ассеты в папку сборки" OFF)
 
 create_library(${PROJECT_NAME}
-    HEADERS ${${PROJECT_NAME}_LIB_H} ${${PROJECT_NAME}_LIB_INL}
+    HEADERS ${${PROJECT_NAME}_LIB_H}
     SOURCES ${${PROJECT_NAME}_LIB_CPP}
     INCLUDE_DIRS ${${PROJECT_NAME}_INCLUDE}
     LIBS ${${PROJECT_NAME}_LIBS}

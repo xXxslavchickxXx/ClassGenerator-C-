@@ -67,7 +67,8 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
-/.vs/ClassGenerator-C-.slnx
 /.vs
+
+libs/attribute_vector/
 
 libs/nfd/

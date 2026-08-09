@@ -9,6 +9,7 @@ namespace cg::source {
 	public NodeEntity,
 	public AccessEntity,
 	public TemplateEntity,
+	public DefinitionEntity,
 	public FabricEntity<Class> {
 		using Base = NodeEntity;
 

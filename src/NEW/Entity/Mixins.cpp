@@ -7,7 +7,7 @@
 #include <Entity/AccessEntities.h>
 
 namespace cg::source {
-	void TemplateEntity::add_template(std::shared_ptr<TemplateArguement> arg) {
+	void TemplateEntity::add_template(std::shared_ptr<TemplateArgument> arg) {
 		auto it = std::find_if(templates.begin(), templates.end(),
 			[&arg](const auto& it) {
 				return it->get_name() == arg->get_name();
@@ -32,7 +32,16 @@ namespace cg::source {
 		if (it != templates.end()) templates.erase(it);
 	}
 
-	std::shared_ptr<TemplateArguement>
+	const std::shared_ptr<Class> TemplateArgument::get_type() const {
+		return type;
+	}
+
+	const std::vector<std::shared_ptr<Class>>& 
+		TemplateArgument::get_instance() const {
+		return instance_cls;
+	}
+
+	std::shared_ptr<TemplateArgument>
 		TemplateEntity::get_template(const std::string& name) {
 		auto it = std::find_if(templates.begin(), templates.end(),
 			[&name](const auto& it) {
@@ -45,41 +54,43 @@ namespace cg::source {
 	}
 
 
-	void TemplateArguement::instance(std::shared_ptr<Class> inst_cls) {
+	void TemplateArgument::instance(std::shared_ptr<Class> inst_cls) {
 		if (type) reset_type();
-		instance_cls = std::move(inst_cls);
+		if (instance_cls.size() == 1 && !variadic)
+			instance_cls.clear();
+		instance_cls.push_back(std::move(inst_cls));
 	}
 
-	void TemplateArguement::reset_instance() {
-		instance_cls.reset();
+	void TemplateArgument::reset_instance() {
+		instance_cls.clear();
 	}
 
-	void TemplateArguement::reset_type() {
+	void TemplateArgument::reset_type() {
 		type.reset();
 	}
-	void TemplateArguement::toggle_variadic() {
+	void TemplateArgument::toggle_variadic() {
 		variadic = !variadic;
 	}
-	bool TemplateArguement::is_variadic() const {
+	bool TemplateArgument::is_variadic() const {
 		return variadic;
 	}
-	void TemplateArguement::set_type(std::shared_ptr<Class> new_type) {
-		if (instance_cls) reset_instance();
+	void TemplateArgument::set_type(std::shared_ptr<Class> new_type) {
+		if (instance_cls.size()) reset_instance();
 		type = std::move(new_type);
 	}
 
-	bool TemplateArguement::is_template_argument() const {
+	bool TemplateArgument::is_template_argument() const {
 		return template_argument;
 	}
-	void TemplateArguement::toggle_template_argument() {
+	void TemplateArgument::toggle_template_argument() {
 		template_argument != template_argument;
 		if (!is_typename()) reset_type();
 	}
 
-	TemplateArguement::TemplateArguement(const std::string& name)
+	TemplateArgument::TemplateArgument(const std::string& name)
 	: NamedEntity(name), type(nullptr), variadic(false) {}
 
-	bool TemplateArguement::is_typename() const {
+	bool TemplateArgument::is_typename() const {
 		return type == nullptr;
 	}
 
@@ -90,11 +101,11 @@ namespace cg::source {
 		access_ = access;
 	}
 
-	std::vector<std::shared_ptr<TemplateArguement>>&
+	std::vector<std::shared_ptr<TemplateArgument>>&
 	TemplateEntity::get_templates() {
 		return templates;
 	}
-	const std::vector<std::shared_ptr<TemplateArguement>>&
+	const std::vector<std::shared_ptr<TemplateArgument>>&
 	TemplateEntity::get_templates() const {
 		return templates;
 	}

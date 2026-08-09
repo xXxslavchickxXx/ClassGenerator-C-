@@ -1,30 +1,28 @@
-﻿#ifdef _WIN32
-    #include <Windows.h>
-#endif // WIN32__
-
 #include <iostream>
-#include <Entity/AccessEntities.h>
 
-using namespace cg::source;
+#include <Node/Node.h>
+
+using namespace cg::src;
+
+struct B {
+	void some_mesag() {
+		std::cout << "im here";
+	}
+};
+
+struct A : public Node, public B {};
 
 int main() {
-#ifdef _WIN32
-    system("chcp 65001 > nul");
-#endif // _WIN32
 
-    auto root = Class::create("Class");
+	auto root_node = std::make_shared<CompositeNode>();
+	auto root_node_child = std::make_shared<CompositeNode>();
+	auto child = std::make_shared<Node>();
+	auto child_side_class = std::make_shared<A>();
 
-    auto int_cls = Class::create("int");
+	root_node->add_child(root_node_child);
+	root_node->add_child(child);
+	root_node->add_child(child_side_class);
 
-    auto T_t = TemplateArguement::create("T");
-    auto U_t = TemplateArguement::create("U");
-
-    root->add_template(T_t);
-    root->add_template(U_t);
-
-    root->get_template("T")->instance(int_cls);
-
-    std::cout << "hello class generator";
-
-    return 0;
+	if (root_node->get_child(2)->as<B>())
+		std::cout << "hello template project!";
 }

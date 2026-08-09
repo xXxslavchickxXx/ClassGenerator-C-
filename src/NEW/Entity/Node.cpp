@@ -5,6 +5,10 @@
 
 namespace cg::source {
 
+    bool NodeEntity::dependent_node() const {
+        return true;
+    }
+
     NodeEntity::NodeEntity(NodeType type,
         const std::string& name)
         : type_(type),
