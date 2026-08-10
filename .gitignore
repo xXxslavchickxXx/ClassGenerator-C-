@@ -71,3 +71,5 @@ Testing/
 /.vs
 
 libs/nfd/
+/CMakePresets.json
+/CMakePresets.json
