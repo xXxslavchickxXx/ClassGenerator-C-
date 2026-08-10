@@ -66,11 +66,9 @@ file(GLOB_RECURSE ${PROJECT_NAME}_TESTS
     #"tests/ClassGenTests.cpp"
 )
 
-find_package(glm REQUIRED)
 add_external_dependency(nfd https://github.com/btzy/nativefiledialog-extended
 GIT_TAG fc168e8)
 set(${PROJECT_NAME}_LIBS
-    glm::glm
     nfd
 )
 
