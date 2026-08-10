@@ -20,6 +20,7 @@ set(PLATFORMS
 
 set(${PROJECT_NAME}_INCLUDE
     "include"
+    "include/core"
 )
 
 file(GLOB_RECURSE ${PROJECT_NAME}_LIB_H
