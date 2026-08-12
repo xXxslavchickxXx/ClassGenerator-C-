@@ -27,9 +27,7 @@ namespace cg::src {
 		LINUX = 1 << 2,
 		APPLE = 1 << 3
 	};
-	ENABLE_BITMASK_OPERATORS(DEFINITION_TYPE)
-
-	constexpr bool has_platform(DEFINITION_TYPE mask, DEFINITION_TYPE check);
+	//ENABLE_BITMASK_OPERATORS(DEFINITION_TYPE)
 
 	class DefinitionEntity {
 		DEFINITION_TYPE type;

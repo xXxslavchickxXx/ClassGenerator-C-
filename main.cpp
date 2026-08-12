@@ -1,28 +1,23 @@
 #include <iostream>
 
-#include <Node/Node.h>
+#include <Entity/Entities.h>
+#include <Generator/MixinGen.h>
+#include <Generator/EntitiesGen.h>
 
 using namespace cg::src;
-
-struct B {
-	void some_mesag() {
-		std::cout << "im here";
-	}
-};
-
-struct A : public Node, public B {};
+using namespace cg::ent;
+using namespace cg::gen;
 
 int main() {
+    auto global_ns = std::make_shared<Namespace>("first");
+    auto ns_1 = std::make_shared<Namespace>("second");
+    auto fake_ns_1 = std::make_shared<Namespace>("second");
+    auto ns_2 = std::make_shared<Namespace>("third");
 
-	auto root_node = std::make_shared<CompositeNode>();
-	auto root_node_child = std::make_shared<CompositeNode>();
-	auto child = std::make_shared<Node>();
-	auto child_side_class = std::make_shared<A>();
+    global_ns->add_child(ns_1);
+    ns_1->add_child(ns_2);
 
-	root_node->add_child(root_node_child);
-	root_node->add_child(child);
-	root_node->add_child(child_side_class);
-
-	if (root_node->get_child(2)->as<B>())
-		std::cout << "hello template project!";
+    std::shared_ptr<Node> sa = global_ns->get_child(0)->shared_from_this();
+    
+    std::cout << generate(ns_1.get()) << std::endl;
 }

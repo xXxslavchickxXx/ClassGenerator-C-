@@ -11,11 +11,6 @@ namespace cg::src {
 		name = new_name;
 	}
 
-	constexpr bool has_platform(DEFINITION_TYPE mask, DEFINITION_TYPE check) {
-		return (static_cast<std::underlying_type_t<DEFINITION_TYPE>>(mask) &
-			static_cast<std::underlying_type_t<DEFINITION_TYPE>>(check)) != 0;
-	}
-
 	DefinitionEntity::DefinitionEntity(
 		const DEFINITION_TYPE& definition)
 		: type(definition) {
