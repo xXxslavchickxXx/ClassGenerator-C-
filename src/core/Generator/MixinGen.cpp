@@ -78,7 +78,7 @@ namespace cg::gen {
 				}
 			}
 			iter = iter->get_parent();
-			++depth;
+			depth++;
 		}
 
 		if (ctx && !found_ctx) {

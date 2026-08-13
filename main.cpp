@@ -9,15 +9,19 @@ using namespace cg::ent;
 using namespace cg::gen;
 
 int main() {
-    auto global_ns = std::make_shared<Namespace>("first");
-    auto ns_1 = std::make_shared<Namespace>("second");
-    auto fake_ns_1 = std::make_shared<Namespace>("second");
-    auto ns_2 = std::make_shared<Namespace>("third");
+    auto first = std::make_shared<Namespace>("first");
+    auto second = std::make_shared<Namespace>("second");
+    auto fake_second = std::make_shared<Namespace>("second");
+    auto third = std::make_shared<Namespace>("third");
 
-    global_ns->add_child(ns_1);
-    ns_1->add_child(ns_2);
+    auto cls_1 = std::make_shared<Class>("Classik");
 
-    std::shared_ptr<Node> sa = global_ns->get_child(0)->shared_from_this();
+    first->add_child(second);
+    second->add_child(third);
+    second->add_child(cls_1);
     
-    std::cout << generate(ns_1.get()) << std::endl;
+    auto registry = GeneratorRegistrator();
+    registry.registry(std::make_unique<NamespaceGenerator>());
+
+    std::cout << registry.generate(second.get());
 }

@@ -52,14 +52,10 @@ namespace cg::ent {
 		public src::NamedEntity,
 		public src::AccessEntity
 	{
-		std::vector<std::shared_ptr<Class>> base_classes;
+		//std::vector<std::pair<std::shared_ptr<Class>, src::Access>> base_classes;
 
 	public:
 		using src::NamedEntity::NamedEntity;
-
-		void add_base_class(src::Node* raw);
-		void erase_base_class(size_t where);
-		void swap_base_classes(size_t from, size_t to);
 
 	};
 

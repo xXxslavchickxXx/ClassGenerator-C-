@@ -25,7 +25,7 @@ namespace cg::gen {
 
 		static std::string generate_namespace_prefix(const src::Node* obj);
 
-	private:
+	//private:
 		/// <summary>
 		/// @brief функция для поиска на сколько нужно глубоко взять путь
 		/// в зависимости от контекста
