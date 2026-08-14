@@ -25,12 +25,14 @@ int main() {
     registry.registry(std::make_unique<ClassGenerator>());
 
     auto int_t = Type(int_cls.get());
-
+    int_t.toggle_const();
+    int_t.get_type_qualificator().toggle_const();
+    int_t.get_type_qualificator().toggle_to_reference();
 
 
     try {
         //std::cout << registry.generate(second.get());
-        std::cout << registry.generate(second.get());
+        std::cout << MixinGenerator::generate(&int_t, second.get());
     }
     catch (const std::runtime_error& e) {
         std::cerr << e.what();

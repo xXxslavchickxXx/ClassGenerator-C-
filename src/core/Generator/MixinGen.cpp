@@ -5,6 +5,21 @@
 #include <Entity/Entities.h>
 
 namespace cg::gen {
+	void MixinGenerator::initialize() {
+		is_init = true;
+		disp.registry(std::make_unique<TypeGenerator>());
+	}
+
+	bool MixinGenerator::is_init = false;
+	ValueDispatcher MixinGenerator::disp;
+
+	std::string MixinGenerator::generate(const src::ITreeElement* obj,
+										 const src::ITreeElement* ctx) {
+		if (!is_init) initialize();
+
+		return disp.generate(obj, ctx);
+	}
+
 	void ValueDispatcher::registry(std::unique_ptr<IValueGenerator> generator) {
 		if (!generator) return;
 
@@ -212,7 +227,7 @@ namespace cg::gen {
 
 		auto ns_list = relative_path(obj_node, ctx_node);
 
-		bool has_dependent;
+		//bool has_dependent;
 
 		if (!ns_list.size()) return "";
 

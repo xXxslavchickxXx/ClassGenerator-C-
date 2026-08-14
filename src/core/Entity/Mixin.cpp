@@ -36,7 +36,7 @@ namespace cg::src {
 	}
 
 	bool Qualificator::has_qualificator() const {
-		return qual == QUALIFICATOR::NON_QUAL;
+		return qual != QUALIFICATOR::NON_QUAL;
 	}
 	const QUALIFICATOR& Qualificator::get_qualificator() const {
 		return qual;

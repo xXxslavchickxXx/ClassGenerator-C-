@@ -37,6 +37,8 @@ namespace cg::gen {
 		std::unordered_map<std::string, std::unique_ptr<IValueGenerator>> generators;
 
 	public:
+		ValueDispatcher() = default;
+
 		void registry(std::unique_ptr<IValueGenerator> generator);
 		void unregistry(const std::string& id);
 
@@ -46,19 +48,36 @@ namespace cg::gen {
 		bool has_generator(const std::string& id) const;
 	};
 
-	struct QualificatorGen {
-		static std::string generate(const src::Qualificator& qual);
-	};
-
 	class TypeGenerator
 		: public IValueGenerator {
 
 	public:
+		TypeGenerator() = default;
+
 		bool can_generate(const src::ITreeElement* node) const override;
 		std::string get_id() const override;
 		std::string generate(const src::ITreeElement* obj,
 							 const src::ITreeElement* ctx) const override;
 
+	};
+
+	class MixinGenerator {
+		static ValueDispatcher disp;
+
+		static bool is_init;
+		static void initialize();
+	public:
+		static std::string generate(const src::ITreeElement* obj,
+									const src::ITreeElement* ctx = nullptr);
+
+	};
+
+	struct InstanceGen {
+
+	};
+
+	struct QualificatorGen {
+		static std::string generate(const src::Qualificator& qual);
 	};
 
 	class NamespaceGeter {
