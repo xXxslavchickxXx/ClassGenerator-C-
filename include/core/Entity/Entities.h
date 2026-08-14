@@ -2,7 +2,9 @@
 
 #include <Node/Node.h>
 #include <Entity/Mixin.h>
-#include <vector>
+
+#include <unordered_map>
+#include <string>
 
 namespace cg::ent {
 	class Variable
@@ -52,10 +54,15 @@ namespace cg::ent {
 		public src::NamedEntity,
 		public src::AccessEntity
 	{
-		//std::vector<std::pair<std::shared_ptr<Class>, src::Access>> base_classes;
+		// TODO: заняться, когда сделаю шаблонность
+		/*std::unordered_map<std::string,
+						   std::pair<std::shared_ptr<Class>, src::Access>>
+		base_classes;*/
 
 	public:
 		using src::NamedEntity::NamedEntity;
+
+
 
 	};
 
@@ -65,5 +72,37 @@ namespace cg::ent {
 	{
 	public:
 		using src::NamedEntity::NamedEntity;
+	};
+
+	class Reference
+		: public src::ITreeElement
+	{
+		std::shared_ptr<const Class> target;
+
+	public:
+		Reference() = default;
+		Reference(const Class* cls);
+
+		const ent::Class* get_target() const;
+	};
+
+	class Type
+		: public src::Constantable,
+		public src::InstanceList,
+		public Reference
+	{
+		src::Qualificator qual;
+
+	public:
+		using Reference::Reference;
+
+		Type(const Type&) = default;
+		Type& operator=(const Type&) = default;
+		Type(Type&&) = default;
+		Type& operator=(Type&&) = default;
+
+		src::Qualificator& get_type_qualificator();
+		const src::Qualificator& get_type_qualificator() const;
+
 	};
 }

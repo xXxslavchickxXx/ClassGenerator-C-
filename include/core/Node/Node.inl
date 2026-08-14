@@ -2,12 +2,12 @@
 
 namespace cg::src {
 	template<typename T>
-	T* Node::as() {
+	T* ITreeElement::as() {
 		return dynamic_cast<T*>(this);
 	}
 
 	template<typename T>
-	const T* Node::as() const {
+	const T* ITreeElement::as() const {
 		return dynamic_cast<const T*>(this);
 	}
 

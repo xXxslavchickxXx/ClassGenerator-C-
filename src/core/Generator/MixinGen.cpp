@@ -5,6 +5,87 @@
 #include <Entity/Entities.h>
 
 namespace cg::gen {
+	void ValueDispatcher::registry(std::unique_ptr<IValueGenerator> generator) {
+		if (!generator) return;
+
+		const auto& id = generator->get_id();
+		if (has_generator(id)) return;
+
+		generators[id] = std::move(generator);
+	}
+	void ValueDispatcher::unregistry(const std::string& id)
+	{
+		const auto& it = generators.find(id);
+
+		if (it == generators.end()) return;
+
+		generators.erase(it);
+	}
+
+	std::string ValueDispatcher::generate(const src::ITreeElement* obj,
+										  const src::ITreeElement* ctx) const {
+		for (const auto& [name, gen] : generators) {
+			if (gen->can_generate(obj)) {
+				return gen->generate(obj, ctx);
+			}
+		}
+
+		std::string entity_name = "entity type";
+
+		if (obj->as<src::NamedEntity>())
+			entity_name = obj->as<src::NamedEntity>()->get_name();
+
+		throw std::runtime_error(
+			std::format("No generator found for {0}", entity_name));
+	}
+	bool ValueDispatcher::has_generator(const std::string& id) const {
+		return generators.find(id) != generators.end();
+	}
+
+	bool TypeGenerator::can_generate(const src::ITreeElement* node) const {
+		return node->as<ent::Type>() != nullptr;
+	}
+	std::string TypeGenerator::get_id() const {
+		return "type";
+	}
+	std::string QualificatorGen::generate(const src::Qualificator& qual) {
+		if (!qual.has_qualificator()) return "";
+
+		std::stringstream sstr;
+
+		if (qual.is_const()) sstr << " const";
+
+		switch (qual.get_qualificator()) {
+			case src::QUALIFICATOR::POINTER:
+				sstr << "*";
+				break;
+			case src::QUALIFICATOR::REFERENCE:
+				sstr << "&";
+				break;
+			case src::QUALIFICATOR::UNIVERSAL_REFERENCE:
+				sstr << "&&";
+				break;
+		}
+
+		return sstr.str();
+	}
+	std::string TypeGenerator::generate(const src::ITreeElement* obj,
+										const src::ITreeElement* ctx) const
+	{
+		if (!obj) return "";
+		
+		const auto* type_ptr = obj->as<ent::Type>();
+
+		std::stringstream sstr;
+
+		if (type_ptr->is_const()) sstr << "const ";
+
+		sstr << NamespaceGeter::generate_namespace(obj, ctx, true);
+		sstr << QualificatorGen::generate(type_ptr->get_type_qualificator());
+
+		return sstr.str();
+	}
+
 	std::string
 		tabulate(const std::string& text, size_t count,
 			const std::string& indent) {
@@ -111,12 +192,27 @@ namespace cg::gen {
 		return name_list;
 	}
 
-	std::string NamespaceGeter::generate_namespace(const src::Node* obj,
-		const src::Node* ctx)
+	std::string NamespaceGeter::generate_namespace(const src::ITreeElement* obj,
+												   const src::ITreeElement* ctx,
+												   bool typename_declaration)
 	{
 		std::stringstream sstr;
 
-		auto ns_list = relative_path(obj, ctx);
+		auto get_node_ptr = [](const auto* ptr) -> const src::Node* {
+			if (ptr->as<src::Node>())
+				return ptr->as<src::Node>();
+			else if (ptr->as<ent::Reference>())
+				return ptr->as<ent::Reference>()->get_target();
+
+			return nullptr;
+		};
+
+		const src::Node* obj_node = get_node_ptr(obj);
+		const src::Node* ctx_node = get_node_ptr(ctx);
+
+		auto ns_list = relative_path(obj_node, ctx_node);
+
+		bool has_dependent;
 
 		if (!ns_list.size()) return "";
 
@@ -131,7 +227,8 @@ namespace cg::gen {
 	}
 
 	std::string NamespaceGeter::generate_namespace_prefix(const src::Node* obj) {
-		if (!obj || !is_named(obj)) return "";
+		if (!obj || !is_named(obj))
+			throw std::runtime_error("Object would be a named_entity!");
 
 		std::stringstream sstr;
 

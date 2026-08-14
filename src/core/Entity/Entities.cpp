@@ -3,6 +3,19 @@
 #include <algorithm>
 
 namespace cg::ent {
+
+    Reference::Reference(const ent::Class* cls)
+        : target(
+        std::dynamic_pointer_cast<const ent::Class>(cls->shared_from_this()))
+    {}
+
+    const ent::Class* Reference::get_target() const { return target.get(); }
+    src::Qualificator& Type::get_type_qualificator() {
+        return qual;
+    }
+    const src::Qualificator& Type::get_type_qualificator() const {
+        return qual;
+    }
     /*void Class::add_base_class(Node* raw,
         const src::Access& acs)
     {

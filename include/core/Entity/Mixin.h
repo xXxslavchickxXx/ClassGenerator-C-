@@ -1,7 +1,13 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <Macros.h>
+
+namespace cg::ent {
+	class Class;
+	class Type;
+}
 
 namespace cg::src {
 	class NamedEntity {
@@ -55,6 +61,54 @@ namespace cg::src {
 	public:
 		const Access& get_access() const;
 		void set_access(const Access& access);
+	};
+
+	class Constantable {
+		bool constantable;
+
+	public:
+		Constantable() : constantable(false) {}
+
+		bool is_const() const;
+		void toggle_const();
+	};
+
+	enum class QUALIFICATOR {
+		NON_QUAL,
+		POINTER,
+		REFERENCE,
+		UNIVERSAL_REFERENCE
+	};
+
+	class Qualificator : public Constantable {
+		QUALIFICATOR qual;
+
+	public:
+		Qualificator() : qual(QUALIFICATOR::NON_QUAL) {}
+
+		bool has_qualificator() const;
+		const QUALIFICATOR& get_qualificator() const;
+
+		void set_qualificator(const QUALIFICATOR& new_qual);
+		void toggle_to_pointer();
+		void toggle_to_reference();
+		void toggle_to_uni_ref();
+		void reset_qualificator();
+	};
+
+	class InstanceList {
+		std::vector<ent::Type> instance_list;
+
+	public:
+		std::vector<ent::Type> get_instance_list();
+		const std::vector<ent::Type> get_instance_list() const;
+
+		void add_instance(const ent::Type& type);
+		void erase_instance(size_t where);
+
+		size_t instance_count() const;
+
+		void swap_instances(size_t from, size_t to);
 	};
 
 	//class TemplateArgument

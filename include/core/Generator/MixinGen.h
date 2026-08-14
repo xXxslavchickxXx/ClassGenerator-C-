@@ -2,9 +2,13 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <memory>
 
 namespace cg::src {
 	class Node;
+	class ITreeElement;
+	class Qualificator;
 }
 
 namespace cg::gen {
@@ -14,18 +18,62 @@ namespace cg::gen {
 	bool is_named(const src::Node* obj);
 	bool is_template(const src::Node* obj);
 
+	class IValueDispacther {
+	public:
+		virtual std::string generate(const src::ITreeElement* obj,
+									 const src::ITreeElement* ctx) const = 0;
+	};
+
+	class IValueGenerator {
+	public:
+		virtual bool can_generate(const src::ITreeElement* node) const = 0;
+		virtual std::string get_id() const = 0;
+		virtual std::string generate(const src::ITreeElement* obj,
+									 const src::ITreeElement* ctx) const = 0;
+	};
+
+	class ValueDispatcher
+		: public IValueDispacther {
+		std::unordered_map<std::string, std::unique_ptr<IValueGenerator>> generators;
+
+	public:
+		void registry(std::unique_ptr<IValueGenerator> generator);
+		void unregistry(const std::string& id);
+
+		std::string generate(const src::ITreeElement* obj,
+							 const src::ITreeElement* ctx) const override;
+
+		bool has_generator(const std::string& id) const;
+	};
+
+	struct QualificatorGen {
+		static std::string generate(const src::Qualificator& qual);
+	};
+
+	class TypeGenerator
+		: public IValueGenerator {
+
+	public:
+		bool can_generate(const src::ITreeElement* node) const override;
+		std::string get_id() const override;
+		std::string generate(const src::ITreeElement* obj,
+							 const src::ITreeElement* ctx) const override;
+
+	};
+
 	class NamespaceGeter {
 	public:
 		static std::vector<const src::Node*>
 			relative_path(const src::Node* obj,
 								const src::Node* ctx = nullptr);
 
-		static std::string generate_namespace(const src::Node* obj,
-									   const src::Node* ctx = nullptr);
+		static std::string generate_namespace(const src::ITreeElement* obj,
+											  const src::ITreeElement* ctx = nullptr,
+											  bool typename_declaration = false);
 
 		static std::string generate_namespace_prefix(const src::Node* obj);
 
-	//private:
+	private:
 		/// <summary>
 		/// @brief функция для поиска на сколько нужно глубоко взять путь
 		/// в зависимости от контекста

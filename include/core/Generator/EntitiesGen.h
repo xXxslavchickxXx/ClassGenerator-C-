@@ -37,7 +37,7 @@ namespace cg::gen {
 		virtual std::string generate(const src::Node* obj,
 									 const src::Node* ctx,
 									 bool declaration,
-									 const IDispacther* dispetcher) const = 0;
+									 const IDispacther* dispatcher) const = 0;
 	};
 
 	class GeneratorRegistrator
@@ -58,8 +58,7 @@ namespace cg::gen {
 	class NamespaceGenerator
 		: public IGenerator
 	{
-		const src::Node* find_first_non_empty_ns(const src::Node* obj,
-												 const src::Node* ctx);
+		const ent::Namespace* find_first_non_empty_ns(const src::Node* obj) const;
 
 	public:
 		bool can_generate(const src::Node* node) const override;
@@ -67,21 +66,22 @@ namespace cg::gen {
 		std::string generate(const src::Node* obj,
 							 const src::Node* ctx,
 							 bool declaration,
-							 const IDispacther* dispetcher) const override;
+							 const IDispacther* dispatcher) const override;
 
 	};
 
-	/*class ClassGenerator
+	class ClassGenerator
 		: public IGenerator
 	{
 	public:
 		bool can_generate(const src::Node* node) const override;
+		std::string get_id() const override;
 		std::string generate(const src::Node* obj,
 							 const src::Node* ctx,
 							 bool declaration,
-							 const IDispecther* dispetcher) const override;
+							 const IDispacther* dispatcher) const override;
 
-	};*/
+	};
 }
 
 #include "EntitiesGen.inl"

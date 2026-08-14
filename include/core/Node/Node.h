@@ -4,28 +4,36 @@
 #include <vector>
 
 namespace cg::src {
-
-	class Node : public std::enable_shared_from_this<Node> {
-	protected:
-		std::weak_ptr<Node> parent;
-
+	class ITreeElement {
 	public:
-		Node(Node&&) = default;
-		Node& operator=(Node&&) = default;
-		Node() = default;
-		virtual ~Node() = default;
-
-		void set_parent(std::shared_ptr<Node> new_parent);
-		void reset_parent();
-
-		const Node* get_parent() const;
-		Node* get_parent();
+		virtual ~ITreeElement() = default;
 
 		template<typename T>
 		T* as();
 
 		template<typename T>
 		const T* as() const;
+	};
+
+	class Node 
+		: public std::enable_shared_from_this<Node>,
+		public ITreeElement 
+	{
+	protected:
+		std::weak_ptr<Node> parent;
+
+	public:
+		Node(Node&&) = default;
+		Node& operator=(Node&&) = default;
+		Node(const Node&) = delete;
+		Node& operator=(const Node&) = delete;
+		Node() = default;
+
+		void set_parent(std::shared_ptr<Node> new_parent);
+		void reset_parent();
+
+		const Node* get_parent() const;
+		Node* get_parent();
 
 	};
 
@@ -43,6 +51,7 @@ namespace cg::src {
 	/// </typeparam>
 	template<typename... SupportedT>
 	class CompositeNode : public Node {
+	protected:
 		std::vector<std::shared_ptr<Node>> children;
 
 	public:
@@ -59,7 +68,7 @@ namespace cg::src {
 		size_t size() const;
 
 	private:
-		constexpr bool is_not_allowed(const Node* node) {
+		bool is_not_allowed(const Node* node) {
 			return (node->as<SupportedT>() || ...);
 		}
 
