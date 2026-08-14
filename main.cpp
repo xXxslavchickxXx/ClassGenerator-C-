@@ -28,6 +28,7 @@ int main() {
     int_t.toggle_const();
     int_t.get_type_qualificator().toggle_const();
     int_t.get_type_qualificator().toggle_to_reference();
+    int_t.get_instance_list().push_back(int_t);
 
 
     try {

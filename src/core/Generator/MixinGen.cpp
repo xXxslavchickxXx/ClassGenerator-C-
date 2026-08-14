@@ -84,6 +84,27 @@ namespace cg::gen {
 
 		return sstr.str();
 	}
+
+	std::string InstanceGen::generate(const src::InstanceList* ent,
+									  const src::ITreeElement* ctx) {
+		if (!ent) return "";
+		std::stringstream sstr;
+
+		sstr << "<";
+
+		const auto& arr = ent->get_instance_list();
+		for (size_t i = 0; i < ent->instance_count(); i++) {
+			sstr << MixinGenerator::generate(&arr[i], ctx);
+
+			if (i != ent->instance_count() - 1)
+				sstr << ", ";
+		}
+
+		sstr << ">";
+
+		return sstr.str();
+	}
+
 	std::string TypeGenerator::generate(const src::ITreeElement* obj,
 										const src::ITreeElement* ctx) const
 	{
@@ -96,6 +117,8 @@ namespace cg::gen {
 		if (type_ptr->is_const()) sstr << "const ";
 
 		sstr << NamespaceGeter::generate_namespace(obj, ctx, true);
+		if (type_ptr->instance_count())
+			sstr << InstanceGen::generate(type_ptr, ctx);
 		sstr << QualificatorGen::generate(type_ptr->get_type_qualificator());
 
 		return sstr.str();
@@ -136,10 +159,15 @@ namespace cg::gen {
 
 		if (!is_named(first) || !is_named(second)) return first == second;
 
-		if (generate_namespace_prefix(first) !=
-			generate_namespace_prefix(second)) return false;
+		if (generate_node_name(first) !=
+			generate_node_name(second)) return false;
 
 		return same_path(first->get_parent(), second->get_parent());
+	}
+
+	bool NamespaceGeter::have_dependent(const std::vector<src::Node*>& path) {
+		// TODO: исправить, когда добавлю алиасы и шаблоны!
+		return false;
 	}
 
 	size_t
@@ -149,7 +177,7 @@ namespace cg::gen {
 			throw std::runtime_error(
 				std::format("Cannot generate definition in namespace '{}' from current context '{}': "
 					"namespaces are independent and not nested. Use explicit qualification.",
-					generate_namespace_prefix(ctx), "")
+				generate_node_name(ctx), "")
 			);
 		}
 
@@ -159,14 +187,14 @@ namespace cg::gen {
 
 		while (iter) {
 			if (ctx) {
-				if (generate_namespace_prefix(ctx) ==
-					generate_namespace_prefix(iter)) {
+				if (generate_node_name(ctx) ==
+					generate_node_name(iter)) {
 					if (!same_path(iter, ctx)) {
 						throw std::runtime_error(
 							std::format("Cannot generate definition in namespace '{}' from current context '{}': "
 								"namespaces are independent and not nested. Use explicit qualification.",
-								generate_namespace_prefix(ctx),
-								generate_namespace_prefix(iter))
+							generate_node_name(ctx),
+							generate_node_name(iter))
 						);
 					}
 					found_ctx = true;
@@ -181,7 +209,7 @@ namespace cg::gen {
 			throw std::runtime_error(
 				std::format("Cannot generate definition in namespace '{}' from current context '{}': "
 					"namespaces are independent and not nested. Use explicit qualification.",
-					generate_namespace_prefix(ctx), generate_namespace_prefix(obj))
+				generate_node_name(ctx), generate_node_name(obj))
 			);
 		}
 
@@ -231,9 +259,11 @@ namespace cg::gen {
 
 		if (!ns_list.size()) return "";
 
+
+
 		for (size_t i = 0; i < ns_list.size(); i++) {
 			const auto& ns = ns_list[i];
-			sstr << generate_namespace_prefix(ns);
+			sstr << generate_node_name(ns);
 			
 			if (i != ns_list.size() - 1) sstr << "::";
 		}
@@ -241,7 +271,7 @@ namespace cg::gen {
 		return sstr.str();
 	}
 
-	std::string NamespaceGeter::generate_namespace_prefix(const src::Node* obj) {
+	std::string NamespaceGeter::generate_node_name(const src::Node* obj) {
 		if (!obj || !is_named(obj))
 			throw std::runtime_error("Object would be a named_entity!");
 

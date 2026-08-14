@@ -9,6 +9,7 @@ namespace cg::src {
 	class Node;
 	class ITreeElement;
 	class Qualificator;
+	class InstanceList;
 }
 
 namespace cg::gen {
@@ -61,6 +62,12 @@ namespace cg::gen {
 
 	};
 
+	/// <summary>
+	/// @brief это статический диспечтер генерации сущностей вроде типа или значений
+	/// 
+	/// @details можно конечно создавать по факту генератор и заполнять его
+	/// но я решил просто попробовать создать такое
+	/// </summary>
 	class MixinGenerator {
 		static ValueDispatcher disp;
 
@@ -73,7 +80,8 @@ namespace cg::gen {
 	};
 
 	struct InstanceGen {
-
+		static std::string generate(const src::InstanceList* ent,
+									const src::ITreeElement* ctx = nullptr);
 	};
 
 	struct QualificatorGen {
@@ -90,9 +98,10 @@ namespace cg::gen {
 											  const src::ITreeElement* ctx = nullptr,
 											  bool typename_declaration = false);
 
-		static std::string generate_namespace_prefix(const src::Node* obj);
+		static std::string generate_node_name(const src::Node* obj);
 
 	private:
+		static bool have_dependent(const std::vector<src::Node*>& path);
 		/// <summary>
 		/// @brief функция для поиска на сколько нужно глубоко взять путь
 		/// в зависимости от контекста

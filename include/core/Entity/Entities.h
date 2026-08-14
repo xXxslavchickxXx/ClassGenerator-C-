@@ -105,4 +105,9 @@ namespace cg::ent {
 		const src::Qualificator& get_type_qualificator() const;
 
 	};
+
+	class TemplateArgument
+		: public Reference {
+
+	};
 }

@@ -100,8 +100,8 @@ namespace cg::src {
 		std::vector<ent::Type> instance_list;
 
 	public:
-		std::vector<ent::Type> get_instance_list();
-		const std::vector<ent::Type> get_instance_list() const;
+		std::vector<ent::Type>& get_instance_list();
+		const std::vector<ent::Type>& get_instance_list() const;
 
 		void add_instance(const ent::Type& type);
 		void erase_instance(size_t where);

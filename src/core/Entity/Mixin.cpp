@@ -59,12 +59,13 @@ namespace cg::src {
 		if (is_const()) toggle_const();
 	}
 
-	const std::vector<ent::Type>
-		InstanceList::get_instance_list() const {
+
+	std::vector<ent::Type>&
+		InstanceList::get_instance_list() {
 		return instance_list;
 	}
-	std::vector<ent::Type>
-		InstanceList::get_instance_list() {
+	const std::vector<ent::Type>&
+		InstanceList::get_instance_list() const {
 		return instance_list;
 	}
 
