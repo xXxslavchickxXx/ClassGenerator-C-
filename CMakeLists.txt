@@ -13,27 +13,13 @@ file(GLOB_RECURSE ${PN}_SRC
     "src/*.cpp"
 )
 
-# add_library(${PN}_LIB)
-
-# target_sources(${PN}_LIB
-#     PRIVATE
-#         ${${PN}_SRC}
-    
-#     PUBLIC
-#         FILE_SET HEADERS
-#         BASE_DIRS
-#             ${CMAKE_CURRENT_SOURCE_DIR}/include
-#         FILES
-#             ${${PN}_HEADERS}
-# )
-
-create_lib(${PN}_LIB    
+create_lib(${PN}_LIB
     PUBLIC
         FILE_SET HEADERS
-        FILES
-            ${${PN}_HEADERS}
         BASE_DIRS
             ${CMAKE_CURRENT_SOURCE_DIR}/include
+        FILES
+            ${${PN}_HEADERS}
 
     PRIVATE
         ${${PN}_SRC}

@@ -82,6 +82,20 @@ function(if_empty flag callback)
     set(${flag} FALSE PARENT_SCOPE)
 endfunction()
 
+# callback - функция, которая принимает один аргумент, а конкретно элемент списка
+function(if_engage flag callback)
+    foreach(item IN LISTS ARGN)
+        if (${item})
+            set(${flag} TRUE PARENT_SCOPE)
+            if(callback)
+                cmake_language(CALL ${callback} ${item})
+            endif()
+            return()
+        endif()
+    endforeach()
+    set(${flag} FALSE PARENT_SCOPE)
+endfunction()
+
 # @brief Проверяет, является ли список ресуров интерфейсного формата
 function(is_interfaceSource SourceArray flag)
     set(state COLLECTING_FILES)
@@ -110,9 +124,12 @@ function(is_interfaceSource SourceArray flag)
                 candidate_state STREQUAL END_STATE
             )
                 # Условие когда есть единицы трансляции, то есть ресурс не интерфейсный
-                if(files AND NOT file_set)
-                    set(${flag} FALSE PARENT_SCOPE)
-                    return()
+                if (files AND NOT file_set)
+                    if_engage(has_engage source_engage_error base_dirs file_set set_type)
+                    if (NOT has_engage)
+                        set(${flag} FALSE PARENT_SCOPE)
+                        return()
+                    endif()
                 endif()
                 # target_source in the second pass
                 set(access ${item})
@@ -146,8 +163,12 @@ function(is_interfaceSource SourceArray flag)
     set(${flag} TRUE PARENT_SCOPE)
 endfunction()
 
-function(source_error var)
+function(source_empty_error var)
     message("[WARNING] The resource package is incomplete; the following is missing: ${var}")
+endfunction()
+
+function(source_engage_error var)
+    message("[WARNING] Attention, translation units must not have header set attributes: ${var}")
 endfunction()
 
 function(target_source_setter custom_target SourceArray)
@@ -177,17 +198,24 @@ function(target_source_setter custom_target SourceArray)
                 candidate_state STREQUAL END_STATE
             )
                 if (file_set)
-                    if_empty("" source_error base_dirs files)
-                    if(type STREQUAL HEADERS)
+                    if_empty(has_empty source_empty_error base_dirs files file_set set_type)
+                    if (NOT has_empty)
                         target_sources(${custom_target}
-                            
+                            ${access}
+                                FILE_SET ${file_set}
+                                TYPE ${set_type}
+                                BASE_DIRS ${base_dirs}
+                                FILES ${files}
                         )
-                    else()
-                        if_empty("" source_error set_type)
-
                     endif()
                 elseif(files)
-
+                    if_engage(has_engage source_engage_error base_dirs file_set set_type)
+                    if (NOT has_engage)
+                        target_sources(${custom_target}
+                            ${access}
+                                ${files}
+                        )
+                    endif()
                 endif()
 
                 # clear data for new set
