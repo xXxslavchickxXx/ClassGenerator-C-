@@ -11,7 +11,7 @@ file(GLOB_RECURSE ${PN}_HEADERS
         "include/*.h"
 )
 file(GLOB_RECURSE ${PN}_SRC
-    CONFIGURE_DEPENDS 
+    CONFIGURE_DEPENDS
         "src/*.cpp"
 )
 
