@@ -7,10 +7,12 @@ project(HelloWorld)
 set(PN ${PROJECT_NAME})
 
 file(GLOB_RECURSE ${PN}_HEADERS
-    "include/*.h"
+    CONFIGURE_DEPENDS 
+        "include/*.h"
 )
 file(GLOB_RECURSE ${PN}_SRC
-    "src/*.cpp"
+    CONFIGURE_DEPENDS 
+        "src/*.cpp"
 )
 
 create_lib(${PN}_LIB
