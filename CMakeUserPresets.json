@@ -1,0 +1,17 @@
+{
+    "version": 8,
+    "include":[
+        "$penv{PRESETS}/env.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "TrueDebug",
+            "description": "Debug режим с настроенным окружением",
+            "inherits": [
+                "env-setup",
+                "vcpkg-env",
+                "Debug"
+            ]
+        }
+    ]
+}

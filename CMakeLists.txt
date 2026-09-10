@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.25)
-include(FetchContent)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LibCreator.cmake)
 
 project(HelloWorld)
@@ -27,6 +26,6 @@ create_lib(${PN}_LIB
         ${${PN}_SRC}
 )
 
-add_executable(${PN} main.cpp)
-
-target_link_libraries(${PN} PRIVATE ${PN}_LIB)
+if (BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
