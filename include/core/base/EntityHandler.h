@@ -12,8 +12,11 @@ namespace cg::core {
 
     public:
         template<typename... Types>
+            requires (std::is_base_of_v<IEntity, std::remove_cvref_t<Types>> && ...)
         EntityHandler();
         template<typename... Args>
+            requires (sizeof...(Args) > 0) &&
+            (std::is_base_of_v<IEntity, std::remove_cvref_t<Args>> && ...)
         EntityHandler(Args&&... args);
 
         template<typename T>
