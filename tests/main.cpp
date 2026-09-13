@@ -13,7 +13,7 @@ class NamedEntity : public cg::core::IEntity {
     std::string name;
 
 public:
-    NamedEntity(const std::string& new_name) : name(new_name) {}
+    NamedEntity(const std::string& new_name = "") : name(new_name) {}
 
     void set_name(const std::string& new_name) { name = new_name; }
     const std::string& get_name() const { return name; }
@@ -21,12 +21,16 @@ public:
 
 int main()
 {
-    auto head = std::make_unique<cg::core::Node>();
-    auto tail = std::make_unique<cg::core::Node>(head.get());
+    auto head = std::make_shared<cg::core::TreeNode>();
+    auto tail = std::make_shared<cg::core::Node>();
 
-    tail->add(NamedEntity("some_node"));
-    //tail->add<NamedEntity>();
+    //tail->add(NamedEntity("some_node"));
 
-    std::cout << tail->get<NamedEntity>()->get_name();
-    return 0;
+    head->add_child(std::move(tail));
+    head->get_children().front()->add<NamedEntity>();
+    auto nme = head->get_children().front()->get<NamedEntity>();
+    if (nme) {
+        nme->set_name("some_name");
+        std::cout << nme->get_name();
+    }
 }
