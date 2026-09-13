@@ -10,43 +10,50 @@ namespace cg::core {
     class INode {
     public:
         virtual ~INode() = default;
-        virtual TreeNode* tree_cast() { return nullptr; }
+        virtual TreeNode* as_container() { return nullptr; }
     };
 
     class Node :
-        public EntityHandler,
         public INode
     {
-        std::weak_ptr<Node> parent;
+        Node* parent;
+        std::unique_ptr<EntityHandler> entities;
 
     public:
         Node();
-        Node(std::shared_ptr<Node> parent);
+        Node(Node* parent);
+
+        Node(const Node&) = delete;
+        Node& operator=(const Node&) = delete;
+        Node(Node&& other);
+        Node& operator=(Node&& other);
+
+        EntityHandler* get_entities();
+        const EntityHandler* get_entities() const;
 
         const Node* get_parent() const;
-        void set_parent(std::shared_ptr<Node> new_parent);
+        void set_parent(Node* new_parent);
     };
 
     class TreeNode :
-        public Node,
-        public std::enable_shared_from_this<TreeNode>    
+        public Node   
     {
-        std::vector<std::shared_ptr<Node>> children;
+        std::vector<std::unique_ptr<Node>> children;
 
     public:
         using Node::Node;
 
-        TreeNode* tree_cast() override { return this; }
+        TreeNode* as_container() override { return this; }
         
         template<typename... Entities>
         Node* create_child();
         template<typename... Args>
         Node* create_child(Args... args);
 
-        void add_child(std::shared_ptr<Node> child);
+        void add_child(std::unique_ptr<Node> child);
 
-        std::vector<std::shared_ptr<Node>>& get_children();
-        const std::vector<std::shared_ptr<Node>>& get_children() const;
+        std::vector<std::unique_ptr<Node>>& get_children();
+        const std::vector<std::unique_ptr<Node>>& get_children() const;
     };
 }
 

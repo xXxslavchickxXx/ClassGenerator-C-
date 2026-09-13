@@ -11,6 +11,13 @@ namespace cg::core {
         std::unordered_map<std::type_index, std::unique_ptr<IEntity>> entities;
 
     public:
+        EntityHandler() = default;
+
+        EntityHandler(const EntityHandler&) = delete;
+        EntityHandler& operator=(const EntityHandler&) = delete;
+        EntityHandler(EntityHandler&&) = default;
+        EntityHandler& operator=(EntityHandler&&) = default;
+
         template<typename... Types>
             requires (std::is_base_of_v<IEntity, std::remove_cvref_t<Types>> && ...)
         EntityHandler();
