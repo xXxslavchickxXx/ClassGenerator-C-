@@ -8,7 +8,7 @@ namespace cg::core {
         requires (sizeof...(Args) > 0) &&
             (std::is_base_of_v<IEntity, std::remove_cvref_t<Args>> && ...)
     EntityHandler::EntityHandler(Args&&... args) {
-        ((std::forward<Args>(add(args))), ...);
+        ((add(std::forward<Args>(args))), ...);
     }
 
     template<typename T>
@@ -66,7 +66,7 @@ namespace cg::core {
     bool EntityHandler::has() const {
         return
             entities.find(
-                std::type_index(typeid(T))
+                std::type_index(typeid(std::remove_cvref_t<T>))
             )
                 !=
             
