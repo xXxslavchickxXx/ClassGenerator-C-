@@ -32,6 +32,9 @@ namespace cg::core {
         std::remove_cvref_t<T>* add(T&& entity);
 
         template<typename T>
+        void remove();
+
+        template<typename T>
         std::remove_cvref_t<T>* get();
 
         template<typename T>

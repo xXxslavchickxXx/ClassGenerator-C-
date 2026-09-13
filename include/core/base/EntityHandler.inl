@@ -12,6 +12,15 @@ namespace cg::core {
     }
 
     template<typename T>
+    void EntityHandler::remove() {
+        using U = std::remove_cvref_t<T>;
+        
+        auto it = entities.find(std::type_index(typeid(U)));
+
+        if (it != entities.end()) entities.erase(it);
+    }
+
+    template<typename T>
     std::remove_cvref_t<T>* EntityHandler::add() {
         using U = std::remove_cvref_t<T>;
         static_assert(std::is_base_of_v<IEntity, U>,
