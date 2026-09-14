@@ -3,7 +3,7 @@
 #include <memory>
 #include <unordered_map>
 #include <typeindex>
-#include <core/base/IEntity.h>
+#include <core/base/interfaces/IEntity.h>
 
 namespace cg::core {
 
@@ -40,10 +40,10 @@ namespace cg::core {
         template<typename T>
         const std::remove_cvref_t<T>* get() const;
 
-    private:
         template<typename T>
         bool has() const;
 
+        EntityHandler clone() const;
     };
 }
 

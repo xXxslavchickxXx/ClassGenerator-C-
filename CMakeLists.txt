@@ -26,7 +26,15 @@ create_lib(${PN}_LIB
         ${${PN}_SRC}
 )
 
-target_compile_options(${PN}_LIB PUBLIC /RTC1 /W4 /WX /analyze /fsanitize=address)
+target_compile_options(${PN}_LIB
+    PUBLIC
+        /W4
+        /fsanitize=address
+    PRIVATE
+        /RTC1
+        /WX
+        /analyze
+)
 
 if (BUILD_TESTS)
     add_subdirectory(tests)

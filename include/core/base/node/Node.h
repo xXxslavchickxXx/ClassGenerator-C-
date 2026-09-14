@@ -2,17 +2,12 @@
 
 #include <memory>
 #include <vector>
+#include <type_traits>
 
-#include <core/base/EntityHandler.h>
+#include <core/base/interfaces/INode.h>
+#include <core/base/entity/EntityHandler.h>
 
 namespace cg::core {
-    class TreeNode;
-    class INode {
-    public:
-        virtual ~INode() = default;
-        virtual TreeNode* as_container() { return nullptr; }
-    };
-
     class Node :
         public INode
     {
@@ -25,14 +20,14 @@ namespace cg::core {
 
         Node(const Node&) = delete;
         Node& operator=(const Node&) = delete;
-        Node(Node&& other);
-        Node& operator=(Node&& other);
+        Node(Node&& other) = delete;
+        Node& operator=(Node&& other) = delete;
 
         EntityHandler* get_entities();
         const EntityHandler* get_entities() const;
 
         const Node* get_parent() const;
-        void set_parent(Node* new_parent);
+        bool set_parent(Node* new_parent);
     };
 
     class TreeNode :
@@ -41,16 +36,17 @@ namespace cg::core {
         std::vector<std::unique_ptr<Node>> children;
 
     public:
-        using Node::Node;
+        TreeNode() = default;
 
         TreeNode* as_container() override { return this; }
         
-        template<typename... Entities>
-        Node* create_child();
-        template<typename... Args>
-        Node* create_child(Args... args);
+        template<typename NodeT, typename... Entities>
+        NodeT* create_child();
+        template<typename NodeT, typename... Args>
+        NodeT* create_child(Args&&... args);
 
-        void add_child(std::unique_ptr<Node> child);
+        template<typename T>
+        T* add_child(std::unique_ptr<T> child);
 
         std::vector<std::unique_ptr<Node>>& get_children();
         const std::vector<std::unique_ptr<Node>>& get_children() const;
