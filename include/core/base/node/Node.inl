@@ -6,19 +6,19 @@ namespace cg::core {
 
         auto new_child = std::make_unique<NodeT>(this);
         auto* raw_ptr = new_child.get();
-        ((new_child->get_entities()->add<Entities>()), ...);
+        ((new_child->get_entities().add<Entities>()), ...);
         children.push_back(std::move(new_child));
 
         return raw_ptr;
     }
-    template<typename NodeT, typename... Args>
-    NodeT* TreeNode::create_child(Args&&... args) {
+    template<typename NodeT, typename... Entities>
+    NodeT* TreeNode::create_child(Entities&&... ents) {
         static_assert(std::is_base_of_v<Node, NodeT>,
         "T must derive from Node");
         
         auto new_child = std::make_unique<NodeT>(this);
         auto* raw_ptr = new_child.get();
-        ((new_child->get_entities()->add<Args>(std::forward<Args>(args))), ...);
+        ((new_child->get_entities().add<Entities>(std::forward<Entities>(ents))), ...);
         children.push_back(std::move(new_child));
 
         return raw_ptr;

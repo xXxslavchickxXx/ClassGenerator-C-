@@ -4,14 +4,14 @@
 
 namespace cg::core {
     Node::Node() : Node(nullptr) {}
-    Node::Node(Node* parent) : parent(parent),entities(std::make_unique<EntityHandler>()) {}
+    Node::Node(Node* parent) : parent(parent), entities() {}
 
     const Node* Node::get_parent() const {
         return parent;
     }
     
-    EntityHandler* Node::get_entities() { return entities.get(); }
-    const EntityHandler* Node::get_entities() const { return entities.get();}
+    EntityHandler& Node::get_entities() { return entities; }
+    const EntityHandler& Node::get_entities() const { return entities; }
     
     bool Node::set_parent(Node* new_parent) {
         if (new_parent != this) {
@@ -36,6 +36,10 @@ namespace cg::core {
         return child;
     }
     void TreeNode::erase_child(size_t where) {
+        // Избавляем ребенка от связи с корнем
+        children.at(where)->set_parent(nullptr);
+
+        // Удаляем информацию из родителя
         children.erase(children.begin() + where);
     }
 }

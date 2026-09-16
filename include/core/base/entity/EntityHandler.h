@@ -26,7 +26,7 @@ namespace cg::core {
         template<typename T>
         std::remove_cvref_t<T>* add(T&& entity);
         template<typename T>
-        T* add(std::unique_ptr<T> ent_ptr);
+        T* take(std::unique_ptr<T> ent_ptr);
 
         template<typename T>
         void remove();
@@ -42,8 +42,6 @@ namespace cg::core {
 
         template<typename T>
         bool has() const;
-
-        EntityHandler clone() const;
     };
 }
 

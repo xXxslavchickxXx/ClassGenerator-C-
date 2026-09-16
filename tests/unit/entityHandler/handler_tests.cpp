@@ -8,12 +8,15 @@ namespace tests {
         int value = 0;
 
         EntityA(int val = 0) : value(val) {}
+
+        ~EntityA() = default;
     };
     
     struct EntityB : public cg::core::IEntity {
         std::string word;
     
         EntityB(const std::string& word_ = "") : word(word_) {}
+        ~EntityB() = default;
     };
 }
 
@@ -53,7 +56,7 @@ TEST(EntityHandler, AddPtrService) {
     auto handler = cg::core::EntityHandler();
 
     int validate_num = 6;
-    handler.add(std::make_unique<tests::EntityA>(validate_num));
+    handler.take(std::make_unique<tests::EntityA>(validate_num));
 
     EXPECT_EQ(handler.get<tests::EntityA>()->value, validate_num);
 }

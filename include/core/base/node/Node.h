@@ -12,7 +12,7 @@ namespace cg::core {
         public INode
     {
         Node* parent;
-        std::unique_ptr<EntityHandler> entities;
+        EntityHandler entities;
 
     public:
         Node();
@@ -23,8 +23,8 @@ namespace cg::core {
         Node(Node&& other) = delete;
         Node& operator=(Node&& other) = delete;
 
-        EntityHandler* get_entities();
-        const EntityHandler* get_entities() const;
+        EntityHandler& get_entities();
+        const EntityHandler& get_entities() const;
 
         const Node* get_parent() const;
 
@@ -62,6 +62,7 @@ namespace cg::core {
             iterator(std::unique_ptr<Node>* data) : p(data) {}
 
             Node* operator*() const { return p->get(); }
+            Node* operator->() const { return p->get(); }
             iterator& operator++() { ++p; return *this; }
             iterator& operator--() { --p; return *this; }
             iterator operator+(const size_t num) { auto temp = *this; temp += num; return temp; }
@@ -69,15 +70,16 @@ namespace cg::core {
             iterator operator-(const size_t num) { auto temp = *this; temp -= num; return temp; }
             iterator& operator-=(const size_t num) { p -= num; return *this; }
             bool operator!=(const iterator& o) const { return p != o.p; }
-            
+            bool operator==(const iterator& o) const { return p == o.p; }
+
         };
 
         TreeNode* as_container() override { return this; }
         
         template<typename NodeT, typename... Entities>
         NodeT* create_child();
-        template<typename NodeT, typename... Args>
-        NodeT* create_child(Args&&... args);
+        template<typename NodeT, typename... Entities>
+        NodeT* create_child(Entities&&... ents);
 
         template<typename T>
         T* add_child(std::unique_ptr<T> child);
@@ -90,6 +92,8 @@ namespace cg::core {
 
         iterator begin() { return {children.data()}; }
         iterator end() { return {children.data() + children.size()}; }
+        const_iter begin() const { return children.begin(); }
+        const_iter end() const { return children.end(); }
     
     };
 }
