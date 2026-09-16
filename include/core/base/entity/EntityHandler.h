@@ -18,21 +18,21 @@ namespace cg::core {
         EntityHandler(EntityHandler&&) = default;
         EntityHandler& operator=(EntityHandler&&) = default;
 
-        template<typename... Types>
-            requires (std::is_base_of_v<IEntity, std::remove_cvref_t<Types>> && ...)
-        EntityHandler();
-        template<typename... Args>
-            requires (sizeof...(Args) > 0) &&
-            (std::is_base_of_v<IEntity, std::remove_cvref_t<Args>> && ...)
-        EntityHandler(Args&&... args);
+        std::unordered_map<std::type_index, std::unique_ptr<IEntity>>& get_data() { return entities; }
+        const std::unordered_map<std::type_index, std::unique_ptr<IEntity>>& get_data() const { return entities; }
 
         template<typename T>
         std::remove_cvref_t<T>* add();
         template<typename T>
         std::remove_cvref_t<T>* add(T&& entity);
+        template<typename T>
+        T* add(std::unique_ptr<T> ent_ptr);
 
         template<typename T>
         void remove();
+
+        template<typename T>
+        std::unique_ptr<std::remove_cvref_t<T>> move_service();
 
         template<typename T>
         std::remove_cvref_t<T>* get();

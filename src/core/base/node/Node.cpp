@@ -21,6 +21,21 @@ namespace cg::core {
         return false;
     }
 
-    std::vector<std::unique_ptr<Node>>& TreeNode::get_children() { return children; }
     const std::vector<std::unique_ptr<Node>>& TreeNode::get_children() const { return children; }
+
+    Node* TreeNode::get_child(size_t where) {
+        return children[where].get();
+    }
+
+    std::unique_ptr<Node> TreeNode::move_child(size_t where) {
+        auto child = std::move(children[where]);
+        child->set_parent(nullptr);
+
+        children.erase(children.begin() + where);
+
+        return child;
+    }
+    void TreeNode::erase_child(size_t where) {
+        children.erase(children.begin() + where);
+    }
 }

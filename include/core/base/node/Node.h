@@ -27,6 +27,22 @@ namespace cg::core {
         const EntityHandler* get_entities() const;
 
         const Node* get_parent() const;
+
+        /// @brief Меняет родителя узла.
+        ///
+        /// @warning Не обновляет 'children' старого/нового родителя.
+        ///          После вызова инвариант дерева может быть нарушен:
+        ///          'old_parent->children всё ещё владеет узлом,
+        ///          а 'new_parent->children' — нет.
+        ///
+        ///          Используй 'TreeNode::reparent()' для безопасной смены,
+        ///          если оба родителя — 'TreeNode'.
+        ///
+        /// @note Безопасно, если:
+        ///       - 'new_parent == nullptr' и узел не в 'children' ни у кого
+        ///       - узел не в 'children' старого родителя
+        ///
+        /// @see TreeNode::reparent
         bool set_parent(Node* new_parent);
     };
 
@@ -34,9 +50,27 @@ namespace cg::core {
         public Node   
     {
         std::vector<std::unique_ptr<Node>> children;
+        using const_iter = std::vector<std::unique_ptr<Node>>::const_iterator;
 
     public:
         TreeNode() = default;
+
+    public:
+        class iterator {
+            std::unique_ptr<Node>* p;
+        public:
+            iterator(std::unique_ptr<Node>* data) : p(data) {}
+
+            Node* operator*() const { return p->get(); }
+            iterator& operator++() { ++p; return *this; }
+            iterator& operator--() { --p; return *this; }
+            iterator operator+(const size_t num) { auto temp = *this; temp += num; return temp; }
+            iterator& operator+=(const size_t num) { p += num; return *this; }
+            iterator operator-(const size_t num) { auto temp = *this; temp -= num; return temp; }
+            iterator& operator-=(const size_t num) { p -= num; return *this; }
+            bool operator!=(const iterator& o) const { return p != o.p; }
+            
+        };
 
         TreeNode* as_container() override { return this; }
         
@@ -48,8 +82,15 @@ namespace cg::core {
         template<typename T>
         T* add_child(std::unique_ptr<T> child);
 
-        std::vector<std::unique_ptr<Node>>& get_children();
         const std::vector<std::unique_ptr<Node>>& get_children() const;
+        Node* get_child(size_t where);
+
+        std::unique_ptr<Node> move_child(size_t where);
+        void erase_child(size_t where);
+
+        iterator begin() { return {children.data()}; }
+        iterator end() { return {children.data() + children.size()}; }
+    
     };
 }
 

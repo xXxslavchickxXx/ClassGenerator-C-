@@ -1,16 +1,4 @@
 namespace cg::core {
-    template<typename... Types>
-        requires (std::is_base_of_v<IEntity, std::remove_cvref_t<Types>> && ...)
-    EntityHandler::EntityHandler() {
-        ((add<Types>()), ...);
-    }
-    template<typename... Args>
-        requires (sizeof...(Args) > 0) &&
-            (std::is_base_of_v<IEntity, std::remove_cvref_t<Args>> && ...)
-    EntityHandler::EntityHandler(Args&&... args) {
-        ((add(std::forward<Args>(args))), ...);
-    }
-
     template<typename T>
     void EntityHandler::remove() {
         using U = std::remove_cvref_t<T>;
@@ -18,6 +6,35 @@ namespace cg::core {
         auto it = entities.find(std::type_index(typeid(U)));
 
         if (it != entities.end()) entities.erase(it);
+    }
+    
+    template<typename T>
+    T* EntityHandler::add(std::unique_ptr<T> ent_ptr) {
+        using U = std::remove_cvref_t<T>;
+        static_assert(std::is_base_of_v<IEntity, U>,
+        "T must derive from IEntity");
+        static_assert(!std::is_abstract_v<U>,
+        "Cannot instantiate abstract class");
+        static_assert(std::is_default_constructible_v<U>,
+        "Type doesn't have default constructor");
+
+        if (!has<U>()) entities[std::type_index(typeid(U))] = std::move(ent_ptr);
+
+        return static_cast<U*>(entities[std::type_index(typeid(U))].get());
+    }
+    
+    template<typename T>
+    std::unique_ptr<std::remove_cvref_t<T>> EntityHandler::move_service() {
+        using U = std::remove_cvref_t<T>;
+        if (!has<U>()) return nullptr;
+
+        auto it = entities.find(std::type_index(typeid(U)));
+
+        U* temp = static_cast<U*>(it->second.release());
+
+        entities.erase(it);
+
+        return std::unique_ptr<U>(temp);
     }
 
     template<typename T>
