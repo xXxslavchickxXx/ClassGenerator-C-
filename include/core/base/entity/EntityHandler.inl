@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 namespace cg::core {
     template<typename T>
     void EntityHandler::remove() {
@@ -16,7 +18,7 @@ namespace cg::core {
         static_assert(!std::is_abstract_v<U>,
         "Cannot instantiate abstract class");
 
-        if (!has<U>()) throw std::runtime_error("this service already exist, data can disappear");
+        if (has<U>()) throw std::runtime_error("this service already exist, data can disappear");
         
         entities[std::type_index(typeid(U))] = std::move(ent_ptr);
 

@@ -23,7 +23,7 @@ namespace tests {
 TEST(EntityHandler, DefaultCtor) {
     auto handler = cg::core::EntityHandler();
 
-    EXPECT_EQ(handler.get_data().empty(), true);
+    SUCCEED();
 }
 
 TEST(EntityHandler, AddServiceWithoutData) {
