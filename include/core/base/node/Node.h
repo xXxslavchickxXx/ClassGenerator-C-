@@ -37,9 +37,6 @@ namespace cg::core {
         ///          'old_parent->children всё ещё владеет узлом,
         ///          а 'new_parent->children' — нет.
         ///
-        ///          Используй 'TreeNode::reparent()' для безопасной смены,
-        ///          если оба родителя — 'TreeNode'.
-        ///
         /// @note Безопасно, если:
         ///       - 'new_parent == nullptr' и узел не в 'children' ни у кого
         ///       - узел не в 'children' старого родителя

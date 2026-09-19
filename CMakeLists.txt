@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.25)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LibCreator.cmake)
 
 project(HelloWorld)
 
@@ -14,7 +13,8 @@ file(GLOB_RECURSE ${PN}_SRC
         "src/*.cpp"
 )
 
-create_lib(${PN}_LIB
+add_library(${PN}_LIB)
+target_sources(${PN}_LIB
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS

@@ -9,5 +9,4 @@ namespace cg::entities::cpp {
     Namespace::Namespace(Node* parent) : TreeNode(parent) {
         this->entities.add<NamedEntity>();
     }
-
 }

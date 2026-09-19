@@ -27,6 +27,8 @@ namespace cg::core {
     T* TreeNode::add_child(std::unique_ptr<T> child) {
         static_assert(std::is_base_of_v<Node, T>,
         "T must derive from Node");
+
+        if (child.get() != this) return nullptr;
         
         if (child->set_parent(this)) {
             auto* raw_ptr = child.get();

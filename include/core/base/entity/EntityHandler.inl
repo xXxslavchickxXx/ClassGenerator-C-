@@ -16,7 +16,9 @@ namespace cg::core {
         static_assert(!std::is_abstract_v<U>,
         "Cannot instantiate abstract class");
 
-        if (!has<U>()) entities[std::type_index(typeid(U))] = std::move(ent_ptr);
+        if (!has<U>()) throw std::runtime_error("this service already exist, data can disappear");
+        
+        entities[std::type_index(typeid(U))] = std::move(ent_ptr);
 
         return static_cast<U*>(entities[std::type_index(typeid(U))].get());
     }
@@ -56,8 +58,6 @@ namespace cg::core {
         "T must derive from IEntity");
         static_assert(!std::is_abstract_v<U>,
         "Cannot instantiate abstract class");
-        static_assert(std::is_default_constructible_v<U>,
-        "Type doesn't have default constructor");
 
         if (!has<U>()) entities[std::type_index(typeid(U))] = std::make_unique<U>(std::forward<T>(entity));
 

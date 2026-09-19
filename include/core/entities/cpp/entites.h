@@ -7,8 +7,4 @@ namespace cg::entities::cpp {
         Namespace(Node* parent);
         
     };
-
-    class Class : public cg::core::TreeNode  {
-
-    };
 }
