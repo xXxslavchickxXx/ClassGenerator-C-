@@ -5,7 +5,7 @@
 #include <string>
 
 namespace tests {
-    int default_value = 0;
+    constexpr int default_value = 0;
     struct EntityA : public cg::core::IEntity {
         int value;
 
