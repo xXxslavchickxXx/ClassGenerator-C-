@@ -1,6 +1,6 @@
-#include <core/entities/basic_entites.h>
+#include <core/entities/cpp/basic_entites.h>
 
-namespace cg::entities {
+namespace cg::entities::cpp {
 	NamedEntity::NamedEntity(const std::string& new_name) : name(new_name) {}
 	void NamedEntity::set_name(const std::string& new_name) { name = new_name; }
 	const std::string& NamedEntity::get_name() const { return name; }

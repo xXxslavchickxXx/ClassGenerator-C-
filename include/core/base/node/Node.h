@@ -12,6 +12,8 @@ namespace cg::core {
         public INode
     {
         Node* parent;
+        
+    protected:
         EntityHandler entities;
 
     public:
@@ -53,7 +55,8 @@ namespace cg::core {
         using const_iter = std::vector<std::unique_ptr<Node>>::const_iterator;
 
     public:
-        TreeNode() = default;
+        TreeNode();
+        TreeNode(Node* parent);
 
     public:
         class iterator {
@@ -89,6 +92,8 @@ namespace cg::core {
 
         std::unique_ptr<Node> move_child(size_t where);
         void erase_child(size_t where);
+
+        size_t children_size() const;
 
         iterator begin() { return {children.data()}; }
         iterator end() { return {children.data() + children.size()}; }

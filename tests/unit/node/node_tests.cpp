@@ -44,3 +44,16 @@ TEST(TreeNode, ForEachIteration) {
 
     EXPECT_EQ(child_counter, test_counter);
 }
+
+TEST(TreeNode, MoveChild) {
+    auto tree_node = cg::core::TreeNode();
+    auto another_tree_node = cg::core::TreeNode();
+    
+    auto* node_ptr = tree_node.create_child<cg::core::Node>();
+
+    another_tree_node.add_child(tree_node.move_child(0));
+
+    
+    EXPECT_EQ(tree_node.children_size(), 0);
+    EXPECT_EQ(another_tree_node.get_child(0), node_ptr);
+}

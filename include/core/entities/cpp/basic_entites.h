@@ -6,7 +6,7 @@
 
 #include <core/base/interfaces/IEntity.h>
 
-namespace cg::entities {
+namespace cg::entities::cpp {
     class NamedEntity : public cg::core::IEntity {
         std::string name;
 
@@ -51,7 +51,7 @@ namespace cg::entities {
 		PUBLIC
 	};
 
-	class AccessEntity : public cg::core::IEntity{
+	class AccessEntity : public cg::core::IEntity {
 		Access access_ = Access::PRIVATE;
 
 	public:

@@ -23,6 +23,13 @@ namespace cg::core {
 
     const std::vector<std::unique_ptr<Node>>& TreeNode::get_children() const { return children; }
 
+    TreeNode::TreeNode() : Node() {}
+    TreeNode::TreeNode(Node* parent) : Node(parent) {}
+
+    size_t TreeNode::children_size() const {
+        return children.size();
+    }
+
     Node* TreeNode::get_child(size_t where) {
         return children[where].get();
     }
