@@ -24,17 +24,17 @@ namespace cg::core {
         return raw_ptr;
     }
     template<typename T>
-    T* TreeNode::add_child(std::unique_ptr<T> child) {
+    T* TreeNode::add_child(std::unique_ptr<T>&& child) {
         static_assert(std::is_base_of_v<Node, T>,
         "T must derive from Node");
-
-        if (child.get() == this) return nullptr;
         
+        // The self‑ownership check is already included in the set_parent.
         if (child->set_parent(this)) {
             auto* raw_ptr = child.get();
             children.push_back(std::move(child));
             return raw_ptr;
         }
+
         return nullptr;
     }
 }

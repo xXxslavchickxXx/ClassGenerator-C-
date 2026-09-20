@@ -47,13 +47,61 @@ TEST(TreeNode, ForEachIteration) {
 
 TEST(TreeNode, MoveChild) {
     auto tree_node = cg::core::TreeNode();
+    
+    tree_node.create_child<cg::core::Node>();
+
+    auto moved_child = tree_node.move_child(0);
+
+    EXPECT_EQ(tree_node.children_size(), 0);
+    EXPECT_EQ(moved_child->get_parent(), nullptr);
+}
+
+TEST(TreeNode, AddChild) {
+    auto tree_node = cg::core::TreeNode();
+    
+    auto child = std::make_unique<cg::core::Node>();
+
+    auto* moved_child = tree_node.add_child(std::move(child));
+    ASSERT_NE(moved_child, nullptr);
+
+    EXPECT_EQ(tree_node.get_child(0), moved_child);
+}
+
+TEST(TreeNode, MoveChildAndTake) {
+    auto tree_node = cg::core::TreeNode();
     auto another_tree_node = cg::core::TreeNode();
     
     auto* node_ptr = tree_node.create_child<cg::core::Node>();
 
-    another_tree_node.add_child(tree_node.move_child(0));
+    auto* moved_child = another_tree_node.add_child(tree_node.move_child(0));
+    ASSERT_NE(moved_child, nullptr);
 
-    
-    EXPECT_EQ(tree_node.children_size(), 0);
     EXPECT_EQ(another_tree_node.get_child(0), node_ptr);
+    EXPECT_EQ(another_tree_node.get_child(0)->get_parent(), &another_tree_node);
+}
+
+TEST(TreeNode, EraseChild) {
+    auto tree_node = cg::core::TreeNode();
+    tree_node.create_child<cg::core::Node>();
+
+    tree_node.erase_child(0);
+
+    EXPECT_EQ(tree_node.children_size(), 0);
+}
+
+TEST(TreeNode, FailedAddChildWithoutLosses) {
+    auto dummy_parent = cg::core::TreeNode();
+
+    // Let him have some kind of parent to check for
+    // this specific case involving data preservation.
+    auto some_child = std::make_unique<cg::core::TreeNode>(&dummy_parent);
+
+    // Trying add child to yourself
+    auto* move_result = some_child->add_child(std::move(some_child));
+    EXPECT_TRUE(some_child != nullptr);
+    EXPECT_EQ(move_result, nullptr);
+
+    // If the data could not be moved, the parent element
+    // will remain as it was.
+    EXPECT_EQ(some_child->get_parent(), &dummy_parent);
 }

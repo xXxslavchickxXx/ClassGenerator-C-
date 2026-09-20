@@ -81,8 +81,13 @@ namespace cg::core {
         template<typename NodeT, typename... Entities>
         NodeT* create_child(Entities&&... ents);
 
+        /// @brief Добавляет ребёнка в дерево.
+        /// @param child rvalue-ссылка на unique_ptr.
+        /// @return Указатель на добавленного ребёнка, или nullptr при неудаче.
+        /// @warning При успехе владение **переходит** в дерево (child становится пустым).
+        ///          При неудаче владение **остаётся** у вызывающего.
         template<typename T>
-        T* add_child(std::unique_ptr<T> child);
+        T* add_child(std::unique_ptr<T>&& child);
 
         const std::vector<std::unique_ptr<Node>>& get_children() const;
         Node* get_child(size_t where);

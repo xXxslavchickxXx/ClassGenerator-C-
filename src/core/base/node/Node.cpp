@@ -43,8 +43,9 @@ namespace cg::core {
         return child;
     }
     void TreeNode::erase_child(size_t where) {
-        // Избавляем ребенка от связи с корнем
-        children.at(where)->set_parent(nullptr);
+        // Смысла удалять ссылку на родителя нет, так, как все равно
+        // здесь есть место только для исключительного владения, так
+        // что при удаления нода исчезает на всегда
 
         // Удаляем информацию из родителя
         children.erase(children.begin() + where);
