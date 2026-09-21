@@ -6,5 +6,5 @@ namespace cg::entities::cpp {
         Namespace();
         Namespace(Node* parent);
         
-    }; 
+    };
 }
