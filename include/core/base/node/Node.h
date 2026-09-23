@@ -5,7 +5,7 @@
 #include <type_traits>
 
 #include <core/base/interfaces/INode.h>
-#include <core/base/entity/EntityHandler.h>
+#include <core/base/serviceHandler/EntityHandler.h>
 
 namespace cg::core {
     class Node :
@@ -49,31 +49,15 @@ namespace cg::core {
         public Node   
     {
         std::vector<std::unique_ptr<Node>> children;
-        using const_iter = std::vector<std::unique_ptr<Node>>::const_iterator;
 
     public:
         TreeNode();
         TreeNode(Node* parent);
 
+        template<bool is_const>
+        class iterator;
+
     public:
-        class iterator {
-            std::unique_ptr<Node>* p;
-        public:
-            iterator(std::unique_ptr<Node>* data) : p(data) {}
-
-            Node* operator*() const { return p->get(); }
-            Node* operator->() const { return p->get(); }
-            iterator& operator++() { ++p; return *this; }
-            iterator& operator--() { --p; return *this; }
-            iterator operator+(const size_t num) { auto temp = *this; temp += num; return temp; }
-            iterator& operator+=(const size_t num) { p += num; return *this; }
-            iterator operator-(const size_t num) { auto temp = *this; temp -= num; return temp; }
-            iterator& operator-=(const size_t num) { p -= num; return *this; }
-            bool operator!=(const iterator& o) const { return p != o.p; }
-            bool operator==(const iterator& o) const { return p == o.p; }
-
-        };
-
         TreeNode* as_container() override { return this; }
         
         template<typename NodeT, typename... Entities>
@@ -84,8 +68,8 @@ namespace cg::core {
         /// @brief Добавляет ребёнка в дерево.
         /// @param child rvalue-ссылка на unique_ptr.
         /// @return Указатель на добавленного ребёнка, или nullptr при неудаче.
-        /// @warning При успехе владение **переходит** в дерево (child становится пустым).
-        ///          При неудаче владение **остаётся** у вызывающего.
+        /// @warning При успехе владение *переходит* в дерево.
+        ///          При неудаче владение *остаётся* у вызывающего.
         template<typename T>
         T* add_child(std::unique_ptr<T>&& child);
 
@@ -97,11 +81,38 @@ namespace cg::core {
 
         size_t children_size() const;
 
-        iterator begin() { return {children.data()}; }
-        iterator end() { return {children.data() + children.size()}; }
-        const_iter begin() const { return children.begin(); }
-        const_iter end() const { return children.end(); }
+        iterator<false> begin() { return {children.data()}; }
+        iterator<false> end() { return {children.data() + children.size()}; }
+
+        iterator<true> begin() const { return {children.data()}; }
+        iterator<true> end() const { return {children.data() + children.size()}; }
+        // const_iter begin() const { return children.begin(); }
+        // const_iter end() const { return children.end(); }
     
+    public:
+        template<bool is_const>
+        class iterator {
+            using uptr = std::conditional_t<is_const, const std::unique_ptr<Node>*, std::unique_ptr<Node>*>;
+            using rptr = std::conditional_t<is_const, const Node*, Node*>;
+
+            uptr p;
+        public:
+            iterator(uptr data) : p(data) {}
+
+            rptr operator*() const { return p->get(); }
+            rptr operator->() const { return p->get(); }
+            iterator<is_const>& operator++() { ++p; return *this; }
+            iterator<is_const>& operator--() { --p; return *this; }
+            iterator<is_const> operator++(int) { auto temp = *this; ++p; return temp; }
+            iterator<is_const> operator--(int) { auto temp = *this; --p; return temp; }
+            iterator<is_const> operator+(const size_t num) const { auto temp = *this; temp += num; return temp; }
+            iterator<is_const>& operator+=(const size_t num) { p += num; return *this; }
+            iterator<is_const> operator-(const size_t num) const { auto temp = *this; temp -= num; return temp; }
+            iterator<is_const>& operator-=(const size_t num) { p -= num; return *this; }
+            bool operator!=(const iterator<is_const>& o) const { return p != o.p; }
+            bool operator==(const iterator<is_const>& o) const { return p == o.p; }
+
+        };
     };
 }
 

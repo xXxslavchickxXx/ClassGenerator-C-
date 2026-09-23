@@ -1,6 +1,24 @@
 #include <gtest/gtest.h>
 
 #include <core/base/node/Node.h>
+#include <string>
+
+namespace tests {
+    struct EntityA : public cg::core::IEntity {
+        int value = 0;
+
+        EntityA(int val = 0) : value(val) {}
+
+        ~EntityA() = default;
+    };
+    
+    struct EntityB : public cg::core::IEntity {
+        std::string word;
+    
+        EntityB(const std::string& word_ = "") : word(word_) {}
+        ~EntityB() = default;
+    };
+}
 
 TEST(Node, DefaultCtorHasNullParent) {
     auto node = cg::core::Node();
@@ -104,4 +122,27 @@ TEST(TreeNode, FailedAddChildWithoutLosses) {
     // If the data could not be moved, the parent element
     // will remain as it was.
     EXPECT_EQ(some_child->get_parent(), &dummy_parent);
+}
+
+TEST(TreeNode, CreateChildWithoutData) {
+    auto some_node = cg::core::TreeNode();
+
+    auto* child = some_node.create_child<cg::core::Node, tests::EntityA>();
+    auto& ents = child->get_entities();
+    
+    EXPECT_TRUE(ents.has<tests::EntityA>());
+    EXPECT_FALSE(ents.has<tests::EntityB>());
+}
+
+TEST(TreeNode, CreateChildWithData) {
+    auto some_node = cg::core::TreeNode();
+
+    int test_value = 6;
+    auto some_serv = tests::EntityA(test_value);
+
+    auto* child = some_node.create_child<cg::core::Node>(some_serv);
+    auto& ents = child->get_entities();
+    ASSERT_NE(ents.get<tests::EntityA>(), nullptr);
+    
+    EXPECT_EQ(ents.get<tests::EntityA>()->value, test_value);
 }

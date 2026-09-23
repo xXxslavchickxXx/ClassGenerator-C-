@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <core/base/entity/EntityHandler.h>
+#include <core/base/serviceHandler/EntityHandler.h>
 #include <string>
 
 namespace tests {
