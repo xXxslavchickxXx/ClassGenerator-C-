@@ -3,8 +3,7 @@
 #include <stdexcept>
 
 namespace cg::core {
-    Node::Node() : Node(nullptr) {}
-    Node::Node(Node* parent) : parent(parent), entities() {}
+    Node::Node() : parent(nullptr) {}
 
     const Node* Node::get_parent() const {
         return parent;
@@ -24,7 +23,6 @@ namespace cg::core {
     const std::vector<std::unique_ptr<Node>>& TreeNode::get_children() const { return children; }
 
     TreeNode::TreeNode() : Node() {}
-    TreeNode::TreeNode(Node* parent) : Node(parent) {}
 
     size_t TreeNode::children_size() const {
         return children.size();

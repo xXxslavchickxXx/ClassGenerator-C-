@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <core/base/interfaces/INode.h>
 
 namespace cg {
     class IDispatcher {

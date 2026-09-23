@@ -4,7 +4,9 @@ namespace cg::core {
         static_assert(std::is_base_of_v<Node, NodeT>,
         "T must derive from Node");
 
-        auto new_child = std::make_unique<NodeT>(this);
+        auto new_child = std::make_unique<NodeT>();
+        new_child->set_parent(this);
+
         auto* raw_ptr = new_child.get();
         ((new_child->get_entities().add<Entities>()), ...);
         children.push_back(std::move(new_child));
@@ -16,7 +18,9 @@ namespace cg::core {
         static_assert(std::is_base_of_v<Node, NodeT>,
         "T must derive from Node");
         
-        auto new_child = std::make_unique<NodeT>(this);
+        auto new_child = std::make_unique<NodeT>();
+        new_child->set_parent(this);
+
         auto* raw_ptr = new_child.get();
         ((new_child->get_entities().add<Entities>(std::forward<Entities>(ents))), ...);
         children.push_back(std::move(new_child));

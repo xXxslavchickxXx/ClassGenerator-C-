@@ -4,12 +4,13 @@
 #include <vector>
 #include <type_traits>
 
-#include <core/base/interfaces/INode.h>
 #include <core/base/serviceHandler/EntityHandler.h>
 
 namespace cg::core {
-    class Node :
-        public INode
+    // FWD
+    class TreeNode;
+
+    class Node
     {
         Node* parent;
         
@@ -18,7 +19,6 @@ namespace cg::core {
 
     public:
         Node();
-        Node(Node* parent);
 
         Node(const Node&) = delete;
         Node& operator=(const Node&) = delete;
@@ -27,6 +27,8 @@ namespace cg::core {
 
         EntityHandler& get_entities();
         const EntityHandler& get_entities() const;
+
+        virtual TreeNode* as_container() { return nullptr; }
 
         const Node* get_parent() const;
 
@@ -52,7 +54,6 @@ namespace cg::core {
 
     public:
         TreeNode();
-        TreeNode(Node* parent);
 
         template<bool is_const>
         class iterator;
@@ -86,8 +87,6 @@ namespace cg::core {
 
         iterator<true> begin() const { return {children.data()}; }
         iterator<true> end() const { return {children.data() + children.size()}; }
-        // const_iter begin() const { return children.begin(); }
-        // const_iter end() const { return children.end(); }
     
     public:
         template<bool is_const>

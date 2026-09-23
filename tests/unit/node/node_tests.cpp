@@ -26,13 +26,6 @@ TEST(Node, DefaultCtorHasNullParent) {
     EXPECT_EQ(node.get_parent(), nullptr);
 }
 
-TEST(Node, CtorWithParentStoresParent) {
-    auto parent = cg::core::Node();
-    auto son = cg::core::Node(&parent);
-
-    EXPECT_EQ(son.get_parent(), &parent);
-}
-
 TEST(TreeNode, CreateChildReturnsNodeWithCorrectParent) {
     auto tree_node = cg::core::TreeNode();
     auto* node = tree_node.create_child<cg::core::Node>();
@@ -112,7 +105,8 @@ TEST(TreeNode, FailedAddChildWithoutLosses) {
 
     // Let him have some kind of parent to check for
     // this specific case involving data preservation.
-    auto some_child = std::make_unique<cg::core::TreeNode>(&dummy_parent);
+    auto some_child = std::make_unique<cg::core::TreeNode>();
+    some_child->set_parent(&dummy_parent);
 
     // Trying add child to yourself
     auto* move_result = some_child->add_child(std::move(some_child));
