@@ -5,10 +5,11 @@ namespace cg::core {
         "T must derive from Node");
 
         auto new_child = std::make_unique<NodeT>();
-        new_child->set_parent(this);
-
+        
         auto* raw_ptr = new_child.get();
         ((new_child->get_entities().add<Entities>()), ...);
+        new_child->set_parent(this);
+        
         children.push_back(std::move(new_child));
 
         return raw_ptr;
@@ -19,10 +20,11 @@ namespace cg::core {
         "T must derive from Node");
         
         auto new_child = std::make_unique<NodeT>();
-        new_child->set_parent(this);
 
         auto* raw_ptr = new_child.get();
         ((new_child->get_entities().add<Entities>(std::forward<Entities>(ents))), ...);
+        new_child->set_parent(this);
+
         children.push_back(std::move(new_child));
 
         return raw_ptr;

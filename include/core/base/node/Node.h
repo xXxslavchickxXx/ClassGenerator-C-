@@ -29,6 +29,7 @@ namespace cg::core {
         const EntityHandler& get_entities() const;
 
         virtual TreeNode* as_container() { return nullptr; }
+        virtual ~Node() = default;
 
         const Node* get_parent() const;
 
@@ -42,8 +43,6 @@ namespace cg::core {
         /// @note Безопасно, если:
         ///       - 'new_parent == nullptr' и узел не в 'children' ни у кого
         ///       - узел не в 'children' старого родителя
-        ///
-        /// @see TreeNode::reparent
         bool set_parent(Node* new_parent);
     };
 

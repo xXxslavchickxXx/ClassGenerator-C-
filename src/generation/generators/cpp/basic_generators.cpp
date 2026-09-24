@@ -1,5 +1,3 @@
-#pragma once
-
 #include <generation/generators/cpp/basic_generators.h>
 #include <core/base/node/Node.h>
 

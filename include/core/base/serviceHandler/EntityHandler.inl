@@ -17,6 +17,7 @@ namespace cg::core {
         "T must derive from IEntity");
 
         if (has<U>()) throw std::runtime_error("this service already exist, data can disappear");
+        if (ent_ptr.get() == nullptr) throw std::runtime_error("service can't be empty");
         
         entities[std::type_index(typeid(U))] = std::move(ent_ptr);
 

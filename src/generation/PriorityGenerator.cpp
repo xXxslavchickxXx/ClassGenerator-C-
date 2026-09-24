@@ -1,5 +1,3 @@
-#pragma once
-
 #include <generation/PriorityGenerator.h>
 #include <core/base/node/Node.h>
 
@@ -10,7 +8,7 @@ namespace cg {
         const core::Node* scoup,
         const IGenerator* dispetcher
     ) {
-        
+
         return "";
     }
 }
