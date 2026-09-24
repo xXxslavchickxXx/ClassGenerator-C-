@@ -1,15 +1,17 @@
 #pragma once
 
 #include <string>
-#include <core/base/interfaces/INode.h>
+
+namespace cg::core { class Node; }
 
 namespace cg {
     class IGenerator {
     public:
         virtual std::string generate(
-            const core::INode* ent,
+            const core::Node* ent,
             bool declaration = false,
-            const core::INode* scoup = nullptr
+            const core::Node* scoup = nullptr,
+            const IGenerator* dispetcher = nullptr
         ) = 0;
     };
 }

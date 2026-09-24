@@ -1,11 +1,10 @@
 #pragma once
 
 #include <generation/interfaces/IGenerator.h>
+#include <core/entities/cpp/basic_entites.h>
 
 namespace cg {
-    class PriorityDispatcher : public IGenerator {
-
-
+    class NamedEntityGenerator : public IGenerator {
     public:
         std::string generate(
             const core::Node* ent,

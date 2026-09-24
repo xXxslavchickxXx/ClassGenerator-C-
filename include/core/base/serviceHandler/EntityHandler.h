@@ -18,6 +18,9 @@ namespace cg::core {
         EntityHandler(EntityHandler&&) = default;
         EntityHandler& operator=(EntityHandler&&) = default;
 
+        std::unordered_map<std::type_index, std::unique_ptr<IEntity>>& get_entities() { return entities; }
+        const std::unordered_map<std::type_index, std::unique_ptr<IEntity>>& get_entities() const { return entities; }
+
         template<typename T>
         std::remove_cvref_t<T>* add();
         template<typename T>

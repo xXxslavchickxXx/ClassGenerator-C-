@@ -15,8 +15,6 @@ namespace cg::core {
         using U = std::remove_cvref_t<T>;
         static_assert(std::is_base_of_v<IEntity, U>,
         "T must derive from IEntity");
-        static_assert(!std::is_abstract_v<U>,
-        "Cannot instantiate abstract class");
 
         if (has<U>()) throw std::runtime_error("this service already exist, data can disappear");
         
@@ -44,8 +42,6 @@ namespace cg::core {
         using U = std::remove_cvref_t<T>;
         static_assert(std::is_base_of_v<IEntity, U>,
         "T must derive from IEntity");
-        static_assert(!std::is_abstract_v<U>,
-        "Cannot instantiate abstract class");
         static_assert(std::is_default_constructible_v<U>,
         "Type doesn't have default constructor");
 
@@ -58,8 +54,6 @@ namespace cg::core {
         using U = std::remove_cvref_t<T>;
         static_assert(std::is_base_of_v<IEntity, U>,
         "T must derive from IEntity");
-        static_assert(!std::is_abstract_v<U>,
-        "Cannot instantiate abstract class");
 
         if (!has<U>()) entities[std::type_index(typeid(U))] = std::make_unique<U>(std::forward<T>(entity));
 

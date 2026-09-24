@@ -28,7 +28,8 @@ target_sources(${PN}_LIB
 
 target_compile_options(${PN}_LIB
     PUBLIC
-        /W4
+        #/W4
+        /W3
         /fsanitize=address
     PRIVATE
         /RTC1
