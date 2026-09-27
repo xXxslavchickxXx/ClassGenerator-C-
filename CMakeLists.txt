@@ -36,9 +36,6 @@ target_compile_options(${PN}_LIB
         /analyze
 )
 
-# add_executable(someExe main.cpp)
-# target_link_libraries(someExe PRIVATE ${PN}_LIB)
-
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
