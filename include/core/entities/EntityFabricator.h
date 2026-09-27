@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <tuple>
 
-namespace cg::core { class Node; }
+namespace cg::core { class Node; class TreeNode; }
 
 template<typename U, typename... T>
 constexpr bool is_one_of_v = (std::is_same_v<std::remove_cvref_t<U>, std::remove_cvref_t<T>> || ...);
@@ -41,3 +41,9 @@ public:
         ((!is_one_of_v<T, U...> ? NT::entities.template add<T>() : 0), ...);
     }
 };
+
+template<typename... T>
+using NodeFabrica = EntityFabricator<cg::core::Node, T...>;
+
+template<typename... T>
+using TreeNodeFabrica = EntityFabricator<cg::core::TreeNode, T...>;

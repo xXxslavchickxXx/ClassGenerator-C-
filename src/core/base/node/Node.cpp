@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 namespace cg::core {
-    Node::Node() : parent(nullptr) {}
+    Node::Node() : parent(nullptr), entities() {}
 
     const Node* Node::get_parent() const {
         return parent;

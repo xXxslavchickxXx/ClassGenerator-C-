@@ -5,12 +5,6 @@
 #include <core/base/node/Node.h>
 
 namespace cg::entities::cpp {
-    template<typename... T>
-    using Node = EntityFabricator<cg::core::Node, T...>;
-
-    template<typename... T>
-    using TreeNode = EntityFabricator<cg::core::TreeNode, T...>;
-
-    using Namespace = TreeNode<NamedEntity, DefinitionEntity>;
-    using Class = TreeNode<NamedEntity, DefinitionEntity>;
+    using Namespace = TreeNodeFabrica<NamedEntity, DefinitionEntity>;
+    using Class = TreeNodeFabrica<NamedEntity, DefinitionEntity>;
 }

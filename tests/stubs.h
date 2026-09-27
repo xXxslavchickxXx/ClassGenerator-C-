@@ -7,6 +7,7 @@
 #include <string>
 
 namespace tests {
+    /// @brief Stub class with integer num
     struct EntityA : public cg::core::IEntity {
         int value = 0;
 
@@ -15,6 +16,7 @@ namespace tests {
         ~EntityA() = default;
     };
     
+    /// @brief Stub class with word
     struct EntityB : public cg::core::IEntity {
         std::string word;
     

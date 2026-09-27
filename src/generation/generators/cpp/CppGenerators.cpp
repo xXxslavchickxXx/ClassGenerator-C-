@@ -3,8 +3,17 @@
 
 #include <sstream>
 
-namespace cg {
-    std::string NamedEntityGenerator::generate(
+namespace cg::gen::cpp {
+
+    
+    std::string relative_path(
+        const core::Node* ent,
+        const core::Node* scope
+    ) {
+        return "";
+    }
+
+    std::string NamespaceGenerator::generate(
         const core::Node* ent,
         bool declaration,
         const core::Node* scoup,
@@ -20,6 +29,8 @@ namespace cg {
 
         auto* ne_ptr = ent->get_entities().get<cg::entities::cpp::NamedEntity>();
         if (!ne_ptr) return "";
+
+
 
         std::stringstream sstr;
 
