@@ -1,4 +1,4 @@
-#include <generation/generators/cpp/PriorityGenerator.h>
+#include <generation/generators/PriorityGenerator.h>
 #include <core/base/node/Node.h>
 
 #include <sstream>

@@ -1,23 +1,5 @@
 #include <gtest/gtest.h>
-#include <core/entities/EntityFabricator.h>
-#include <core/base/node/Node.h>
-
-namespace tests {
-    struct EntityA : public cg::core::IEntity {
-        int value = 0;
-
-        EntityA(int val = 0) : value(val) {}
-
-        ~EntityA() = default;
-    };
-    
-    struct EntityB : public cg::core::IEntity {
-        std::string word;
-    
-        EntityB(const std::string& word_ = "") : word(word_) {}
-        ~EntityB() = default;
-    };
-}
+#include <stubs.h>
 
 TEST(EntityFabricator, DefaultCtorWithoutEntities) {
     auto node = EntityFabricator<cg::core::Node>();

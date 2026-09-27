@@ -1,19 +1,5 @@
 #include <gtest/gtest.h>
-
-#include <core/base/node/Node.h>
-#include <core/entities/cpp/BasicEntities.h>
-#include <string>
-
-namespace tests {
-    constexpr int default_value = 0;
-    struct EntityA : public cg::core::IEntity {
-        int value;
-
-        EntityA(int val = default_value) : value(val) {}
-
-        ~EntityA() = default;
-    };
-}
+#include <stubs.h>
 
 TEST(EntityHandlerIntegrationTest, NodeMoveService) {
     // Creating 2 diffenet nodes;

@@ -1,54 +1,5 @@
 #include <gtest/gtest.h>
-
-#include <generation/generators/cpp/BasicGenerators.h>
-#include <generation/generators/cpp/PriorityGenerator.h>
-
-#include <core/base/node/Node.h>
-#include <core/entities/cpp/BasicEntities.h>
-#include <core/entities/EntityFabricator.h>
-
-namespace tests {
-    struct EntityA : public cg::core::IEntity {
-        int value = 0;
-
-        EntityA(int val = 0) : value(val) {}
-
-        ~EntityA() = default;
-    };
-    
-    struct EntityB : public cg::core::IEntity {
-        std::string word;
-    
-        EntityB(const std::string& word_ = "") : word(word_) {}
-        ~EntityB() = default;
-    };
-
-    struct AGen : public cg::IGenerator {
-        std::string generate(
-            const cg::core::Node* ent,
-            bool declaration = false,
-            const cg::core::Node* scoup = nullptr,
-            const IGenerator* dispetcher = nullptr
-        ) override {
-            if (!ent->get_entities().has<EntityA>()) return "";
-
-            return std::to_string(ent->get_entities().get<EntityA>()->value);
-        }
-    };
-
-    struct BGen : public cg::IGenerator {
-        std::string generate(
-            const cg::core::Node* ent,
-            bool declaration = false,
-            const cg::core::Node* scoup = nullptr,
-            const IGenerator* dispetcher = nullptr
-        ) override {
-            if (!ent->get_entities().has<EntityB>()) return "";
-
-            return (ent->get_entities().get<EntityB>()->word);            
-        }
-    };
-}
+#include <stubs.h>
 
 TEST(PriorityGenIntegrationTest, DeleteGenerator) {
     // Test data
@@ -129,18 +80,20 @@ TEST(PriorityGenIntegrationTest, GeneratePutBack) {
 
 TEST(NamedEntityGeneratorIntegrationTest, ReturnsEmptyWhenNoEntity) {
     cg::core::Node node;
-    cg::NamedEntityGenerator gen;
+
+    auto gen = cg::PriorityGenerator();
+
     EXPECT_EQ(gen.generate(&node), "");
 }
 
 TEST(NamedEntityGeneratorIntegrationTest, GenerateNameFromEntity) {
     std::string node_name = "word";
 
-    auto ent = cg::entities::cpp::NamedEntity(node_name);
+    auto ent = tests::EntityB(node_name);
 
-    auto node = std::make_unique<EntityFabricator<cg::core::Node, cg::entities::cpp::NamedEntity>>(ent);
+    auto node = std::make_unique<EntityFabricator<cg::core::Node, tests::EntityB>>(ent);
 
-    auto gen = cg::NamedEntityGenerator();
+    auto gen = cg::PriorityGeneratorFabricator<tests::BGen>();
 
     EXPECT_EQ(gen.generate(node.get()), node_name);
 }

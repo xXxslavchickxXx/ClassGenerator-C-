@@ -1,24 +1,5 @@
 #include <gtest/gtest.h>
-
-#include <core/base/serviceHandler/EntityHandler.h>
-#include <string>
-
-namespace tests {
-    struct EntityA : public cg::core::IEntity {
-        int value = 0;
-
-        EntityA(int val = 0) : value(val) {}
-
-        ~EntityA() = default;
-    };
-    
-    struct EntityB : public cg::core::IEntity {
-        std::string word;
-    
-        EntityB(const std::string& word_ = "") : word(word_) {}
-        ~EntityB() = default;
-    };
-}
+#include <stubs.h>
 
 TEST(EntityHandler, DefaultCtor) {
     auto handler = cg::core::EntityHandler();
