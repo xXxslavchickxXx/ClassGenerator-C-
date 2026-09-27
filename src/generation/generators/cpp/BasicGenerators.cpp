@@ -8,7 +8,7 @@ namespace cg {
         const core::Node* ent,
         bool declaration,
         const core::Node* scoup,
-        const IGenerator* dispetcher
+        const IGenerator* dispatcher
     ) {
         // TODO...
         // На самом деле тут дофига чего надо сделать:

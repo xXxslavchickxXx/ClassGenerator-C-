@@ -4,7 +4,7 @@
 #include <generation/generators/cpp/PriorityGenerator.h>
 
 #include <core/base/node/Node.h>
-#include <core/entities/cpp/BasicEntites.h>
+#include <core/entities/cpp/BasicEntities.h>
 #include <core/entities/EntityFabricator.h>
 
 namespace tests {

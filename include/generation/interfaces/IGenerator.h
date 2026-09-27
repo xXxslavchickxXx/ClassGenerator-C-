@@ -13,7 +13,7 @@ namespace cg {
             const core::Node* ent,
             bool declaration = false,
             const core::Node* scoup = nullptr,
-            const IGenerator* dispetcher = nullptr
+            const IGenerator* dispatcher = nullptr
         ) = 0;
 
         virtual ~IGenerator() = default;

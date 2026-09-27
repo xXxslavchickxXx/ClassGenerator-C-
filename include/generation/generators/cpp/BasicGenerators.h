@@ -1,7 +1,7 @@
 #pragma once
 
 #include <generation/interfaces/IGenerator.h>
-#include <core/entities/cpp/BasicEntites.h>
+#include <core/entities/cpp/BasicEntities.h>
 
 namespace cg {
     class NamedEntityGenerator : public IGenerator {
@@ -10,7 +10,7 @@ namespace cg {
             const core::Node* ent,
             bool declaration = false,
             const core::Node* scoup = nullptr,
-            const IGenerator* dispetcher = nullptr
+            const IGenerator* dispatcher = nullptr
         ) override;
     };
 }
