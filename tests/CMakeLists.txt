@@ -18,5 +18,4 @@ target_link_libraries(${PN}_tests
         GTest::gtest
 )
 
-enable_testing()
 gtest_discover_tests(${PN}_tests)

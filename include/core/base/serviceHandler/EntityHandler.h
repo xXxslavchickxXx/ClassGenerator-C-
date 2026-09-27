@@ -6,7 +6,6 @@
 #include <core/base/interfaces/IEntity.h>
 
 namespace cg::core {
-
     class EntityHandler {
         std::unordered_map<std::type_index, std::unique_ptr<IEntity>> entities;
 
@@ -17,9 +16,6 @@ namespace cg::core {
         EntityHandler& operator=(const EntityHandler&) = delete;
         EntityHandler(EntityHandler&&) = default;
         EntityHandler& operator=(EntityHandler&&) = default;
-
-        std::unordered_map<std::type_index, std::unique_ptr<IEntity>>& get_entities() { return entities; }
-        const std::unordered_map<std::type_index, std::unique_ptr<IEntity>>& get_entities() const { return entities; }
 
         template<typename T>
         std::remove_cvref_t<T>* add();

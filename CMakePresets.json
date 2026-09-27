@@ -19,7 +19,7 @@
             "inherits": "ProjectSetup",
             "binaryDir": "${sourceDir}/out/build/Debug",
             "cacheVariables": {
-                "BUILD_TESTS": "TRUE"
+                "BUILD_TESTS": true
             }
         }
     ]

@@ -1,4 +1,4 @@
-#include <core/entities/cpp/basic_entites.h>
+#include <core/entities/cpp/BasicEntites.h>
 
 namespace cg::entities::cpp {
 	NamedEntity::NamedEntity(const std::string& new_name) : name(new_name) {}

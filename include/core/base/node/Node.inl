@@ -1,3 +1,5 @@
+#pragma once
+
 namespace cg::core {
     template<typename NodeT, typename... Entities>
     NodeT* TreeNode::create_child() {

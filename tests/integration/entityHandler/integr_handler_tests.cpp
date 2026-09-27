@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <core/base/node/Node.h>
-#include <core/entities/cpp/basic_entites.h>
+#include <core/entities/cpp/BasicEntites.h>
 #include <string>
 
 namespace tests {
