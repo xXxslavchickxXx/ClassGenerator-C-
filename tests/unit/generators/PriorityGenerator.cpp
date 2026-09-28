@@ -10,7 +10,7 @@ TEST(PriorityGenIntegrationTest, DeleteGenerator) {
     auto ent_num = tests::EntityA(test_num);
     auto ent_word = tests::EntityB(test_name);
 
-    auto node = std::make_unique<EntityFabricator<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
+    auto node = std::make_unique<TypeRegistryFabrica<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
 
     auto gen = cg::PriorityGenerator();
 
@@ -31,7 +31,7 @@ TEST(PriorityGenIntegrationTest, GenerateNestedGen) {
     auto ent_num = tests::EntityA(test_num);
     auto ent_word = tests::EntityB(test_name);
 
-    auto node = std::make_unique<EntityFabricator<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
+    auto node = std::make_unique<TypeRegistryFabrica<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
 
     using NestedGenerator = cg::PriorityGeneratorFabricator<tests::BGen, tests::AGen>;
 
@@ -49,7 +49,7 @@ TEST(PriorityGenIntegrationTest, GeneratePutFront) {
     auto ent_num = tests::EntityA(test_num);
     auto ent_word = tests::EntityB(test_name);
 
-    auto node = std::make_unique<EntityFabricator<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
+    auto node = std::make_unique<TypeRegistryFabrica<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
 
     auto gen = cg::PriorityGenerator();
 
@@ -68,7 +68,7 @@ TEST(PriorityGenIntegrationTest, GeneratePutBack) {
     auto ent_num = tests::EntityA(test_num);
     auto ent_word = tests::EntityB(test_name);
 
-    auto node = std::make_unique<EntityFabricator<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
+    auto node = std::make_unique<TypeRegistryFabrica<cg::core::Node, tests::EntityA, tests::EntityB>>(ent_num, ent_word);
 
     auto gen = cg::PriorityGenerator();
 
@@ -91,7 +91,7 @@ TEST(NamedEntityGeneratorIntegrationTest, GenerateNameFromEntity) {
 
     auto ent = tests::EntityB(node_name);
 
-    auto node = std::make_unique<EntityFabricator<cg::core::Node, tests::EntityB>>(ent);
+    auto node = std::make_unique<TypeRegistryFabrica<cg::core::Node, tests::EntityB>>(ent);
 
     auto gen = cg::PriorityGeneratorFabricator<tests::BGen>();
 

@@ -9,8 +9,8 @@ namespace cg::core {
         return parent;
     }
     
-    EntityHandler& Node::get_entities() { return entities; }
-    const EntityHandler& Node::get_entities() const { return entities; }
+    TypeRegistry<IEntity>& Node::get_entities() { return entities; }
+    const TypeRegistry<IEntity>& Node::get_entities() const { return entities; }
     
     bool Node::set_parent(Node* new_parent) {
         if (new_parent != this) {

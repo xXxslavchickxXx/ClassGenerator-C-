@@ -6,16 +6,19 @@
 #include <core/base/interfaces/IEntity.h>
 
 namespace cg::core {
-    class EntityHandler {
-        std::unordered_map<std::type_index, std::unique_ptr<IEntity>> entities;
+    template<typename Type>
+    class TypeRegistry {
+    protected:
+        using service_type = Type;
+        std::unordered_map<std::type_index, std::unique_ptr<Type>> entities;
 
     public:
-        EntityHandler() = default;
+        TypeRegistry() = default;
 
-        EntityHandler(const EntityHandler&) = delete;
-        EntityHandler& operator=(const EntityHandler&) = delete;
-        EntityHandler(EntityHandler&&) = default;
-        EntityHandler& operator=(EntityHandler&&) = default;
+        TypeRegistry(const TypeRegistry&) = delete;
+        TypeRegistry& operator=(const TypeRegistry&) = delete;
+        TypeRegistry(TypeRegistry&&) = default;
+        TypeRegistry& operator=(TypeRegistry&&) = default;
 
         template<typename T>
         std::remove_cvref_t<T>* add();
@@ -28,7 +31,7 @@ namespace cg::core {
         void remove();
 
         template<typename T>
-        std::unique_ptr<std::remove_cvref_t<T>> move_service();
+        std::unique_ptr<std::remove_cvref_t<T>> release();
 
         template<typename T>
         std::remove_cvref_t<T>* get();
@@ -41,4 +44,4 @@ namespace cg::core {
     };
 }
 
-#include "EntityHandler.inl"
+#include "TypeRegistry.inl"

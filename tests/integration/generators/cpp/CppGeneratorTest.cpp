@@ -3,6 +3,7 @@
 
 #include <core/entities/cpp/entites.h>
 #include <generation/generators/cpp/CppGenerators.h>
+#include <generation/dispatchers/RegisteredDispatcher.h>
 
 TEST(CPPGen, RelativeFunc) {
     // Empty Node
@@ -32,9 +33,11 @@ TEST(CPPGen, NamespaceGen) {
     auto main = cg::entities::cpp::Namespace(main_name);
     auto* ext_ptr = main.add_child(std::make_unique<cg::entities::cpp::Namespace>(external_name));
 
-    auto gen = cg::gen::cpp::NamespaceGenerator();
+    auto dispatcher = cg::RegisteredDispatcher();
 
-    EXPECT_EQ(gen.generate(&main), "namespace main {\n\n}");
-    EXPECT_EQ(gen.generate(ext_ptr), "namespace main::external {\n\n}");
-    EXPECT_EQ(gen.generate(ext_ptr, false, &main), "namespace external {\n\n}");
+    dispatcher.add<cg::gen::cpp::NamespaceGenerator>();
+
+    EXPECT_EQ(dispatcher.generate(&main), "namespace main {\n\n}");
+    EXPECT_EQ(dispatcher.generate(ext_ptr), "namespace main::external {\n\n}");
+    EXPECT_EQ(dispatcher.generate(ext_ptr, false, &main), "namespace external {\n\n}");
 }

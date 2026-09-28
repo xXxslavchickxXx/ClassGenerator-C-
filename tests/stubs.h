@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/entities/EntityFabricator.h>
+#include <core/base/typeRegistry/TypeRegistryFabricator.h>
 #include <core/base/node/Node.h>
 #include <generation/generators/PriorityGenerator.h>
 

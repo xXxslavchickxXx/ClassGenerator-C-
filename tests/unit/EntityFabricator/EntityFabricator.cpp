@@ -2,14 +2,14 @@
 #include <stubs.h>
 
 TEST(EntityFabricator, DefaultCtorWithoutEntities) {
-    auto node = EntityFabricator<cg::core::Node>();
-    auto tree_node = EntityFabricator<cg::core::TreeNode>();
+    auto node = TypeRegistryFabrica<cg::core::Node>();
+    auto tree_node = TypeRegistryFabrica<cg::core::TreeNode>();
 
     SUCCEED();
 }
 
 TEST(EntityFabricator, DefaultCtorWithClearEntities) {
-    auto node = EntityFabricator<cg::core::Node, tests::EntityA>();
+    auto node = TypeRegistryFabrica<cg::core::Node, tests::EntityA>();
 
     EXPECT_TRUE(node.get_entities().has<tests::EntityA>());
 }
@@ -18,7 +18,7 @@ TEST(EntityFabricator, CtorWithObjEntity) {
     int test_num = 5;
     auto ent = tests::EntityA(test_num);
 
-    auto node = EntityFabricator<cg::core::Node, tests::EntityA>(ent);
+    auto node = TypeRegistryFabrica<cg::core::Node, tests::EntityA>(ent);
     ASSERT_TRUE(node.get_entities().has<tests::EntityA>());
 
     EXPECT_EQ(node.get_entities().get<tests::EntityA>()->value, test_num);
@@ -28,7 +28,7 @@ TEST(EntityFabricator, CtorWithObjEntities) {
     int test_num = 5;
     auto ent = tests::EntityA(test_num);
 
-    auto node = EntityFabricator<cg::core::Node, tests::EntityA, tests::EntityB>(ent);
+    auto node = TypeRegistryFabrica<cg::core::Node, tests::EntityA, tests::EntityB>(ent);
     ASSERT_TRUE(node.get_entities().has<tests::EntityA>());
     ASSERT_TRUE(node.get_entities().has<tests::EntityB>());
 
@@ -41,7 +41,7 @@ TEST(EntityFabricator, CtorWithObjEntitiesUnorderedQuery) {
     std::string test_word = "some";
     auto ent_B = tests::EntityB(test_word);
 
-    auto node = EntityFabricator<cg::core::Node, tests::EntityA, tests::EntityB>(ent_B, ent_A);
+    auto node = TypeRegistryFabrica<cg::core::Node, tests::EntityA, tests::EntityB>(ent_B, ent_A);
     ASSERT_TRUE(node.get_entities().has<tests::EntityA>());
     ASSERT_TRUE(node.get_entities().has<tests::EntityB>());
 

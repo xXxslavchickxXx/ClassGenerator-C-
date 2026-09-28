@@ -4,7 +4,7 @@
 #include <vector>
 #include <type_traits>
 
-#include <core/base/serviceHandler/EntityHandler.h>
+#include <core/base/typeRegistry/TypeRegistry.h>
 
 namespace cg::core {
     // FWD
@@ -15,7 +15,7 @@ namespace cg::core {
         Node* parent;
         
     protected:
-        EntityHandler entities;
+        TypeRegistry<IEntity> entities;
 
     public:
         Node();
@@ -25,8 +25,8 @@ namespace cg::core {
         Node(Node&& other) = delete;
         Node& operator=(Node&& other) = delete;
 
-        EntityHandler& get_entities();
-        const EntityHandler& get_entities() const;
+        TypeRegistry<IEntity>& get_entities();
+        const TypeRegistry<IEntity>& get_entities() const;
 
         virtual TreeNode* as_container() { return nullptr; }
         virtual const TreeNode* as_container() const { return nullptr; }

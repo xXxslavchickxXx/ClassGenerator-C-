@@ -4,30 +4,24 @@
 #include <type_traits>
 #include <tuple>
 
-namespace cg::core { class Node; class TreeNode; }
-
 template<typename U, typename... T>
 constexpr bool is_one_of_v = (std::is_same_v<std::remove_cvref_t<U>, std::remove_cvref_t<T>> || ...);
 
 template<typename NT, typename... T>
-class EntityFabricator : public NT {
+class TypeRegistryFabrica : public NT {
     static_assert(
-        ((std::is_base_of_v<cg::core::IEntity, T>) && ...),
-        "Every element in list would be derived from IEntity"
-    );
-    static_assert(
-        std::is_base_of_v<cg::core::Node, NT>,
-        "NT would derived from Node"
+        ((std::is_base_of_v<this->service_type, T>) && ...),
+        "Every element in list would be derived from service_type"
     );
 
 public:
-    EntityFabricator() : NT() {
+    TypeRegistryFabrica() : NT() {
         ((NT::entities.template add<T>()), ...);
     }
     
     template<typename... U>
         requires(sizeof...(U) > 0)
-    EntityFabricator(U&&... ents) : NT() {
+    TypeRegistryFabrica(U&&... ents) : NT() {
         static_assert(
             (is_one_of_v<U, T...> && ...),
             "Every element in list would be derived from IEntity"
@@ -41,9 +35,3 @@ public:
         ((!is_one_of_v<T, U...> ? NT::entities.template add<T>() : 0), ...);
     }
 };
-
-template<typename... T>
-using NodeFabrica = EntityFabricator<cg::core::Node, T...>;
-
-template<typename... T>
-using TreeNodeFabrica = EntityFabricator<cg::core::TreeNode, T...>;
