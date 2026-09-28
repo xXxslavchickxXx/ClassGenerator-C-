@@ -56,8 +56,8 @@ namespace cg {
             const core::Node* ent,
             bool declaration = false,
             const core::Node* scoup = nullptr,
-            const IGenerator* dispetcher = nullptr
-        ) override;
+            const IDispatcher* dispetcher = nullptr
+        ) const override;
     };
 
     template<typename... T>

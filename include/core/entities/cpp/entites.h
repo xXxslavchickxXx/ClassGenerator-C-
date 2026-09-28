@@ -5,6 +5,10 @@
 #include <core/base/node/Node.h>
 
 namespace cg::entities::cpp {
-    using Namespace = TreeNodeFabrica<NamedEntity, DefinitionEntity>;
-    using Class = TreeNodeFabrica<NamedEntity, DefinitionEntity>;
+	// Классы заглушки
+	class INamespace : public core::IEntity {};
+    class IClass : public core::IEntity {};
+
+    using Namespace = TreeNodeFabrica<NamedEntity, DefinitionEntity, INamespace>;
+    using Class = TreeNodeFabrica<NamedEntity, DefinitionEntity, IClass>;
 }

@@ -29,8 +29,8 @@ namespace tests {
             const cg::core::Node* ent,
             bool declaration = false,
             const cg::core::Node* scoup = nullptr,
-            const IGenerator* dispetcher = nullptr
-        ) override {
+            const cg::IDispatcher* dispetcher = nullptr
+        ) const override {
             if (!ent->get_entities().has<EntityA>()) return "";
 
             return std::to_string(ent->get_entities().get<EntityA>()->value);
@@ -42,8 +42,8 @@ namespace tests {
             const cg::core::Node* ent,
             bool declaration = false,
             const cg::core::Node* scoup = nullptr,
-            const IGenerator* dispetcher = nullptr
-        ) override {
+            const cg::IDispatcher* dispetcher = nullptr
+        ) const override {
             if (!ent->get_entities().has<EntityB>()) return "";
 
             return (ent->get_entities().get<EntityB>()->word);            

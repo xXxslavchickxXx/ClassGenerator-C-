@@ -1,7 +1,9 @@
 #include <generation/generators/cpp/CppGenerators.h>
 #include <core/base/node/Node.h>
+#include <generation/utils.h>
 
 #include <sstream>
+#include <stack>
 
 namespace cg::gen::cpp {
 
@@ -10,31 +12,58 @@ namespace cg::gen::cpp {
         const core::Node* ent,
         const core::Node* scope
     ) {
-        return "";
+        std::stack<const core::Node*> path;
+
+        auto* iter = ent;
+        while (iter) {
+            if (iter == scope) break;
+
+            path.push(iter);
+            iter = iter->get_parent();
+        }
+
+        std::stringstream sstr;
+        while(!path.empty()) {
+            if (!path.top()->get_entities().has<entities::cpp::NamedEntity>())
+                throw std::runtime_error("To extract a relative path in the form, each node must have a NamedEntity.");
+            
+            sstr << path.top()->get_entities().get<entities::cpp::NamedEntity>()->get_name();
+            path.pop();
+
+            if (!path.empty()) sstr << "::";
+        }
+
+        return sstr.str();
+    }
+    
+    bool NamespaceGenerator::can_generate(const core::Node* node) const {
+        if (!node) return false;
+
+        if (node->get_entities().has<cg::entities::cpp::INamespace>()) return true;
+
+        return false;
     }
 
     std::string NamespaceGenerator::generate(
         const core::Node* ent,
         bool declaration,
         const core::Node* scoup,
-        const IGenerator* dispatcher
-    ) {
-        // TODO...
-        // На самом деле тут дофига чего надо сделать:
-        // 1. Самое важно это релативацию пути, типа получение относительного пути
-        // 2. Это собственно отображение относительного пути
-        // Суть в том, что я собираюсь этот генератор использовать не только
-        // для неймспейс генератора, но и для других сущностей, например функции
-        // там тоже надо генерить имя с относительным путем, и в целом все как надо будет
-
-        auto* ne_ptr = ent->get_entities().get<cg::entities::cpp::NamedEntity>();
-        if (!ne_ptr) return "";
-
-
-
+        const IDispatcher* dispatcher
+    ) const {
         std::stringstream sstr;
 
-        sstr << ne_ptr->get_name();
+        sstr << "namespace " << relative_path(ent, scoup) << " {\n";
+
+        auto* tree_cast = ent->as_container();
+        if (!tree_cast)
+            throw std::runtime_error("namespace node would be a tree node!");
+        
+        if (dispatcher)
+            for (auto* node : *tree_cast) {
+                tabulate(dispatcher->generate(node, declaration, ent), 1, "    ");
+            }
+
+        sstr << "\n}";
 
         return sstr.str();
     }

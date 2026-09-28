@@ -74,8 +74,8 @@ namespace cg {
         const core::Node* ent,
         bool declaration,
         const core::Node* scoup,
-        const IGenerator* dispetcher
-    ) {
+        const IDispatcher* dispatcher
+    ) const {
         std::stringstream sstr;
 
         for (auto it = priority_map.begin(); it != priority_map.end(); it++) {
@@ -83,7 +83,7 @@ namespace cg {
 
             auto& gen = it->second;
             if (gen->can_generate(ent))
-                sstr << gen->generate(ent, declaration, scoup, dispetcher);
+                sstr << gen->generate(ent, declaration, scoup, dispatcher);
         }
 
         return sstr.str();

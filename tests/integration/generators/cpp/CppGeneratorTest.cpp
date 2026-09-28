@@ -5,6 +5,9 @@
 #include <generation/generators/cpp/CppGenerators.h>
 
 TEST(CPPGen, RelativeFunc) {
+    // Empty Node
+    EXPECT_EQ(cg::gen::cpp::relative_path(nullptr), "");
+
     auto main_name = cg::entities::cpp::NamedEntity("main");
     auto external_name = cg::entities::cpp::NamedEntity("external");
 
@@ -15,6 +18,10 @@ TEST(CPPGen, RelativeFunc) {
     EXPECT_EQ(cg::gen::cpp::relative_path(&main), "main");
     EXPECT_EQ(cg::gen::cpp::relative_path(ext_ptr), "main::external");
     EXPECT_EQ(cg::gen::cpp::relative_path(ext_ptr, &main), "external");
+
+    // Path without NamedEntity (catching exception)
+    auto node_without_entities = cg::core::Node();
+    EXPECT_ANY_THROW(cg::gen::cpp::relative_path(&node_without_entities));
 }
 
 TEST(CPPGen, NamespaceGen) {
@@ -27,7 +34,7 @@ TEST(CPPGen, NamespaceGen) {
 
     auto gen = cg::gen::cpp::NamespaceGenerator();
 
-    // EXPECT_EQ(gen.generate(&main), "main");
-    // EXPECT_EQ(gen.generate(ext_ptr), "main::external");
-    // EXPECT_EQ(gen.generate(ext_ptr, false, &main), "external");
+    EXPECT_EQ(gen.generate(&main), "namespace main {\n\n}");
+    EXPECT_EQ(gen.generate(ext_ptr), "namespace main::external {\n\n}");
+    EXPECT_EQ(gen.generate(ext_ptr, false, &main), "namespace external {\n\n}");
 }

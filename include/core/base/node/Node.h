@@ -29,6 +29,7 @@ namespace cg::core {
         const EntityHandler& get_entities() const;
 
         virtual TreeNode* as_container() { return nullptr; }
+        virtual const TreeNode* as_container() const { return nullptr; }
         virtual ~Node() = default;
 
         const Node* get_parent() const;
@@ -59,6 +60,7 @@ namespace cg::core {
 
     public:
         TreeNode* as_container() override { return this; }
+        const TreeNode* as_container() const override { return this; }
         
         template<typename NodeT, typename... Entities>
         NodeT* create_child();

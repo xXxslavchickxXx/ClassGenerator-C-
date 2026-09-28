@@ -1,5 +1,6 @@
 #pragma once
 
+#include <generation/interfaces/IDispatcher.h>
 #include <string>
 
 namespace cg::core { class Node; }
@@ -13,8 +14,8 @@ namespace cg {
             const core::Node* ent,
             bool declaration = false,
             const core::Node* scoup = nullptr,
-            const IGenerator* dispatcher = nullptr
-        ) = 0;
+            const IDispatcher* dispatcher = nullptr
+        ) const = 0;
 
         virtual ~IGenerator() = default;
     };
