@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <stubs.h>
+#include <format>
 
 #include <core/entities/cpp/entites.h>
 #include <generation/generators/cpp/CppGenerators.h>
@@ -35,7 +36,13 @@ TEST(CPPGen, NamespaceGen) {
 
     auto dispatcher = cg::RegDispatcherFtor<cg::gen::cpp::NamespaceGenerator>();
 
-    EXPECT_EQ(dispatcher.generate(&main), "namespace main {\n\n}");
+    EXPECT_EQ(dispatcher.generate(&main),
+R"(namespace main {
+    namespace external {
+    
+    }
+})"
+    );
     EXPECT_EQ(dispatcher.generate(ext_ptr), "namespace main::external {\n\n}");
     EXPECT_EQ(dispatcher.generate(ext_ptr, false, &main), "namespace external {\n\n}");
 }

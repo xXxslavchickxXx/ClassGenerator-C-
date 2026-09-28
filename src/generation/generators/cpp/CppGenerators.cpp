@@ -60,7 +60,7 @@ namespace cg::gen::cpp {
         
         if (dispatcher)
             for (auto* node : *tree_cast) {
-                tabulate(dispatcher->generate(node, declaration, ent), 1, "    ");
+                sstr << tabulate(dispatcher->generate(node, declaration, ent), 1, "    ");
             }
 
         sstr << "\n}";

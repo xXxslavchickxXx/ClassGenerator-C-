@@ -7,7 +7,7 @@
             "hidden": true,
             "generator": "Ninja",
             "cacheVariables": {
-                "CMAKE_CXX_STANDARD": "20",
+                "CMAKE_CXX_STANDARD": "23",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "CMAKE_C_COMPILER": "cl.exe",
