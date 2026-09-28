@@ -29,6 +29,8 @@ namespace cg {
         }
     };
 
-    // template<typename... T>
-    // using RegisteredDispatcherFabricator = 
+    /// @brief RegisteredDispatcherFabricator
+    /// @tparam ...T 
+    template<typename... T>
+    using RegDispatcherFtor = TypeRegistryFabricator<RegisteredDispatcher, T...>;
 }

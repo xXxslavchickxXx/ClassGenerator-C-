@@ -45,3 +45,4 @@ namespace cg::core {
 }
 
 #include "TypeRegistry.inl"
+#include "TypeRegistryFabricator.h"

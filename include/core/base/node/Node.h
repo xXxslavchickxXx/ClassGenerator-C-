@@ -117,3 +117,4 @@ namespace cg::core {
 }
 
 #include "Node.inl"
+#include "NodeFabricator.h"

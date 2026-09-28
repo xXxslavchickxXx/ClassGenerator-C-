@@ -7,30 +7,35 @@
 #include <core/base/concepts.h>
 
 template<typename NT, typename... T>
-class TypeRegistryFabricator : public NT {
+class NodeFabricator : public NT {
     static_assert(
-        ((std::is_base_of_v<this->service_type, T>) && ...),
+        ((std::is_base_of_v<this->entities.service_type, T>) && ...),
         "Every element in list would be derived from service_type"
     );
 
 public:
-    TypeRegistryFabricator() : NT() {
-        ((this->template add<T>()), ...);
+    NodeFabricator() : NT() {
+        ((this->entities.template add<T>()), ...);
     }
     
     template<typename... U>
         requires(sizeof...(U) > 0)
-    TypeRegistryFabricator(U&&... ents) : NT() {
+    NodeFabricator(U&&... ents) : NT() {
         static_assert(
             (is_one_of_v<U, T...> && ...),
             "Every element in list would be derived from IEntity"
         );
 
         // We add only the objects that have been passed.
-        (this->template add<U>(std::forward<U>(ents)), ...);
+        (this->entities.template add<U>(std::forward<U>(ents)), ...);
 
         // We are looking for entities that are not mentioned in 
         // the list of U, but are present in the list of T.
-        ((!is_one_of_v<T, U...> ? this->template add<T>() : 0), ...);
+        ((!is_one_of_v<T, U...> ? this->entities.template add<T>() : 0), ...);
     }
 };
+
+template<typename... T>
+using NodeFabrica = NodeFabricator<cg::core::Node, T...>;
+template<typename... T>
+using TreeNodeFabrica = NodeFabricator<cg::core::TreeNode, T...>;
