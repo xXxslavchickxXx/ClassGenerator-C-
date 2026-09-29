@@ -34,6 +34,7 @@ target_compile_options(${PN}_LIB
         /RTC1
         /WX
         /analyze
+        /Zc:preprocessor
 )
 
 if (BUILD_TESTS)

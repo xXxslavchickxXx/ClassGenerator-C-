@@ -7,8 +7,6 @@ file(GLOB_RECURSE ${PN}_test_src
 file(GLOB_RECURSE ${PN}_test_hdrs
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
 )
-list(REMOVE_ITEM ${PN}_test_src "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
-message("[INFORMATION] ${${PN}_test_src}")
 add_executable(${PN}_tests)
 target_sources(${PN}_tests
     PRIVATE

@@ -23,7 +23,7 @@ public:
     TypeRegistryFabricator(U&&... ents) : NT() {
         static_assert(
             (is_one_of_v<U, T...> && ...),
-            "Every element in list would be derived from IEntity"
+            "Every element in list would be derived from service_type"
         );
 
         // We add only the objects that have been passed.
