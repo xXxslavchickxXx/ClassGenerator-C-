@@ -73,7 +73,7 @@ namespace cg::core {
         /// @warning При успехе владение *переходит* в дерево.
         ///          При неудаче владение *остаётся* у вызывающего.
         template<typename T>
-        T* add_child(std::unique_ptr<T>&& child);
+        T* take(std::unique_ptr<T>&& child);
 
         const std::vector<std::unique_ptr<Node>>& get_children() const;
         Node* get_child(size_t where);

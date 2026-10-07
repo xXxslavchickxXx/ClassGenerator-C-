@@ -9,7 +9,12 @@ namespace cg::core {
         auto new_child = std::make_unique<NodeT>();
         
         auto* raw_ptr = new_child.get();
-        ((new_child->get_entities().add<Entities>()), ...);
+        ((
+            new_child->get_entities().has<Entities>() ?
+                new_child->get_entities().replace<Entities>()
+                :
+                new_child->get_entities().add<Entities>()
+        ), ...);
         new_child->set_parent(this);
         
         children.push_back(std::move(new_child));
@@ -24,7 +29,12 @@ namespace cg::core {
         auto new_child = std::make_unique<NodeT>();
 
         auto* raw_ptr = new_child.get();
-        ((new_child->get_entities().add<Entities>(std::forward<Entities>(ents))), ...);
+        ((
+            new_child->get_entities().has<Entities>() ?
+                new_child->get_entities().replace<Entities>(std::forward<Entities>(ents))
+                :
+                new_child->get_entities().add<Entities>(std::forward<Entities>(ents))
+        ), ...);
         new_child->set_parent(this);
 
         children.push_back(std::move(new_child));
@@ -32,7 +42,7 @@ namespace cg::core {
         return raw_ptr;
     }
     template<typename T>
-    T* TreeNode::add_child(std::unique_ptr<T>&& child) {
+    T* TreeNode::take(std::unique_ptr<T>&& child) {
         static_assert(std::is_base_of_v<Node, T>,
         "T must derive from Node");
         

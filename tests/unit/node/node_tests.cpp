@@ -53,7 +53,7 @@ TEST(TreeNode, AddChild) {
     
     auto child = std::make_unique<cg::core::Node>();
 
-    auto* moved_child = tree_node.add_child(std::move(child));
+    auto* moved_child = tree_node.take(std::move(child));
     ASSERT_NE(moved_child, nullptr);
 
     EXPECT_EQ(tree_node.get_child(0), moved_child);
@@ -65,7 +65,7 @@ TEST(TreeNode, MoveChildAndTake) {
     
     auto* node_ptr = tree_node.create_child<cg::core::Node>();
 
-    auto* moved_child = another_tree_node.add_child(tree_node.move_child(0));
+    auto* moved_child = another_tree_node.take(tree_node.move_child(0));
     ASSERT_NE(moved_child, nullptr);
 
     EXPECT_EQ(another_tree_node.get_child(0), node_ptr);
@@ -90,7 +90,7 @@ TEST(TreeNode, FailedAddChildWithoutLosses) {
     some_child->set_parent(&dummy_parent);
 
     // Trying add child to yourself
-    auto* move_result = some_child->add_child(std::move(some_child));
+    auto* move_result = some_child->take(std::move(some_child));
     EXPECT_TRUE(some_child != nullptr);
     EXPECT_EQ(move_result, nullptr);
 

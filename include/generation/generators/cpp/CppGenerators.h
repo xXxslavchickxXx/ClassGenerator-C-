@@ -15,8 +15,44 @@ namespace cg::gen::cpp {
 
         std::string generate(
             const core::Node* ent,
-            bool declaration = false,
+            bool declaration = true,
             const core::Node* scoup = nullptr,
+            const IDispatcher* dispatcher = nullptr
+        ) const override;
+    };
+
+    class ClassGenerator : public IGenerator {
+    public:
+        bool can_generate(const core::Node* node) const override;
+
+        std::string generate(
+            const core::Node* ent,
+            bool declaration = true,
+            const core::Node* scoup = nullptr,
+            const IDispatcher* dispatcher = nullptr
+        ) const override;
+    };
+
+    class TypeGenerator : public IGenerator {
+    public:
+        bool can_generate(const core::Node* node) const override;
+
+        std::string generate(
+            const core::Node* ent,
+            bool declaration = true,
+            const core::Node* scope = nullptr,
+            const IDispatcher* dispatcher = nullptr
+        ) const override;
+    };
+
+    class AliasGenerator : public IGenerator {
+    public:
+        bool can_generate(const core::Node* node) const override;
+
+        std::string generate(
+            const core::Node* ent,
+            bool declaration = true,
+            const core::Node* scope = nullptr,
             const IDispatcher* dispatcher = nullptr
         ) const override;
     };

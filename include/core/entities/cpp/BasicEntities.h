@@ -6,7 +6,32 @@
 
 #include <core/base/interfaces/IEntity.h>
 
+namespace cg::core { class Node; }
+
 namespace cg::entities::cpp {
+	class TypeHandler : public cg::core::IEntity {
+		const cg::core::Node* type;
+	
+	public:
+		TypeHandler(const cg::core::Node* type = nullptr);
+
+		const cg::core::Node* get_type() const;
+		void set_type(const cg::core::Node* new_type);
+	
+	};
+
+	/// @brief Just an entity that can store a 
+	/// specific class, such as a type or template
+	class ClassHandler : public cg::core::IEntity {
+		const cg::core::Node* nested_class;
+	
+	public:
+		ClassHandler(const cg::core::Node* nested_class = nullptr);
+
+		const cg::core::Node* get_class() const;
+		void set_class(const cg::core::Node* new_ref);
+	};
+
     class NamedEntity : public cg::core::IEntity {
         std::string name;
 
@@ -40,7 +65,7 @@ namespace cg::entities::cpp {
 			DEFINITION_TYPE::NO_DEFINITION);
 
 		const DEFINITION_TYPE& get_definition() const;
-		void set_definition(const DEFINITION_TYPE& definition);
+		DefinitionEntity& set_definition(const DEFINITION_TYPE& definition);
 
 		bool has_definition() const;
 	};
@@ -55,8 +80,10 @@ namespace cg::entities::cpp {
 		Access access_ = Access::PRIVATE;
 
 	public:
+		AccessEntity(Access access = Access::PRIVATE);
+
 		const Access& get_access() const;
-		void set_access(const Access& access);
+		AccessEntity& set_access(const Access& access);
 	};
 
     enum class TYPE_QUAL : uint16_t {
@@ -73,12 +100,12 @@ namespace cg::entities::cpp {
 		TypeQualificator();
 
 		bool is_const() const;
-		void toggle_const();
+		TypeQualificator& toggle_const();
 
         bool is_volatile() const;
-		void toggle_volatile();
+		TypeQualificator& toggle_volatile();
 
-        void set_mask(const TYPE_QUAL& _mask);
+        TypeQualificator& set_mask(const TYPE_QUAL& _mask);
 	};
 
 	enum class TYPE_CONSTRUCTORS {
@@ -97,10 +124,13 @@ namespace cg::entities::cpp {
 		bool has_qualificator() const;
 		const TYPE_CONSTRUCTORS& get_qualificator() const;
 
-		void set_qualificator(const TYPE_CONSTRUCTORS& new_qual);
-		void toggle_to_pointer();
-		void toggle_to_reference();
-		void toggle_to_uni_ref();
-		void reset_qualificator();
+		TypeConstructor& set_qualificator(const TYPE_CONSTRUCTORS& new_qual);
+		TypeConstructor& toggle_to_pointer();
+		TypeConstructor& toggle_to_reference();
+		TypeConstructor& toggle_to_uni_ref();
+		TypeConstructor& reset_qualificator();
+
+		TypeConstructor& toggle_const();
+		TypeConstructor& toggle_volatile();
 	};
 }

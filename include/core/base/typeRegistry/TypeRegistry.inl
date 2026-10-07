@@ -69,6 +69,30 @@ namespace cg::core {
 
         return static_cast<U*>(entities[std::type_index(typeid(U))].get()); 
     }
+    template<typename Type>
+    template<typename T>
+    std::remove_cvref_t<T>* TypeRegistry<Type>::replace() {
+        using U = std::remove_cvref_t<T>;
+        static_assert(std::is_base_of_v<Type, U>,
+        "T must derive from Type");
+        static_assert(std::is_default_constructible_v<U>,
+        "Type doesn't have default constructor");
+
+        entities[std::type_index(typeid(U))] = std::make_unique<U>();
+        
+        return static_cast<U*>(entities[std::type_index(typeid(U))].get());
+    }
+    template<typename Type>
+    template<typename T>
+    std::remove_cvref_t<T>* TypeRegistry<Type>::replace(T&& entity) {
+        using U = std::remove_cvref_t<T>;
+        static_assert(std::is_base_of_v<Type, U>,
+        "T must derive from Type");
+
+        entities[std::type_index(typeid(U))] = std::make_unique<U>(std::forward<T>(entity));
+        
+        return static_cast<U*>(entities[std::type_index(typeid(U))].get()); 
+    }
 
     template<typename Type>
     template<typename T>

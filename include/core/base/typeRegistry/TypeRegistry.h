@@ -24,6 +24,12 @@ namespace cg::core {
         std::remove_cvref_t<T>* add();
         template<typename T>
         std::remove_cvref_t<T>* add(T&& entity);
+
+        template<typename T>
+        std::remove_cvref_t<T>* replace();
+        template<typename T>
+        std::remove_cvref_t<T>* replace(T&& entity);
+
         template<typename T>
         T* take(std::unique_ptr<T> ent_ptr);
 

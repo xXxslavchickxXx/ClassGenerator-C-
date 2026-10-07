@@ -16,7 +16,7 @@ namespace cg {
     public:
         std::string generate(
             const core::Node* ent,
-            bool declaration = false,
+            bool declaration = true,
             const core::Node* scoup = nullptr
         ) const override {
             for (const auto& [type, gen] : entities) {
