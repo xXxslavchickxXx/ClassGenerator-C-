@@ -9,4 +9,5 @@ namespace cg::entities::cpp {
     using Class = TreeNodeFabrica<NamedEntity, IClass>;
     using Type = TreeNodeFabrica<ClassHandler, TypeQualificator, TypeConstructor, IType>;
     using Alias = TreeNodeFabrica<NamedEntity, TypeHandler, IAlias>;
+    using Variable = TreeNodeFabrica<NamedEntity, TypeHandler, IVariable>;
 }

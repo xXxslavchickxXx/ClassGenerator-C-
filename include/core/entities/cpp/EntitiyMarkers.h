@@ -8,4 +8,5 @@ namespace cg::entities::cpp {
     class IClass : public core::IEntity {};
     class IType : public core::IEntity {};
     class IAlias : public core::IEntity {};
+    class IVariable : public core::IEntity {};
 }

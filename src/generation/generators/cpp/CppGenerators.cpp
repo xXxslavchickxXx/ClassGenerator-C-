@@ -95,7 +95,7 @@ namespace cg::gen::cpp {
 
             sstr
                 << (is_const ? "const" : "")
-                << (is_volatile ? "volatile" : "")
+                << (is_volatile ? is_const ? " volatile" : "volatile" : "")
                 << (is_volatile || is_const ? " " : "");
         }
 
@@ -142,7 +142,7 @@ namespace cg::gen::cpp {
             sstr
                 << (is_volatile || is_const ? " " : "")
                 << (is_const ? "const" : "")
-                << (is_volatile ? "volatile" : "");
+                << (is_volatile ? is_const ? " volatile" : "volatile" : "");
         }
 
         return sstr.str();
