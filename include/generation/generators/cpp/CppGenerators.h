@@ -56,4 +56,16 @@ namespace cg::gen::cpp {
             const IDispatcher* dispatcher = nullptr
         ) const override;
     };
+
+    class VariableGenerator : public IGenerator {
+    public:
+        bool can_generate(const core::Node* node) const override;
+
+        std::string generate(
+            const core::Node* ent,
+            bool declaration = true,
+            const core::Node* scope = nullptr,
+            const IDispatcher* dispatcher = nullptr
+        ) const override;
+    };
 }

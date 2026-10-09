@@ -9,6 +9,46 @@
 namespace cg::core { class Node; }
 
 namespace cg::entities::cpp {
+	class OptionalEntity : public cg::core::IEntity {
+        bool constexpr_;
+        bool static_;
+        bool inline_;
+        bool friend_;
+
+    public:
+        OptionalEntity()
+        : constexpr_(false),
+        static_(false),
+        inline_(false),
+        friend_(false)
+        {}
+
+        bool is_constexpr() const { return constexpr_; }
+        OptionalEntity& toggle_constexpr() { constexpr_ = !constexpr_; return *this; }
+
+        bool is_static() const { return static_; }
+        OptionalEntity& toggle_static() { static_ = !static_; return *this; }
+
+        bool is_inline() const { return inline_; }
+        OptionalEntity& toggle_inline() { inline_ = !inline_; return *this; }
+
+        bool is_friend() const { return friend_; }
+        OptionalEntity& toggle_friend() { friend_ = !friend_; return *this; }
+    };
+
+	class ValueHandler : public cg::core::IEntity {
+		std::string value;
+
+	public:
+		ValueHandler(const std::string& value = "") : value(value) {}
+
+		const std::string& get_value() const { return value; }
+		void set_value(const std::string& value_) { value = value_; }
+
+		bool have_value() const { return !value.empty(); }
+
+	};
+
 	class TypeHandler : public cg::core::IEntity {
 		const cg::core::Node* type;
 	

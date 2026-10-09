@@ -221,3 +221,47 @@ TEST(CPPGen, TypeAndAliasGeneration) {
 
     EXPECT_EQ(dispatcher.generate(const_itertor), "using const_iterator = int;");
 }
+
+TEST(CPPGen, ValueGeneration) {
+    // namespace std
+    //            └── namespace filesystem
+    //                            └── class path
+    // class int
+    using namespace cg::entities::cpp;
+
+    /// Tree
+    auto std_ns = Namespace(NamedEntity("std"));
+    auto* fs = std_ns.create_child<Namespace>(NamedEntity("filesystem"));
+    auto* path = fs->create_child<Class>(NamedEntity("path"));
+    
+    auto int_cls = Class(NamedEntity("int"));
+
+    /// Types
+    // const int
+    auto const_int = Type(ClassHandler(&int_cls), TypeQualificator().toggle_const());
+    // just a std::filesystem::path type
+    auto type_path = Type(ClassHandler(path));
+
+    /// Values
+    auto some_value = Variable(NamedEntity("some_value"), TypeHandler(&const_int));
+    auto some_value_with_def = Variable(NamedEntity("some_value"),
+                                        TypeHandler(&const_int),
+                                        ValueHandler("42"));
+
+    auto path_value = Variable(NamedEntity("path_val"),
+                               TypeHandler(&type_path),
+                               ValueHandler("\"C:/DevTools\""));
+
+    auto dispatcher = cg::RegDispatcherFtor<
+        cg::gen::cpp::TypeGenerator,
+        cg::gen::cpp::VariableGenerator
+    >();
+    
+    // Without context
+    EXPECT_EQ(dispatcher.generate(&some_value), "const int some_value");
+    EXPECT_EQ(dispatcher.generate(&some_value_with_def), "const int some_value = 42");
+    EXPECT_EQ(dispatcher.generate(&path_value), "std::filesystem::path path_val = \"C:/DevTools\"");  
+    
+    // With context
+    EXPECT_EQ(dispatcher.generate(&path_value, true, fs), "path path_val = \"C:/DevTools\"");
+}

@@ -36,6 +36,61 @@ namespace cg::gen::cpp {
         return sstr.str();
     }
 
+    bool VariableGenerator::can_generate(const core::Node* node) const {
+        if (!node) return false;
+
+        if (node->get_entities().has<cg::entities::cpp::IVariable>()) return true;
+
+        return false;
+    }
+
+    std::string VariableGenerator::generate(
+        const core::Node* ent,
+        bool declaration,
+        const core::Node* scope,
+        const IDispatcher* dispatcher
+    ) const {
+        using namespace cg::entities::cpp;
+
+        auto& entities = ent->get_entities();
+        
+        // Gen context
+        auto have_def = (
+            entities.has<DefinitionEntity>() ?
+                entities.get<DefinitionEntity>()->has_definition()
+                :
+                false
+        );
+
+        // Variable gen data
+        auto name = (entities.has<NamedEntity>() ? entities.get<NamedEntity>()->get_name() : "undefined");
+        auto type = (
+            entities.has<TypeHandler>() ?
+                dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope)
+                :
+                "undefined_type"
+        );
+        auto have_value = (
+            entities.has<ValueHandler>() ? 
+                entities.get<ValueHandler>()->have_value()
+                :
+                false
+        );
+
+        std::stringstream sstr;
+
+        auto opt = entities.
+        if (declaration) {
+            
+        }
+        sstr << type << " " << name;
+
+        if (have_value) sstr << " = " << entities.get<ValueHandler>()->get_value();
+
+        return sstr.str();
+    }
+
+
     bool AliasGenerator::can_generate(const core::Node* node) const {
         if (!node) return false;
 
