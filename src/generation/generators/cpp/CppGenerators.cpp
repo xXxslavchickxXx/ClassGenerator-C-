@@ -44,7 +44,7 @@ namespace cg::gen::cpp {
         return false;
     }
 
-    std::string VariableGenerator::generate(
+    std::string VariableGenerator::generate_impl(
         const core::Node* ent,
         bool declaration,
         const core::Node* scope,
@@ -63,13 +63,8 @@ namespace cg::gen::cpp {
         );
 
         // Variable gen data
-        auto name = (entities.has<NamedEntity>() ? entities.get<NamedEntity>()->get_name() : "undefined");
-        auto type = (
-            entities.has<TypeHandler>() ?
-                dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope)
-                :
-                "undefined_type"
-        );
+        auto name = entities.get<NamedEntity>()->get_name();
+        auto type = dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope);
         auto have_value = (
             entities.has<ValueHandler>() ? 
                 entities.get<ValueHandler>()->have_value()
@@ -99,7 +94,7 @@ namespace cg::gen::cpp {
         return false;
     }
 
-    std::string AliasGenerator::generate(
+    std::string AliasGenerator::generate_impl(
         const core::Node* ent,
         bool declaration,
         const core::Node* scope,
@@ -112,13 +107,11 @@ namespace cg::gen::cpp {
 
         sstr << "using ";
 
-        if (!entities.has<NamedEntity>()) sstr << "undefined";
-        else sstr << entities.get<NamedEntity>()->get_name();
+        sstr << entities.get<NamedEntity>()->get_name();
 
         sstr << " = ";
 
-        if (entities.has<TypeHandler>())
-            sstr << dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope);
+        sstr << dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope);
 
         sstr << ";";
 
@@ -133,7 +126,7 @@ namespace cg::gen::cpp {
         return false;
     }
 
-    std::string TypeGenerator::generate(
+    std::string TypeGenerator::generate_impl(
         const core::Node* ent,
         bool declaration,
         const core::Node* scope,
@@ -144,39 +137,22 @@ namespace cg::gen::cpp {
         std::stringstream sstr;
         auto& entities = ent->get_entities();
 
-        if (entities.has<TypeQualificator>()) {
-            auto is_const = entities.get<TypeQualificator>()->is_const();
-            auto is_volatile = entities.get<TypeQualificator>()->is_volatile();
+        auto is_const = entities.get<TypeQualificator>()->is_const();
+        auto is_volatile = entities.get<TypeQualificator>()->is_volatile();
 
-            sstr
-                << (is_const ? "const" : "")
-                << (is_volatile ? is_const ? " volatile" : "volatile" : "")
-                << (is_volatile || is_const ? " " : "");
-        }
+        sstr
+            << (is_const ? "const" : "")
+            << (is_volatile ? is_const ? " volatile" : "volatile" : "")
+            << (is_volatile || is_const ? " " : "");
 
         // Пускай валидатор разбирается с тем, кто в чем и где лежит, генератор просто генерирует
-        if (
-            (
-                !entities.has<ClassHandler>()
-                ||
-                !entities.get<ClassHandler>()->get_class()
-            )
-            &&
-            !entities.has<IAlias>()
-        ) sstr << "undefined";
-        else {
-            sstr << (
-                entities.has<IAlias>() ? relative_path(ent, scope)
-                :
-                relative_path(entities.get<ClassHandler>()->get_class(), scope)
-            );
-        }
+        sstr << (
+            entities.has<IAlias>() ? relative_path(ent, scope)
+            :
+            relative_path(entities.get<ClassHandler>()->get_class(), scope)
+        );
 
-        if (
-            entities.has<TypeConstructor>()
-            &&
-            entities.get<TypeConstructor>()->has_qualificator()
-        ) {
+        if (entities.get<TypeConstructor>()->has_qualificator()) {
             std::stringstream tc_sstr;
 
             switch (entities.get<TypeConstructor>()->get_qualificator()) {
@@ -191,8 +167,8 @@ namespace cg::gen::cpp {
                     break;
             }
 
-            auto is_const = entities.get<TypeConstructor>()->is_const();
-            auto is_volatile = entities.get<TypeConstructor>()->is_volatile();
+            is_const = entities.get<TypeConstructor>()->is_const();
+            is_volatile = entities.get<TypeConstructor>()->is_volatile();
 
             sstr
                 << (is_volatile || is_const ? " " : "")
@@ -262,7 +238,7 @@ namespace cg::gen::cpp {
         return false;
     }
 
-    std::string ClassGenerator::generate(
+    std::string ClassGenerator::generate_impl(
         const core::Node* ent,
         bool declaration,
         const core::Node* scoup,

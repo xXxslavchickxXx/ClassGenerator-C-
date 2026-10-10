@@ -25,11 +25,13 @@ namespace cg::gen::cpp {
         ) const override;
     };
 
-    class ClassGenerator : public IGenerator {
+    class ClassGenerator : public IEntityCheckedGenerator<
+        cg::entities::cpp::NamedEntity
+    > {
     public:
         bool can_generate(const core::Node* node) const override;
 
-        std::string generate(
+        std::string generate_impl(
             const core::Node* ent,
             bool declaration = true,
             const core::Node* scoup = nullptr,
@@ -37,11 +39,15 @@ namespace cg::gen::cpp {
         ) const override;
     };
 
-    class TypeGenerator : public IGenerator {
+    class TypeGenerator : public IEntityCheckedGenerator<
+        cg::entities::cpp::ClassHandler,
+        cg::entities::cpp::TypeQualificator,
+        cg::entities::cpp::TypeConstructor
+    > {
     public:
         bool can_generate(const core::Node* node) const override;
 
-        std::string generate(
+        std::string generate_impl(
             const core::Node* ent,
             bool declaration = true,
             const core::Node* scope = nullptr,
@@ -49,11 +55,14 @@ namespace cg::gen::cpp {
         ) const override;
     };
 
-    class AliasGenerator : public IGenerator {
+    class AliasGenerator : public IEntityCheckedGenerator<
+        cg::entities::cpp::NamedEntity,
+        cg::entities::cpp::TypeHandler
+    > {
     public:
         bool can_generate(const core::Node* node) const override;
 
-        std::string generate(
+        std::string generate_impl(
             const core::Node* ent,
             bool declaration = true,
             const core::Node* scope = nullptr,
@@ -61,11 +70,17 @@ namespace cg::gen::cpp {
         ) const override;
     };
 
-    class VariableGenerator : public IGenerator {
+    class VariableGenerator : public IEntityCheckedGenerator<
+        cg::entities::cpp::NamedEntity,
+        cg::entities::cpp::TypeHandler,
+        cg::entities::cpp::ValueHandler,
+        cg::entities::cpp::DefinitionEntity,
+        cg::entities::cpp::OptionalEntity
+    > {
     public:
         bool can_generate(const core::Node* node) const override;
 
-        std::string generate(
+        std::string generate_impl(
             const core::Node* ent,
             bool declaration = true,
             const core::Node* scope = nullptr,
