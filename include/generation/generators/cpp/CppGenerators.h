@@ -1,6 +1,6 @@
 #pragma once
 
-#include <generation/interfaces/IGenerator.h>
+#include <generation/interfaces/IEntityCheckedGenerator.h>
 #include <core/entities/cpp/entites.h>
 
 namespace cg::gen::cpp {
@@ -9,11 +9,15 @@ namespace cg::gen::cpp {
         const core::Node* scope = nullptr
     );
 
-    class NamespaceGenerator : public IGenerator {
+    class NamespaceGenerator :
+    public IEntityCheckedGenerator<
+        cg::entities::cpp::NamedEntity
+    > {
     public:
         bool can_generate(const core::Node* node) const override;
 
-        std::string generate(
+    private:
+        std::string generate_impl(
             const core::Node* ent,
             bool declaration = true,
             const core::Node* scoup = nullptr,

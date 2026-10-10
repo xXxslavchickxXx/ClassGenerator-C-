@@ -79,10 +79,10 @@ namespace cg::gen::cpp {
 
         std::stringstream sstr;
 
-        auto opt = entities.
-        if (declaration) {
+        // auto opt = entities.
+        // if (declaration) {
             
-        }
+        // }
         sstr << type << " " << name;
 
         if (have_value) sstr << " = " << entities.get<ValueHandler>()->get_value();
@@ -211,7 +211,7 @@ namespace cg::gen::cpp {
         return false;
     }
 
-    std::string NamespaceGenerator::generate(
+    std::string NamespaceGenerator::generate_impl(
         const core::Node* ent,
         bool declaration,
         const core::Node* scoup,
