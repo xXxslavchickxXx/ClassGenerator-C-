@@ -26,16 +26,18 @@ target_sources(${PN}_LIB
         ${${PN}_SRC}
 )
 
-target_compile_options(${PN}_LIB
-    PUBLIC
-        /W3
-        /fsanitize=address
-    PRIVATE
-        /RTC1
-        /WX
-        /analyze
-        /Zc:preprocessor
-)
+if (Debug)
+    target_compile_options(${PN}_LIB
+        PUBLIC
+            /W3
+            /fsanitize=address
+        PRIVATE
+            /RTC1
+            /WX
+            /analyze
+            /Zc:preprocessor
+    )
+endif()
 
 if (BUILD_TESTS)
     enable_testing()

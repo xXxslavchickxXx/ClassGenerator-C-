@@ -7,6 +7,7 @@
             "hidden": true,
             "generator": "Ninja",
             "cacheVariables": {
+                "Debug": false,
                 "CMAKE_CXX_STANDARD": "23",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
@@ -19,6 +20,7 @@
             "inherits": "ProjectSetup",
             "binaryDir": "${sourceDir}/out/build/Debug",
             "cacheVariables": {
+                "Debug": true,
                 "BUILD_TESTS": true
             }
         }

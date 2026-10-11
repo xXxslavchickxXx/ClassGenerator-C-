@@ -243,14 +243,30 @@ TEST(CPPGen, ValueGeneration) {
     auto type_path = Type(ClassHandler(path));
 
     /// Values
-    auto some_value = Variable(NamedEntity("some_value"), TypeHandler(&const_int));
+    auto some_value_without_def = Variable(NamedEntity("some_value"),
+                                    TypeHandler(&const_int),
+                                    ValueHandler("42"));
+    auto static_some_value = Variable(NamedEntity("some_value"),
+                                    TypeHandler(&const_int),
+                                    OptionalEntity().toggle_static(),
+                                    DefinitionEntity()
+                                        .set_definition(cg::entities::cpp::DEFINITION_TYPE::CROSSPLATOFORM),
+                                    ValueHandler("42"));
+    auto some_value = Variable(NamedEntity("some_value"),
+                                TypeHandler(&const_int),
+                                DefinitionEntity()
+                                    .set_definition(cg::entities::cpp::DEFINITION_TYPE::CROSSPLATOFORM));
     auto some_value_with_def = Variable(NamedEntity("some_value"),
                                         TypeHandler(&const_int),
-                                        ValueHandler("42"));
+                                        ValueHandler("42"),
+                                        DefinitionEntity()
+                                            .set_definition(cg::entities::cpp::DEFINITION_TYPE::CROSSPLATOFORM));
 
     auto path_value = Variable(NamedEntity("path_val"),
                                TypeHandler(&type_path),
-                               ValueHandler("\"C:/DevTools\""));
+                               ValueHandler("\"C:/DevTools\""),
+                                DefinitionEntity()
+                                    .set_definition(cg::entities::cpp::DEFINITION_TYPE::CROSSPLATOFORM));
 
     auto dispatcher = cg::RegDispatcherFtor<
         cg::gen::cpp::TypeGenerator,
@@ -258,10 +274,13 @@ TEST(CPPGen, ValueGeneration) {
     >();
     
     // Without context
-    EXPECT_EQ(dispatcher.generate(&some_value), "const int some_value");
-    EXPECT_EQ(dispatcher.generate(&some_value_with_def), "const int some_value = 42");
-    EXPECT_EQ(dispatcher.generate(&path_value), "std::filesystem::path path_val = \"C:/DevTools\"");  
+    EXPECT_EQ(dispatcher.generate(&some_value), "extern const int some_value");
+    EXPECT_EQ(dispatcher.generate(&static_some_value), "");
+    EXPECT_EQ(dispatcher.generate(&static_some_value, false), "static const int some_value = 42");
+    EXPECT_EQ(dispatcher.generate(&some_value_without_def), "inline const int some_value = 42");
+    EXPECT_EQ(dispatcher.generate(&some_value_with_def, false), "const int some_value = 42");
+    EXPECT_EQ(dispatcher.generate(&path_value), "extern std::filesystem::path path_val");  
     
     // With context
-    EXPECT_EQ(dispatcher.generate(&path_value, true, fs), "path path_val = \"C:/DevTools\"");
+    EXPECT_EQ(dispatcher.generate(&path_value, false, fs), "path path_val = \"C:/DevTools\"");
 }

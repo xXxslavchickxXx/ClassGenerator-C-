@@ -29,6 +29,8 @@ namespace cg {
             return generate_impl(ent, declaration, scoup, dispatcher);
         }
 
+        bool can_generate(const core::Node* node) const override { return true; }
+
     private:
         virtual std::string generate_impl(
             const core::Node* ent,

@@ -13,14 +13,12 @@ namespace cg::entities::cpp {
         bool constexpr_;
         bool static_;
         bool inline_;
-        bool friend_;
 
     public:
         OptionalEntity()
         : constexpr_(false),
         static_(false),
-        inline_(false),
-        friend_(false)
+        inline_(false)
         {}
 
         bool is_constexpr() const { return constexpr_; }
@@ -31,9 +29,6 @@ namespace cg::entities::cpp {
 
         bool is_inline() const { return inline_; }
         OptionalEntity& toggle_inline() { inline_ = !inline_; return *this; }
-
-        bool is_friend() const { return friend_; }
-        OptionalEntity& toggle_friend() { friend_ = !friend_; return *this; }
     };
 
 	class ValueHandler : public cg::core::IEntity {

@@ -53,31 +53,41 @@ namespace cg::gen::cpp {
         using namespace cg::entities::cpp;
 
         auto& entities = ent->get_entities();
-        
-        // Gen context
-        auto have_def = (
-            entities.has<DefinitionEntity>() ?
-                entities.get<DefinitionEntity>()->has_definition()
-                :
-                false
-        );
+
+        // Context
+        bool have_def = entities.get<DefinitionEntity>()->has_definition();
 
         // Variable gen data
         auto name = entities.get<NamedEntity>()->get_name();
         auto type = dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope);
-        auto have_value = (
-            entities.has<ValueHandler>() ? 
-                entities.get<ValueHandler>()->have_value()
-                :
-                false
-        );
+        auto have_value = entities.get<ValueHandler>()->have_value() && !declaration;
 
         std::stringstream sstr;
 
-        // auto opt = entities.
-        // if (declaration) {
-            
-        // }
+        auto* opt = entities.get<OptionalEntity>();
+
+        if (declaration) {
+            if (opt->is_inline() || opt->is_constexpr()) {
+                sstr << (opt->is_inline() ? "inline " : "constexpr");
+
+                if (opt->is_static()) sstr << "static ";
+
+                have_value = true;
+            }
+            else if (opt->is_static()) return "";
+            else if (!have_def) {
+                sstr << "inline ";
+                
+                have_value = true;
+            }
+            else sstr << "extern ";
+        }
+        else {
+            if (opt->is_inline() || opt->is_constexpr()) return "";
+            else if (!have_def) return "";
+            else if (opt->is_static()) sstr << "static ";
+        }
+
         sstr << type << " " << name;
 
         if (have_value) sstr << " = " << entities.get<ValueHandler>()->get_value();
