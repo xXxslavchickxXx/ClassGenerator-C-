@@ -170,7 +170,8 @@ TEST(CPPGen, TypeAndAliasGeneration) {
     auto type_int = Type(ClassHandler(&int_cls));
 
     // just test
-    auto* const_itertor = path->create_child<Alias>(NamedEntity("const_iterator"), TypeHandler(&type_int));
+    auto* const_itertor = path->create_child<Alias>(NamedEntity("const_iterator"),
+                                                    TypeHandler(&type_int));
 
     // const int
     auto const_int = Type(ClassHandler(&int_cls), TypeQualificator().toggle_const());

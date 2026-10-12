@@ -25,9 +25,9 @@ namespace tests {
 
     struct AGen : public cg::IGenerator {
         std::string generate(
-            const cg::core::Node* ent,
+            const cg::core::TreeNodeBase* ent,
             bool declaration = false,
-            const cg::core::Node* scoup = nullptr,
+            const cg::core::TreeNodeBase* scoup = nullptr,
             const cg::IDispatcher* dispetcher = nullptr
         ) const override {
             if (!ent->get_entities().has<EntityA>()) return "";
@@ -38,9 +38,9 @@ namespace tests {
 
     struct BGen : public cg::IGenerator {
         std::string generate(
-            const cg::core::Node* ent,
+            const cg::core::TreeNodeBase* ent,
             bool declaration = false,
-            const cg::core::Node* scoup = nullptr,
+            const cg::core::TreeNodeBase* scoup = nullptr,
             const cg::IDispatcher* dispetcher = nullptr
         ) const override {
             if (!ent->get_entities().has<EntityB>()) return "";

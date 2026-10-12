@@ -15,13 +15,13 @@ namespace cg {
     {
     public:
         std::string generate(
-            const core::Node* ent,
+            const core::TreeNodeBase* ent,
             bool declaration = true,
-            const core::Node* scoup = nullptr
+            const core::TreeNodeBase* scope = nullptr
         ) const override {
             for (const auto& [type, gen] : entities) {
                 if (gen->can_generate(ent)) {
-                    return gen->generate(ent, declaration, scoup, this);
+                    return gen->generate(ent, declaration, scope, this);
                 }
             }
 

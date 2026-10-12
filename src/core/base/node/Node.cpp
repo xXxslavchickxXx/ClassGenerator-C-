@@ -3,14 +3,11 @@
 #include <stdexcept>
 
 namespace cg::core {
-    Node::Node() : parent(nullptr), entities() {}
+    Node::Node() : parent(nullptr), TreeNodeBase() {}
 
     const Node* Node::get_parent() const {
         return parent;
     }
-    
-    TypeRegistry<IEntity>& Node::get_entities() { return entities; }
-    const TypeRegistry<IEntity>& Node::get_entities() const { return entities; }
     
     bool Node::set_parent(Node* new_parent) {
         if (new_parent != this) {

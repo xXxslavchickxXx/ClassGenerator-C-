@@ -3,12 +3,50 @@
 #include <core/entities/cpp/EntitiyMarkers.h>
 
 namespace cg::entities::cpp {
-	TypeHandler::TypeHandler(const cg::core::Node* type) : type(type) {}
+	ArgumentList::ArgumentList(std::initializer_list<const cg::core::Node*> arg_list) {
+        for (auto* el : arg_list)
+            if (!el->get_entities().has<cg::entities::cpp::IArgument>())
+                throw std::runtime_error("all elements of arg list would derived from IArgument");
+            
+        for (auto* el : arg_list)
+            arguments.push_back(el);
+    }
 
-	const cg::core::Node* TypeHandler::get_type() const {
+	ArgumentList& ArgumentList::push_back(const cg::core::Node* node) {
+		if (!node->get_entities().has<cg::entities::cpp::IArgument>())
+                throw std::runtime_error("all elements of arg list would derived from IArgument");
+		
+		arguments.push_back(node);
+
+		return *this;
+	}
+	void ArgumentList::erase(it iter) {
+		arguments.erase(iter);
+	}
+	void ArgumentList::erase(size_t iter) {
+		arguments.erase(arguments.begin() + iter);
+	}
+
+	ArgumentList::it ArgumentList::begin() {
+		return arguments.begin();
+	}
+	ArgumentList::it ArgumentList::end() {
+		return arguments.end();
+	}
+	
+	ArgumentList::const_it ArgumentList::begin() const {
+		return arguments.begin();
+	}
+	ArgumentList::const_it ArgumentList::end() const {
+		return arguments.end();
+	}
+
+	TypeHandler::TypeHandler(const cg::core::TreeNodeBase* type) : type(type) {}
+
+	const cg::core::TreeNodeBase* TypeHandler::get_type() const {
 		return type;
 	}
-	void TypeHandler::set_type(const cg::core::Node* new_type) {
+	void TypeHandler::set_type(const cg::core::TreeNodeBase* new_type) {
 		if (
 			!new_type->get_entities().has<IClass>()
 				&&

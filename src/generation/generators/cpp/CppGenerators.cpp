@@ -7,17 +7,25 @@
 
 namespace cg::gen::cpp {
     std::string relative_path(
-        const core::Node* ent,
-        const core::Node* scope
+        const core::TreeNodeBase* ent,
+        const core::TreeNodeBase* scope
     ) {
-        std::stack<const core::Node*> path;
+        std::stack<const core::TreeNodeBase*> path;
 
         auto* iter = ent;
+        while (iter) {
+            if (!iter->as_parent())
+                throw std::runtime_error("the element is not a member of the tree");
+                
+            iter = iter->as_parent()->get_parent();
+        }
+
+        iter = ent;
         while (iter) {
             if (iter == scope) break;
 
             path.push(iter);
-            iter = iter->get_parent();
+            iter = iter->as_parent()->get_parent();
         }
 
         std::stringstream sstr;
@@ -34,7 +42,7 @@ namespace cg::gen::cpp {
         return sstr.str();
     }
 
-    bool ArgumentGenerator::can_generate(const core::Node* node) const {
+    bool ArgumentGenerator::can_generate(const core::TreeNodeBase* node) const {
         if (!node) return false;
 
         if (node->get_entities().has<cg::entities::cpp::IArgument>()) return true;
@@ -43,9 +51,9 @@ namespace cg::gen::cpp {
     }
 
     std::string ArgumentGenerator::generate_impl(
-        const core::Node* ent,
+        const core::TreeNodeBase* ent,
         bool declaration,
-        const core::Node* scope,
+        const core::TreeNodeBase* scope,
         const IDispatcher* dispatcher
     ) const {
         using namespace cg::entities::cpp;
@@ -66,7 +74,7 @@ namespace cg::gen::cpp {
         return sstr.str();
     }
 
-    bool VariableGenerator::can_generate(const core::Node* node) const {
+    bool VariableGenerator::can_generate(const core::TreeNodeBase* node) const {
         if (!node) return false;
 
         if (node->get_entities().has<cg::entities::cpp::IVariable>()) return true;
@@ -75,9 +83,9 @@ namespace cg::gen::cpp {
     }
 
     std::string VariableGenerator::generate_impl(
-        const core::Node* ent,
+        const core::TreeNodeBase* ent,
         bool declaration,
-        const core::Node* scope,
+        const core::TreeNodeBase* scope,
         const IDispatcher* dispatcher
     ) const {
         using namespace cg::entities::cpp;
@@ -126,7 +134,7 @@ namespace cg::gen::cpp {
     }
 
 
-    bool AliasGenerator::can_generate(const core::Node* node) const {
+    bool AliasGenerator::can_generate(const core::TreeNodeBase* node) const {
         if (!node) return false;
 
         if (node->get_entities().has<cg::entities::cpp::IAlias>()) return true;
@@ -135,9 +143,9 @@ namespace cg::gen::cpp {
     }
 
     std::string AliasGenerator::generate_impl(
-        const core::Node* ent,
+        const core::TreeNodeBase* ent,
         bool declaration,
-        const core::Node* scope,
+        const core::TreeNodeBase* scope,
         const IDispatcher* dispatcher
     ) const {
         using namespace cg::entities::cpp;
@@ -158,7 +166,7 @@ namespace cg::gen::cpp {
         return sstr.str();
     }
 
-    bool TypeGenerator::can_generate(const core::Node* node) const {
+    bool TypeGenerator::can_generate(const core::TreeNodeBase* node) const {
         if (!node) return false;
 
         if (node->get_entities().has<cg::entities::cpp::IType>()) return true;
@@ -167,9 +175,9 @@ namespace cg::gen::cpp {
     }
 
     std::string TypeGenerator::generate_impl(
-        const core::Node* ent,
+        const core::TreeNodeBase* ent,
         bool declaration,
-        const core::Node* scope,
+        const core::TreeNodeBase* scope,
         const IDispatcher* dispatcher
     ) const {
         using namespace cg::entities::cpp;
@@ -219,7 +227,7 @@ namespace cg::gen::cpp {
         return sstr.str();
     }
     
-    bool NamespaceGenerator::can_generate(const core::Node* node) const {
+    bool NamespaceGenerator::can_generate(const core::TreeNodeBase* node) const {
         if (!node) return false;
 
         if (node->get_entities().has<cg::entities::cpp::INamespace>()) return true;
@@ -228,14 +236,14 @@ namespace cg::gen::cpp {
     }
 
     std::string NamespaceGenerator::generate_impl(
-        const core::Node* ent,
+        const core::TreeNodeBase* ent,
         bool declaration,
-        const core::Node* scoup,
+        const core::TreeNodeBase* scope,
         const IDispatcher* dispatcher
     ) const {
         std::stringstream sstr;
 
-        auto path = relative_path(ent, scoup);
+        auto path = relative_path(ent, scope);
         
         if (!path.empty())
             sstr << "namespace " << path << " {\n";
@@ -270,7 +278,7 @@ namespace cg::gen::cpp {
         return sstr.str();
     }
 
-    bool ClassGenerator::can_generate(const core::Node* node) const {
+    bool ClassGenerator::can_generate(const core::TreeNodeBase* node) const {
         if (!node) return false;
 
         if (node->get_entities().has<cg::entities::cpp::IClass>()) return true;
@@ -279,14 +287,17 @@ namespace cg::gen::cpp {
     }
 
     std::string ClassGenerator::generate_impl(
-        const core::Node* ent,
+        const core::TreeNodeBase* ent,
         bool declaration,
-        const core::Node* scoup,
+        const core::TreeNodeBase* scope,
         const IDispatcher* dispatcher
     ) const {
         std::stringstream sstr;
 
-        auto path = relative_path(ent, scoup);
+        auto path = relative_path(ent, scope);
+
+        if (!ent->as_parent())
+            throw std::runtime_error("the element is not a member of the tree");
 
         if (declaration && !path.empty())
             sstr << "class " << path << " {\n";
@@ -308,7 +319,7 @@ namespace cg::gen::cpp {
                     << (declaration && !path.empty() ?
                         tabulate(dispatcher->generate(node, declaration, ent), 1, "    ")
                         :
-                        dispatcher->generate(node, declaration, ent->get_parent()));
+                        dispatcher->generate(node, declaration, ent->as_parent()->get_parent()));
                 }
 
                 sstr << nested_sstr.str();

@@ -36,6 +36,8 @@ public:
 };
 
 template<typename... T>
+using TreeElementFabrica = NodeFabricator<cg::core::TreeNodeBase, T...>;
+template<typename... T>
 using NodeFabrica = NodeFabricator<cg::core::Node, T...>;
 template<typename... T>
 using TreeNodeFabrica = NodeFabricator<cg::core::TreeNode, T...>;

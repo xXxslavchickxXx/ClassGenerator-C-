@@ -9,13 +9,30 @@
 namespace cg::core {
     // FWD
     class TreeNode;
+    class Node;
 
-    class Node
-    {
-        Node* parent;
-        
+    class TreeNodeBase  {
     protected:
         TypeRegistry<IEntity> entities;
+    
+    public:
+        TreeNodeBase() = default;
+
+        TypeRegistry<IEntity>& get_entities() { return entities; }
+        const TypeRegistry<IEntity>& get_entities() const { return entities; }
+
+        virtual TreeNode* as_container() { return nullptr; }
+        virtual const TreeNode* as_container() const { return nullptr; }
+
+        virtual Node* as_parent() { return nullptr; }
+        virtual const Node* as_parent() const { return nullptr; }
+        
+        virtual ~TreeNodeBase() = default;
+
+    };
+
+    class Node : public TreeNodeBase  {
+        Node* parent;
 
     public:
         Node();
@@ -25,14 +42,10 @@ namespace cg::core {
         Node(Node&& other) = delete;
         Node& operator=(Node&& other) = delete;
 
-        TypeRegistry<IEntity>& get_entities();
-        const TypeRegistry<IEntity>& get_entities() const;
-
-        virtual TreeNode* as_container() { return nullptr; }
-        virtual const TreeNode* as_container() const { return nullptr; }
-        virtual ~Node() = default;
-
         const Node* get_parent() const;
+        
+        Node* as_parent() override final { return this; }
+        const Node* as_parent() const override final { return this; }
 
         /// @brief Меняет родителя узла.
         ///
@@ -59,8 +72,8 @@ namespace cg::core {
         class iterator;
 
     public:
-        TreeNode* as_container() override { return this; }
-        const TreeNode* as_container() const override { return this; }
+        TreeNode* as_container() override final { return this; }
+        const TreeNode* as_container() const override final { return this; }
         
         template<typename NodeT, typename... Entities>
         NodeT* create_child();

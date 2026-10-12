@@ -50,12 +50,12 @@ namespace cg {
         PriorityGenerator(const PriorityGenerator&) = delete;
         PriorityGenerator& operator=(const PriorityGenerator&) = delete;
 
-        bool can_generate(const core::Node* node) const override;
+        bool can_generate(const core::TreeNodeBase* node) const override;
 
         std::string generate(
-            const core::Node* ent,
+            const core::TreeNodeBase* ent,
             bool declaration = false,
-            const core::Node* scoup = nullptr,
+            const core::TreeNodeBase* scoup = nullptr,
             const IDispatcher* dispetcher = nullptr
         ) const override;
     };

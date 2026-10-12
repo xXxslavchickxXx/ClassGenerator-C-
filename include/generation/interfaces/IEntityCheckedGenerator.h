@@ -18,24 +18,24 @@ namespace cg {
 
     public:
         std::string generate(
-            const core::Node* ent,
+            const core::TreeNodeBase* ent,
             bool declaration = true,
-            const core::Node* scoup = nullptr,
+            const core::TreeNodeBase* scope = nullptr,
             const IDispatcher* dispatcher = nullptr
         ) const override final {
             if (!ent || !(ent->get_entities().has<Entities>() && ...))
                 throw std::runtime_error("the node entity list does not contain the necessary entities");
 
-            return generate_impl(ent, declaration, scoup, dispatcher);
+            return generate_impl(ent, declaration, scope, dispatcher);
         }
 
-        bool can_generate(const core::Node* node) const override { return true; }
+        bool can_generate(const core::TreeNodeBase* node) const override { return true; }
 
     private:
         virtual std::string generate_impl(
-            const core::Node* ent,
+            const core::TreeNodeBase* ent,
             bool declaration = true,
-            const core::Node* scoup = nullptr,
+            const core::TreeNodeBase* scoup = nullptr,
             const IDispatcher* dispatcher = nullptr
         ) const = 0;
 

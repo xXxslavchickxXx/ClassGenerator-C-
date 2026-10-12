@@ -6,16 +6,26 @@
 
 #include <core/base/interfaces/IEntity.h>
 
-namespace cg::core { class Node; }
+namespace cg::core { class TreeNodeBase; class Node; }
 
 namespace cg::entities::cpp {
 	class ArgumentList : public cg::core::IEntity {
 		std::vector<const cg::core::Node*> arguments;
 
+		using it = std::vector<const cg::core::Node*>::iterator;
+		using const_it = std::vector<const cg::core::Node*>::const_iterator;
     public:
         ArgumentList(std::initializer_list<const cg::core::Node*> arg_list);
 
+		ArgumentList& push_back(const cg::core::Node* node);
+		void erase(it iter);
+		void erase(size_t iter);
+
+		it begin();
+		it end();
 		
+		const_it begin() const;
+		const_it end() const;
     };
 
 	class OptionalEntity : public cg::core::IEntity {
@@ -54,13 +64,13 @@ namespace cg::entities::cpp {
 	};
 
 	class TypeHandler : public cg::core::IEntity {
-		const cg::core::Node* type;
+		const cg::core::TreeNodeBase* type;
 	
 	public:
-		TypeHandler(const cg::core::Node* type = nullptr);
+		TypeHandler(const cg::core::TreeNodeBase* type = nullptr);
 
-		const cg::core::Node* get_type() const;
-		void set_type(const cg::core::Node* new_type);
+		const cg::core::TreeNodeBase* get_type() const;
+		void set_type(const cg::core::TreeNodeBase* new_type);
 	
 	};
 

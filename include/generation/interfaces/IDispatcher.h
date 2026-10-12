@@ -2,15 +2,15 @@
 
 #include <string>
 
-namespace cg::core { class Node; }
+namespace cg::core { class TreeNodeBase; }
 
 namespace cg {
     class IDispatcher {
     public:
         virtual std::string generate(
-            const core::Node* ent,
+            const core::TreeNodeBase* ent,
             bool declaration = false,
-            const core::Node* scoup = nullptr
+            const core::TreeNodeBase* scope = nullptr
         ) const = 0;
 
         virtual ~IDispatcher() = default;

@@ -63,7 +63,7 @@ namespace cg {
         return uptr;
     }
 
-    bool PriorityGenerator::can_generate(const core::Node* node) const {
+    bool PriorityGenerator::can_generate(const core::TreeNodeBase* node) const {
         for (auto& [priority, gen] : priority_map)
             if (gen->can_generate(node)) return true;
 
@@ -71,9 +71,9 @@ namespace cg {
     }
 
     std::string PriorityGenerator::generate(
-        const core::Node* ent,
+        const core::TreeNodeBase* ent,
         bool declaration,
-        const core::Node* scoup,
+        const core::TreeNodeBase* scoup,
         const IDispatcher* dispatcher
     ) const {
         std::stringstream sstr;

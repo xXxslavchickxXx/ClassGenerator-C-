@@ -7,7 +7,7 @@
 namespace cg::entities::cpp {
     using Namespace = TreeNodeFabrica<NamedEntity, INamespace>;
     using Class = TreeNodeFabrica<NamedEntity, IClass>;
-    using Type = NodeFabrica<ClassHandler, TypeQualificator, TypeConstructor, IType>;
+    using Type = TreeElementFabrica<ClassHandler, TypeQualificator, TypeConstructor, IType>;
     using Alias = NodeFabrica<NamedEntity, TypeHandler, IAlias>;
     using Variable = NodeFabrica<
         NamedEntity,
@@ -17,7 +17,7 @@ namespace cg::entities::cpp {
         OptionalEntity,
         IVariable
     >;
-    using Argument = NodeFabrica<
+    using Argument = TreeElementFabrica<
         NamedEntity,
         TypeHandler,
         ValueHandler,
