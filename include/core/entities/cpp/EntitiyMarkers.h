@@ -9,4 +9,6 @@ namespace cg::entities::cpp {
     class IType : public core::IEntity {};
     class IAlias : public core::IEntity {};
     class IVariable : public core::IEntity {};
+    class IArgument : public core::IEntity {};
+    class IFunction : public core::IEntity {};
 }

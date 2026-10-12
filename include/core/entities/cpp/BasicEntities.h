@@ -9,6 +9,15 @@
 namespace cg::core { class Node; }
 
 namespace cg::entities::cpp {
+	class ArgumentList : public cg::core::IEntity {
+		std::vector<const cg::core::Node*> arguments;
+
+    public:
+        ArgumentList(std::initializer_list<const cg::core::Node*> arg_list);
+
+		
+    };
+
 	class OptionalEntity : public cg::core::IEntity {
         bool constexpr_;
         bool static_;

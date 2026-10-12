@@ -6,8 +6,6 @@
 #include <stack>
 
 namespace cg::gen::cpp {
-
-    
     std::string relative_path(
         const core::Node* ent,
         const core::Node* scope
@@ -36,6 +34,38 @@ namespace cg::gen::cpp {
         return sstr.str();
     }
 
+    bool ArgumentGenerator::can_generate(const core::Node* node) const {
+        if (!node) return false;
+
+        if (node->get_entities().has<cg::entities::cpp::IArgument>()) return true;
+
+        return false;
+    }
+
+    std::string ArgumentGenerator::generate_impl(
+        const core::Node* ent,
+        bool declaration,
+        const core::Node* scope,
+        const IDispatcher* dispatcher
+    ) const {
+        using namespace cg::entities::cpp;
+
+        auto& entities = ent->get_entities();
+
+        // Variable gen data
+        auto name = entities.get<NamedEntity>()->get_name();
+        auto type = dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope);
+        auto have_value = entities.get<ValueHandler>()->have_value() && declaration;
+
+        std::stringstream sstr;
+
+        sstr << type << name;
+
+        if (have_value) sstr << entities.get<ValueHandler>()->get_value();
+
+        return sstr.str();
+    }
+
     bool VariableGenerator::can_generate(const core::Node* node) const {
         if (!node) return false;
 
@@ -58,7 +88,7 @@ namespace cg::gen::cpp {
         bool have_def = entities.get<DefinitionEntity>()->has_definition();
 
         // Variable gen data
-        auto name = entities.get<NamedEntity>()->get_name();
+        auto name = relative_path(ent, scope);
         auto type = dispatcher->generate(entities.get<TypeHandler>()->get_type(), declaration, scope);
         auto have_value = entities.get<ValueHandler>()->have_value() && !declaration;
 

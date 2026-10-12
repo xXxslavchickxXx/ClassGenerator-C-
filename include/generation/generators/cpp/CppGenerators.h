@@ -9,6 +9,40 @@ namespace cg::gen::cpp {
         const core::Node* scope = nullptr
     );
 
+    class FunctionGenerator :
+    public IEntityCheckedGenerator<
+        cg::entities::cpp::NamedEntity
+    > {
+    public:
+        bool can_generate(const core::Node* node) const override;
+
+    private:
+        std::string generate_impl(
+            const core::Node* ent,
+            bool declaration = true,
+            const core::Node* scoup = nullptr,
+            const IDispatcher* dispatcher = nullptr
+        ) const override;
+    };
+
+    class ArgumentGenerator :
+    public IEntityCheckedGenerator<
+        cg::entities::cpp::TypeHandler,
+        cg::entities::cpp::ValueHandler,
+        cg::entities::cpp::NamedEntity
+    > {
+    public:
+        bool can_generate(const core::Node* node) const override;
+
+    private:
+        std::string generate_impl(
+            const core::Node* ent,
+            bool declaration = true,
+            const core::Node* scoup = nullptr,
+            const IDispatcher* dispatcher = nullptr
+        ) const override;
+    };
+
     class NamespaceGenerator :
     public IEntityCheckedGenerator<
         cg::entities::cpp::NamedEntity
