@@ -221,6 +221,11 @@ TEST(CPPGen, TypeAndAliasGeneration) {
     EXPECT_EQ(dispatcher.generate(&const_path_ptr, true, &std_ns), "const filesystem::path*");
 
     EXPECT_EQ(dispatcher.generate(const_itertor), "using const_iterator = int;");
+
+    auto const_iter_t = Type(ClassHandler(const_itertor));
+
+    EXPECT_EQ(dispatcher.generate(&const_iter_t, true, &std_ns),
+                                  "filesystem::path::const_iterator");
 }
 
 TEST(CPPGen, ValueGeneration) {

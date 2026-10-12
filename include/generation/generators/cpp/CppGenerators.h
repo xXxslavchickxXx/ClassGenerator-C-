@@ -62,15 +62,16 @@ namespace cg::gen::cpp {
     class ClassGenerator : public IEntityCheckedGenerator<
         cg::entities::cpp::NamedEntity
     > {
-    public:
-        bool can_generate(const core::TreeNodeBase* node) const override;
-
         std::string generate_impl(
             const core::TreeNodeBase* ent,
             bool declaration = true,
             const core::TreeNodeBase* scope = nullptr,
             const IDispatcher* dispatcher = nullptr
         ) const override;
+        
+    public:
+        bool can_generate(const core::TreeNodeBase* node) const override;
+
     };
 
     class TypeGenerator : public IEntityCheckedGenerator<
@@ -78,30 +79,30 @@ namespace cg::gen::cpp {
         cg::entities::cpp::TypeQualificator,
         cg::entities::cpp::TypeConstructor
     > {
-    public:
-        bool can_generate(const core::TreeNodeBase* node) const override;
-
         std::string generate_impl(
             const core::TreeNodeBase* ent,
             bool declaration = true,
             const core::TreeNodeBase* scope = nullptr,
             const IDispatcher* dispatcher = nullptr
         ) const override;
+
+    public:
+        bool can_generate(const core::TreeNodeBase* node) const override;
     };
 
     class AliasGenerator : public IEntityCheckedGenerator<
         cg::entities::cpp::NamedEntity,
         cg::entities::cpp::TypeHandler
     > {
-    public:
-        bool can_generate(const core::TreeNodeBase* node) const override;
-
         std::string generate_impl(
             const core::TreeNodeBase* ent,
             bool declaration = true,
-            const core::TreeNodeBase* scoup = nullptr,
+            const core::TreeNodeBase* scope = nullptr,
             const IDispatcher* dispatcher = nullptr
         ) const override;
+
+    public:
+        bool can_generate(const core::TreeNodeBase* node) const override;
     };
 
     class VariableGenerator : public IEntityCheckedGenerator<
@@ -111,14 +112,14 @@ namespace cg::gen::cpp {
         cg::entities::cpp::DefinitionEntity,
         cg::entities::cpp::OptionalEntity
     > {
-    public:
-        bool can_generate(const core::TreeNodeBase* node) const override;
-
         std::string generate_impl(
             const core::TreeNodeBase* ent,
             bool declaration = true,
             const core::TreeNodeBase* scope = nullptr,
             const IDispatcher* dispatcher = nullptr
         ) const override;
+
+    public:
+        bool can_generate(const core::TreeNodeBase* node) const override;
     };
 }

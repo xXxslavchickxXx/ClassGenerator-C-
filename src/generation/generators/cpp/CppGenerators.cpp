@@ -16,7 +16,7 @@ namespace cg::gen::cpp {
         while (iter) {
             if (!iter->as_parent())
                 throw std::runtime_error("the element is not a member of the tree");
-                
+
             iter = iter->as_parent()->get_parent();
         }
 
@@ -106,7 +106,8 @@ namespace cg::gen::cpp {
 
         if (declaration) {
             if (opt->is_inline() || opt->is_constexpr()) {
-                sstr << (opt->is_inline() ? "inline " : "constexpr");
+                if (opt->is_inline()) sstr << "inline ";
+                if (opt->is_constexpr()) sstr << "constexpr ";
 
                 if (opt->is_static()) sstr << "static ";
 
